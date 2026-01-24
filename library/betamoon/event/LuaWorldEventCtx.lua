@@ -1,3 +1,5 @@
+---@meta
+
 ---@class LuaWorldInfo
 local LuaWorldInfo = require("betamoon.world.LuaWorldInfo")
 ---@class LuaWorldInfoSpawn

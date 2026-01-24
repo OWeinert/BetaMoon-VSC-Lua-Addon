@@ -1,3 +1,5 @@
+---@meta
+
 ---@class LuaPlayerEventCtx
 local LuaPlayerEventCtx = {}
 

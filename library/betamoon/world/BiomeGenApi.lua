@@ -1,3 +1,5 @@
+---@meta
+
 ---@class WorldGenHandle
 local WorldGenHandle = require("betamoon.world.WorldGenApi").WorldGenHandle
 

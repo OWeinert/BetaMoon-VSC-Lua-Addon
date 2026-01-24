@@ -1,3 +1,5 @@
+---@meta
+
 ---@class ContentQueryHandle
 local ContentQueryHandle = {}
 

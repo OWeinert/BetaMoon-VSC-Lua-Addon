@@ -1,3 +1,5 @@
+---@meta
+
 ---@class QueryApiUtils
 local QueryApiUtils = {}
 

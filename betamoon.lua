@@ -1,3 +1,5 @@
+---@meta
+
 ---@class LuaWorldEventCtx
 local LuaWorldEventCtx = require("betamoon.event.LuaWorldEventCtx")
 ---@class LuaPlayerEventCtx

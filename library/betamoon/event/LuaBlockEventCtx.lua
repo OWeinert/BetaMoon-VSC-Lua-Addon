@@ -1,3 +1,5 @@
+---@meta
+
 ---@class BlockPos
 ---@field x number
 ---@field y number

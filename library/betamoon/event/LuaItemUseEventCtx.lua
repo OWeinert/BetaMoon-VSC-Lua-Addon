@@ -1,3 +1,5 @@
+---@meta
+
 ---@class ReadOnlyItemHandle
 local ReadOnlyItemHandle = require("betamoon.item.ItemApi").ReadOnlyItemHandle
 

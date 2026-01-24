@@ -1,3 +1,5 @@
+---@meta
+
 ---@class BlockHandle
 local BlockHandle = require("betamoon.block.BlockApi").BlockHandle
 

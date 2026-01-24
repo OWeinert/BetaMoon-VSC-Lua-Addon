@@ -1,3 +1,5 @@
+---@meta
+
 ---@class LuaGuiEventCtx
 local LuaGuiEventCtx = {}
 

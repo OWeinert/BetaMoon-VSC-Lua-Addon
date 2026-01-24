@@ -1,3 +1,5 @@
+---@meta
+
 ---@class LuaWorldInfoSpawn
 ---@field x number
 ---@field y number

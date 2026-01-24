@@ -1,3 +1,5 @@
+---@meta
+
 ---@class ModuleApi
 local ModuleApi = {}
 

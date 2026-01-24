@@ -1,3 +1,5 @@
+---@meta
+
 ---@class OreGenHandle
 local OreGenHandle = require("betamoon.world.OreGenApi").OreGenHandle
 ---@class BiomeGeneratorHandle
