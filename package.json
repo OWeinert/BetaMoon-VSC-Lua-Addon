@@ -1,6 +1,6 @@
 {
-  "name": "betamoon-lua-api",
-  "displayName": "BetaMoon Lua API",
+  "name": "betamoon-api",
+  "displayName": "BetaMoon API",
   "description": "BetaMoon 0.6.0 API completion, documentation and types for LuaLS.",
   "version": "0.6.0",
   "publisher": "OWeinert",
