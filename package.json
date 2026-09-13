@@ -1,0 +1,48 @@
+{
+  "name": "betamoon-lua-api",
+  "displayName": "BetaMoon Lua API",
+  "description": "BetaMoon 0.6.0 API completion, documentation and types for LuaLS.",
+  "version": "0.6.0",
+  "publisher": "OWeinert",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OWeinert/BetaMoon-VSC-Lua-Addon.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages"],
+  "keywords": ["Lua", "LuaLS", "BetaMoon", "Minecraft"],
+  "extensionDependencies": ["sumneko.lua"],
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "betamoon.enable",
+        "title": "Enable API for Workspace Folder",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.disable",
+        "title": "Disable API for Workspace Folder",
+        "category": "BetaMoon"
+      }
+    ]
+  },
+  "scripts": {
+    "sync-api": "node scripts/sync-api.js",
+    "check-api": "node scripts/sync-api.js --check",
+    "test": "node --test",
+    "package": "vsce package",
+    "vscode:prepublish": "npm test"
+  },
+  "dependencies": {
+    "jsonc-parser": "3.3.1"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "3.2.2"
+  }
+}

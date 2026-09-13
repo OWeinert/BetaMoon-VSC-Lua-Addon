@@ -1,0 +1,332 @@
+---@meta
+
+-- Run npm run sync-api to regenerate this category.
+
+local OverrideHandle = require("betamoon.handles").OverrideHandle
+
+-- --------------------------------------------------------------------------
+-- CATEGORY: BLOCKS AND ITEMS
+-- --------------------------------------------------------------------------
+
+---@class BetaMoonResourceReference
+---@field id integer
+---@field damage integer
+---@field key string
+---@field name string
+---@field displayName string
+---@field owner string
+---@field isVanilla boolean
+---@field isBetaMoon boolean
+---@field exists boolean
+local ResourceReference = {}
+
+---@param definition BetaMoonDirectOverrideDefinition
+---@return BetaMoonOverrideHandle
+function ResourceReference:override(definition)
+  return OverrideHandle
+end
+
+---@class BetaMoonBlockReference: BetaMoonResourceReference
+---@field texture integer
+---@field light integer
+---@field lightOpacity integer
+---@field hardness number
+---@field resistance number
+local BlockReference = {} ---@as BetaMoonBlockReference
+
+---@class BetaMoonItemReference: BetaMoonResourceReference
+---@field type BetaMoonItemType
+---@field category 'item'|'tool'|'armor'
+---@field maxStackSize integer
+---@field maxDamage integer
+---@field hasSubtypes boolean
+---@field icon integer
+local ItemReference = {} ---@as BetaMoonItemReference
+
+---@class BetaMoonResourceQuery
+---@field id integer|nil
+---@field damage integer|{min: integer, max: integer}|nil
+---@field name string|nil
+---@field displayName string|nil
+---@field nameContains string|nil
+---@field type BetaMoonItemType|nil
+---@field owner string|nil
+---@field ignoreCase boolean|nil
+
+---@class BetaMoonBlockQuery: BetaMoonResourceQuery
+---@field where (fun(resource: BetaMoonBlockReference): boolean)|nil
+
+---@class BetaMoonItemQuery: BetaMoonResourceQuery
+---@field where (fun(resource: BetaMoonItemReference): boolean)|nil
+
+---@class BetaMoonBlockDefinition
+---@field id integer
+---@field material BetaMoonBlockMaterial
+---@field key string
+---@field displayName string|nil
+---@field hardness number|nil
+---@field resistance number|nil
+---@field light integer|nil
+---@field lightOpacity integer|nil
+---@field stepSound BetaMoonStepSound|nil
+---@field unbreakable boolean|nil
+---@field texture string|integer|nil
+---@field textures table<string, string|integer>|nil
+---@field harvest table<string, integer>|nil
+---@field drops? BetaMoonBlockDrop[]
+---@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrop[]?} Read-only query; nil keeps declared/vanilla drops.
+---@field state? table<string, BetaMoonBlockStateField>
+---@field placement? BetaMoonBlockPlacement
+---@field collision? {boxes: BetaMoonLocalBox[]}
+---@field selection? BetaMoonLocalBox
+---@field opaque? boolean
+---@field normalCube? boolean Whether vanilla treats this as a full cube for suffocation, player push-out and solid support. Defaults to false for partial/empty collision, partial render bounds or cross rendering; does not remove collision.
+---@field replaceable? boolean
+---@field climbable? boolean
+---@field slipperiness? number
+---@field piston? {reaction: 'move'|'destroy'|'block'}
+---@field fire? {spread: integer, burn: integer}
+---@field render? BetaMoonBlockRender
+---@field onActivate? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonInteractionResult?}
+---@field canPlace? {action: fun(ctx: BetaMoonBlockActionContext): boolean?}
+---@field canBreak? {action: fun(ctx: BetaMoonBlockActionContext): boolean?}
+---@field onClick? BetaMoonBlockCallback
+---@field onPlaced? BetaMoonBlockCallback
+---@field onAdded? BetaMoonBlockCallback
+---@field onRemoved? BetaMoonBlockCallback
+---@field onBroken? BetaMoonBlockCallback
+---@field onExploded? BetaMoonBlockCallback
+---@field onEntityWalk? BetaMoonBlockCallback
+---@field onEntityCollide? BetaMoonBlockCallback
+---@field onNeighborChanged? BetaMoonBlockCallback
+---@field onTick? BetaMoonBlockTickDefinition Gameplay updates for each placed block.
+---@field onDisplayTick? BetaMoonBlockDisplayTickDefinition Client-side particles and sounds.
+---@field tileEntity? BetaMoonTileEntityHandle
+---@field container? BetaMoonContainerHandle
+---@field gui? BetaMoonContainerGuiHandle
+---@field redstone? BetaMoonRedstoneDefinition
+
+---@class BetaMoonDefaultBlockTick
+---@field mode 'default'
+---@field action fun(ctx: BetaMoonBlockTickContext)
+
+---@class BetaMoonRandomBlockTick
+---@field mode 'random'
+---@field action fun(ctx: BetaMoonBlockTickContext)
+
+---@class BetaMoonScheduledBlockTick
+---@field mode 'scheduled'
+---@field schedule? BetaMoonBlockTickSchedule
+---@field action fun(ctx: BetaMoonBlockTickContext)
+
+---@alias BetaMoonBlockTickDefinition BetaMoonDefaultBlockTick|BetaMoonRandomBlockTick|BetaMoonScheduledBlockTick
+
+---@class BetaMoonBlockTickSchedule
+---@field delay? integer Ticks before the first update. Omit for manual scheduling.
+---@field repeatEvery? integer Ticks between later updates. Omit this for a one-time update.
+
+---@class BetaMoonBlockDisplayTickDefinition
+---@field chance? number Chance from 0 to 1 for each attempt. Defaults to 1.
+---@field attempts? integer Number of attempts during each display update. Defaults to 1.
+---@field action fun(ctx: BetaMoonBlockDisplayTickContext)
+
+---@class BetaMoonBlockAtPosition
+---@field id integer
+---@field damage integer
+
+---@class BetaMoonDisplayTickWorld
+local DisplayTickWorld = {}
+
+---@param x integer
+---@param y integer
+---@param z integer
+---@return BetaMoonBlockAtPosition
+function DisplayTickWorld:getBlock(x, y, z) end
+
+---@param name BetaMoonParticleName
+---@param options BetaMoonParticleOptions
+function DisplayTickWorld:spawnParticle(name, options) end
+
+---@param name string
+---@param options BetaMoonSoundOptions
+function DisplayTickWorld:playSound(name, options) end
+
+---@class BetaMoonTickWorld: BetaMoonDisplayTickWorld
+local TickWorld = {}
+
+---@param x integer
+---@param y integer
+---@param z integer
+---@param block BetaMoonBlockReference|integer
+---@param damage? integer
+---@return boolean
+function TickWorld:setBlock(x, y, z, block, damage) return false end
+
+---@class BetaMoonParticleOptions
+---@field x number
+---@field y number
+---@field z number
+---@field velocityX? number
+---@field velocityY? number
+---@field velocityZ? number
+
+---@class BetaMoonSoundOptions
+---@field x number
+---@field y number
+---@field z number
+---@field volume? number
+---@field pitch? number
+
+---@class BetaMoonBlockTickContext
+---@field state BetaMoonBlockStateAccess
+---@field redstone BetaMoonBlockPowerAccess
+---@field tileEntity? {data: BetaMoonTileDataAccess}
+---@field x integer
+---@field y integer
+---@field z integer
+---@field position BetaMoonPositionI
+---@field id integer
+---@field damage integer
+---@field world BetaMoonTickWorld
+---@field random fun(): number Returns a random number from 0 up to, but not including, 1.
+---@field schedule fun(self: BetaMoonBlockTickContext, delay: integer) Queues another update for this block.
+
+---@class BetaMoonBlockDisplayTickContext
+---@field x integer
+---@field y integer
+---@field z integer
+---@field position BetaMoonPositionI
+---@field id integer
+---@field damage integer
+---@field world BetaMoonDisplayTickWorld
+---@field random fun(): number Returns a random number from 0 up to, but not including, 1.
+
+---@class BetaMoonBlockDisplayOverrideContext: BetaMoonBlockDisplayTickContext
+---@field base fun(self: BetaMoonBlockDisplayOverrideContext) Runs the next display callback layer once.
+
+---@class BetaMoonItemDefinition
+---@field id integer
+---@field type BetaMoonItemType|nil
+---@field key string
+---@field displayName string|nil
+---@field material BetaMoonToolMaterialName|BetaMoonArmorMaterialName|BetaMoonToolMaterial|BetaMoonArmorMaterial|nil
+---@field slot BetaMoonArmorSlot|nil
+---@field maxStackSize integer|nil
+---@field maxDamage integer|nil
+---@field hasSubtypes boolean|nil
+---@field full3D boolean|nil
+---@field icon {x: integer, y: integer}|nil
+---@field texture string|nil
+---@field modelTexture string|nil Path to the texture drawn on the worn armor model. Cannot be combined with renderIndex.
+---@field food {healing: integer, wolfFood: boolean|nil}|nil
+---@field renderIndex BetaMoonArmorMaterialName|integer|nil Vanilla worn-armor texture. Cannot be combined with modelTexture.
+---@field efficiency number|nil
+---@field damageVsEntity integer|nil
+---@field use? BetaMoonItemUseDefinition
+---@field tool? BetaMoonItemToolDefinition
+---@field render? {variants: table<integer, {icon: integer?, color: integer?}>}
+---@field onUseFirst? BetaMoonItemInteractionCallback
+---@field onUseOnBlock? BetaMoonItemInteractionCallback
+---@field onUse? BetaMoonItemInteractionCallback
+---@field onUseOnEntity? BetaMoonItemInteractionCallback
+---@field onHitEntity? BetaMoonItemCallback
+---@field onBlockDestroyed? BetaMoonItemCallback
+---@field onCrafted? BetaMoonItemCallback
+---@field onInventoryTick? BetaMoonItemInventoryCallback
+---@field canHarvest? {action: fun(ctx: BetaMoonMiningQueryContext): boolean?}
+---@field getMiningSpeed? {action: fun(ctx: BetaMoonMiningQueryContext): number?}
+
+---@class BetaMoonResultList<T>: table<integer, T>
+local ResultList = {}
+
+---@return T|nil
+function ResultList:first() end
+
+---@return T|nil
+function ResultList:last() end
+
+---@return T|nil
+function ResultList:one() end
+
+---@return boolean
+function ResultList:isEmpty()
+  return false
+end
+
+---@param definition BetaMoonBulkOverrideDefinition
+---@return BetaMoonOverrideHandle[]
+function ResultList:overrideAll(definition)
+  return {}
+end
+
+---@class BetaMoonBlockRegistry
+local BlockRegistry = {}
+
+---@param idOrKey BetaMoonResourceId
+---@return BetaMoonBlockReference|nil
+function BlockRegistry:get(idOrKey) end
+
+---@param idOrKey BetaMoonResourceId
+---@return BetaMoonBlockReference
+function BlockRegistry:getRequired(idOrKey)
+  return BlockReference
+end
+
+---@param query BetaMoonBlockQuery|nil
+---@return BetaMoonResultList<BetaMoonBlockReference>
+function BlockRegistry:find(query)
+  return ResultList
+end
+
+---@param query BetaMoonBlockQuery|nil
+---@return BetaMoonBlockReference|nil
+function BlockRegistry:first(query) end
+
+---@param query BetaMoonBlockQuery|nil
+---@return BetaMoonBlockReference|nil
+function BlockRegistry:one(query) end
+
+---@param definition BetaMoonBlockDefinition
+---@return BetaMoonBlockReference
+function BlockRegistry:add(definition)
+  return BlockReference
+end
+
+---@class BetaMoonItemRegistry
+local ItemRegistry = {}
+
+---@param idOrKey BetaMoonResourceId
+---@return BetaMoonItemReference|nil
+function ItemRegistry:get(idOrKey) end
+
+---@param idOrKey BetaMoonResourceId
+---@return BetaMoonItemReference
+function ItemRegistry:getRequired(idOrKey)
+  return ItemReference
+end
+
+---@param query BetaMoonItemQuery|nil
+---@return BetaMoonResultList<BetaMoonItemReference>
+function ItemRegistry:find(query)
+  return ResultList
+end
+
+---@param query BetaMoonItemQuery|nil
+---@return BetaMoonItemReference|nil
+function ItemRegistry:first(query) end
+
+---@param query BetaMoonItemQuery|nil
+---@return BetaMoonItemReference|nil
+function ItemRegistry:one(query) end
+
+---@param definition BetaMoonItemDefinition
+---@return BetaMoonItemReference
+function ItemRegistry:add(definition)
+  return ItemReference
+end
+
+return {
+    ResultList = ResultList,
+    BlockRegistry = BlockRegistry,
+    ItemRegistry = ItemRegistry
+}

@@ -1,0 +1,5 @@
+{
+    "workspace.library": ["library"],
+    "workspace.ignoreDir": [".vscode", "internal", "node_modules"],
+    "workspace.checkThirdParty": false
+}
