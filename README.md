@@ -1,6 +1,6 @@
 # BetaMoon Lua API
 
-LuaLS definitions and a VS Code extension for **BetaMoon 0.6.X**.
+LuaLS definitions and a VS Code extension for [**BetaMoon 0.6.X**](https://modrinth.com/mod/betamoon), a mod for Minecraft b1.7.3 providing a Lua scripting framework.
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
 including blocks, items, recipes, world generation, events, tile entities and container GUIs.
 
