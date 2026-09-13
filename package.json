@@ -3,7 +3,7 @@
   "displayName": "BetaMoon API",
   "icon": "BetaMoon_icon.png",
   "description": "BetaMoon 0.6.0 API completion, documentation and types for LuaLS.",
-  "version": "1.0.0+bm.0.6.0",
+  "version": "0.6.0+2026091301",
   "publisher": "OWeinert",
   "license": "MIT",
   "repository": {
