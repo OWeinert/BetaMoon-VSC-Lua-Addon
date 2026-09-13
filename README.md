@@ -1,6 +1,6 @@
 # BetaMoon Lua API
 
-LuaLS definitions and a VS Code extension for **BetaMoon 0.6.0**, targeting Minecraft Beta 1.7.3.
+LuaLS definitions and a VS Code extension for **BetaMoon 0.6.X**.
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
 including blocks, items, recipes, world generation, events, tile entities and container GUIs.
 
