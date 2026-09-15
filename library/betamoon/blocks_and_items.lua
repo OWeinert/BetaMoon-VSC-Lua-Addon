@@ -70,8 +70,8 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field lightOpacity integer|nil
 ---@field stepSound BetaMoonStepSound|nil
 ---@field unbreakable boolean|nil
----@field texture string|integer|nil
----@field textures table<string, string|integer>|nil
+---@field texture BetaMoonTextureInput|integer|nil
+---@field textures table<string, BetaMoonTextureInput|integer>|nil
 ---@field harvest table<string, integer>|nil
 ---@field drops? BetaMoonBlockDrop[]
 ---@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrop[]?} Read-only query; nil keeps declared/vanilla drops.
@@ -216,8 +216,8 @@ function TickWorld:setBlock(x, y, z, block, damage) return false end
 ---@field hasSubtypes boolean|nil
 ---@field full3D boolean|nil
 ---@field icon {x: integer, y: integer}|nil
----@field texture string|nil
----@field modelTexture string|nil Path to the texture drawn on the worn armor model. Cannot be combined with renderIndex.
+---@field texture BetaMoonTextureInput|nil
+---@field modelTexture BetaMoonTextureInput|nil Texture drawn on the worn armor model. Cannot be combined with renderIndex.
 ---@field food {healing: integer, wolfFood: boolean|nil}|nil
 ---@field renderIndex BetaMoonArmorMaterialName|integer|nil Vanilla worn-armor texture. Cannot be combined with modelTexture.
 ---@field efficiency number|nil

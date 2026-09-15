@@ -21,7 +21,7 @@ test('splitting preserves every source annotation and documentation section exac
     const source = sourceFixture();
     const files = splitApi(source);
     const combined = [...files.values()].join('\n');
-    assert.equal(files.size, 13);
+    assert.equal(files.size, categories.length);
     assert.deepEqual(combined.match(/^---@(?:class|field).*$/gm), source.match(/^---@(?:class|field).*$/gm));
     for (let index = 0; index < categories.length; index++) {
         assert.equal(combined.split(`-- Documentation for category ${index}.`).length - 1, 1);
