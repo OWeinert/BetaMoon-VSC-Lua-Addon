@@ -178,7 +178,7 @@ function TileWorldAccess:notifyNeighbors() end
 ---@field pauseGame? boolean
 
 ---@class BetaMoonGuiBackground
----@field image? string Complete PNG relative to the scripts directory.
+---@field image? BetaMoonTextureInput Complete PNG relative to the scripts directory.
 ---@field builtin? BetaMoonGuiPreset
 ---@field style? 'minecraft' Draw a simple generated Minecraft-style panel.
 ---@field drawSlotFrames? boolean Draw frames at the container's slot positions.
@@ -204,7 +204,7 @@ function TileWorldAccess:notifyNeighbors() end
 
 ---@class BetaMoonGuiImageElement: BetaMoonGuiElementBase
 ---@field type 'image'
----@field image? string Complete PNG relative to the scripts directory.
+---@field image? BetaMoonTextureInput Complete PNG relative to the scripts directory.
 ---@field builtin? BetaMoonGuiBuiltinSprite
 ---@field width? integer
 ---@field height? integer
@@ -224,9 +224,9 @@ function TileWorldAccess:notifyNeighbors() end
 ---@field value string
 ---@field maximum integer|string
 ---@field direction? 'left_to_right'|'right_to_left'|'top_to_bottom'|'bottom_to_top'
----@field image? string Complete fill image relative to the scripts directory.
+---@field image? BetaMoonTextureInput Complete fill image relative to the scripts directory.
 ---@field builtin? BetaMoonGuiBuiltinSprite
----@field background? string Optional complete empty-state image.
+---@field background? BetaMoonTextureInput Optional complete empty-state image.
 ---@field backgroundBuiltin? BetaMoonGuiBuiltinSprite
 ---@field minimumPixels? integer
 ---@field hideWhenEmpty? boolean
@@ -234,10 +234,10 @@ function TileWorldAccess:notifyNeighbors() end
 ---@class BetaMoonGuiStateImageElement: BetaMoonGuiElementBase
 ---@field type 'state_image'
 ---@field value string
----@field states? table<string, string>
----@field whenTrue? string
----@field whenFalse? string
----@field default? string
+---@field states? table<string, BetaMoonTextureInput>
+---@field whenTrue? BetaMoonTextureInput
+---@field whenFalse? BetaMoonTextureInput
+---@field default? BetaMoonTextureInput
 
 ---@class BetaMoonGuiRectangleElement: BetaMoonGuiElementBase
 ---@field type 'rectangle'

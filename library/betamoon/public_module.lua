@@ -4,6 +4,9 @@
 
 local BlockRegistry = require("betamoon.blocks_and_items").BlockRegistry
 local ItemRegistry = require("betamoon.blocks_and_items").ItemRegistry
+local Assets = require("betamoon.assets_and_audio").Assets
+local SoundEvents = require("betamoon.assets_and_audio").SoundEvents
+local Audio = require("betamoon.assets_and_audio").Audio
 local ToolMaterialRegistry = require("betamoon.tool_and_armor_materials").ToolMaterialRegistry
 local ArmorMaterialRegistry = require("betamoon.tool_and_armor_materials").ArmorMaterialRegistry
 local RecipeTypeRegistry = require("betamoon.recipes").RecipeTypeRegistry
@@ -51,6 +54,9 @@ local TreeModes
 ---@field items BetaMoonItemRegistry
 ---@field tools BetaMoonItemRegistry
 ---@field armor BetaMoonItemRegistry
+---@field assets BetaMoonAssets
+---@field soundEvents BetaMoonSoundEventRegistry
+---@field audio BetaMoonAudio
 ---@field materials {tools: BetaMoonToolMaterialRegistry, armor: BetaMoonArmorMaterialRegistry}
 ---@field recipes BetaMoonRecipeRegistry
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
@@ -73,6 +79,9 @@ betamoon = {
   items = ItemRegistry,
   tools = ItemRegistry,
   armor = ItemRegistry,
+  assets = Assets,
+  soundEvents = SoundEvents,
+  audio = Audio,
   materials = {
     tools = ToolMaterialRegistry,
     armor = ArmorMaterialRegistry

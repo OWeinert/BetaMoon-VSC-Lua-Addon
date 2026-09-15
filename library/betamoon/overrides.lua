@@ -26,7 +26,7 @@ local OverrideHandle = require("betamoon.handles").OverrideHandle
 ---@field displayName string|nil
 ---@field hardness number|nil
 ---@field resistance number|nil
----@field texture string|integer|nil
+---@field texture BetaMoonTextureInput|integer|nil
 ---@field light integer|nil
 ---@field lightOpacity integer|nil
 ---@field maxStackSize integer|nil
