@@ -8,12 +8,12 @@
 
 ---@class BetaMoonAssetDefinition
 ---@field key string Exact lowercase namespace:path key, unique within its asset category.
----@field path string File relative to lua_scripts. PNG for textures; OGG or WAV for sounds.
+---@field path string File relative to lua_scripts. PNG textures, OGG/WAV sounds, .json models, or .animation.json clips.
 
 ---@class BetaMoonAssetSource
----@field kind 'pack'|'script' Actual source of the currently usable content.
----@field name string Texture pack name or script root directory.
----@field path string Selected entry or script-relative file path.
+---@field kind 'pack'|'script'|'builtin' Actual source of the currently usable content.
+---@field name string Texture pack name, script root directory, or built-in provider name.
+---@field path string Selected entry, script-relative file path, or packaged built-in path.
 
 ---@class BetaMoonAssetReference
 local AssetReference = {}
@@ -21,13 +21,13 @@ local AssetReference = {}
 ---@return string key
 function AssetReference:getKey() return "" end
 
----@return 'textures'|'sounds' kind
+---@return 'textures'|'sounds'|'models'|'animations' kind
 function AssetReference:getKind() return "textures" end
 
----@return string path Script-relative fallback file.
+---@return string path Script-relative fallback file or packaged path for a built-in model.
 function AssetReference:getPath() return "" end
 
----@return string path Override location relative to the texture-pack ZIP root.
+---@return string path Override location beneath bm_assets/, relative to the texture-pack ZIP root.
 function AssetReference:getOverridePath() return "" end
 
 ---@return BetaMoonAssetSource source
@@ -70,10 +70,164 @@ function SoundAssetRegistry:get(key) return nil end
 ---@return BetaMoonSoundAsset
 function SoundAssetRegistry:getRequired(key) return {} end
 
+---@alias BetaMoonModelInput BetaMoonModelAsset|string Model reference, namespaced key, or relative geometry path.
+---@alias BetaMoonAnimationInput BetaMoonAnimationAsset|string Animation reference, namespaced key, or relative clip file.
+
+---@class BetaMoonModelAsset: BetaMoonAssetReference
+local ModelAsset = {}
+
+---Create independent pose storage bound to this geometry version. Existing explicit poses retain their version after refresh.
+---@return BetaMoonModelPose
+function ModelAsset:createPose() return {} end
+
+---@class BetaMoonAnimationClipInfo
+---@field duration number Length in seconds.
+---@field loop 'once'|'loop'|'hold'
+
+---@class BetaMoonAnimationAsset: BetaMoonAssetReference
+local AnimationAsset = {}
+
+---@return table<string, BetaMoonAnimationClipInfo> clips Copied descriptors indexed by exact exported clip name.
+function AnimationAsset:getClips() return {} end
+
+---@class BetaMoonModelAssetRegistry
+local ModelAssetRegistry = {}
+
+---Declare during modInit/modReload. Imports the cuboid subset of Bedrock geometry 1.12.0; requires a valid bundled default.
+---@param definition BetaMoonAssetDefinition
+---@return BetaMoonModelAsset
+function ModelAssetRegistry:add(definition) return {} end
+
+---Includes built-in Beta 1.7.3 block models under minecraft:block/...; these need no registration.
+---@param key string
+---@return BetaMoonModelAsset|nil
+function ModelAssetRegistry:get(key) return nil end
+
+---@param key string Raises an error when absent.
+---@return BetaMoonModelAsset
+function ModelAssetRegistry:getRequired(key) return {} end
+
+---@class BetaMoonAnimationAssetRegistry
+local AnimationAssetRegistry = {}
+
+---Declare numeric Bedrock/GeckoLib-style animation 1.8.0 during modInit/modReload.
+---@param definition BetaMoonAssetDefinition
+---@return BetaMoonAnimationAsset
+function AnimationAssetRegistry:add(definition) return {} end
+
+---@param key string
+---@return BetaMoonAnimationAsset|nil
+function AnimationAssetRegistry:get(key) return nil end
+
+---@param key string Raises an error when absent.
+---@return BetaMoonAnimationAsset
+function AnimationAssetRegistry:getRequired(key) return {} end
+
+---@class BetaMoonModelSocket
+---@field position BetaMoonPositionF Position in model units after the bone hierarchy is applied.
+---@field rotation BetaMoonPositionF Orientation in degrees. Excludes appearance/display transforms.
+
+---@class BetaMoonModelPose
+local ModelPose = {}
+
+---@param part string
+---@param value BetaMoonPositionF Local offset in model units; 16 units per block.
+function ModelPose:setPosition(part, value) end
+
+---@param part string
+---@param value BetaMoonPositionF Rotation delta relative to authored rest, in degrees. Local X, then Y, then Z.
+function ModelPose:setRotation(part, value) end
+
+---@param part string
+---@param value BetaMoonPositionF Nonnegative scale factors, relative to rest; identity is 1,1,1.
+function ModelPose:setScale(part, value) end
+
+---@param part string
+---@param value BetaMoonPositionF Add to the current local translation.
+function ModelPose:translate(part, value) end
+
+---@param part string
+---@param value BetaMoonPositionF Compose additional rotation around current local axes, in degrees.
+function ModelPose:rotate(part, value) end
+
+---@param part string
+---@param value BetaMoonPositionF Multiply current scale factors.
+function ModelPose:scale(part, value) end
+
+---@param part string
+---@return BetaMoonPositionF position Copied local offset.
+function ModelPose:getPosition(part) return {x=0,y=0,z=0} end
+
+---@param part string
+---@return BetaMoonPositionF rotation Equivalent Euler delta in degrees; angles may wrap.
+function ModelPose:getRotation(part) return {x=0,y=0,z=0} end
+
+---@param part string
+---@return BetaMoonPositionF scale Copied local factors.
+function ModelPose:getScale(part) return {x=1,y=1,z=1} end
+
+---@param part string
+---@return boolean
+function ModelPose:hasPart(part) return false end
+
+---@param part? string Reset only this part; omit to restore the entire rest pose.
+function ModelPose:reset(part) end
+
+---@param name string Exact exported locator name; raises an error when absent.
+---@return BetaMoonModelSocket
+function ModelPose:getSocket(name) return {} end
+
+---Blend declared channels in call order. Reset explicit poses before each fresh evaluation. In onPose, register the animation beforehand.
+---@param animation BetaMoonAnimationInput
+---@param clip string Exact exported name.
+---@param seconds number Nonnegative explicit time in seconds.
+---@param weight? number 0..1, default 1.
+---@param parts? string[] Optional dense mask of up to 128 exact part names.
+function ModelPose:applyAnimation(animation, clip, seconds, weight, parts) end
+
+---@class BetaMoonModelTransform
+---@field position? BetaMoonPositionF Offset in model units, default zero.
+---@field rotation? BetaMoonPositionF Rotation in degrees, default zero.
+---@field scale? number|BetaMoonPositionF Nonnegative factors, default 1. Numeric shorthand: 0..1024.
+
+---@class BetaMoonModelMaterial
+---@field texture? BetaMoonTextureInput Required unless appearance.texture supplies the default texture.
+---@field blend? 'opaque'|'cutout'|'alpha'|'additive' Default cutout; cutout threshold 0.1.
+---@field lighting? 'world'|'unlit' Default world. Unlit appearance does not emit world light.
+---@field cull? boolean Hide back faces, default false.
+---@field tint? integer RGB 0x000000..0xFFFFFF, default white.
+---@field opacity? number 0..1, default 1.
+---@field uv? {u: number?, v: number?, scaleU: number?, scaleV: number?} Normalized UV offset/scaling; defaults 0,0,1,1. Values within +/-10000.
+
+---@class BetaMoonModelPoseState
+---@field ageTicks number Interpolated age/time. Held: holder age; ground: dropped item age; block/GUI: world time (GUI without world: 0).
+---@field display 'gui'|'held'|'ground'|'block'
+---@field metadata integer Item damage/metadata or block metadata.
+---@field x number World position, or zero in GUI.
+---@field y number
+---@field z number
+
+---@class BetaMoonModelPoseContext
+---@field pose BetaMoonModelPose Writer expires when the callback returns.
+---@field state BetaMoonModelPoseState Copied presentation inputs; changing them cannot change gameplay.
+
+---@class BetaMoonModelAppearance: BetaMoonModelTransform
+---@field model BetaMoonModelInput
+---@field texture? BetaMoonTextureInput Shorthand for the default material texture.
+---@field material? BetaMoonModelMaterial Default material settings; texture may come from the shorthand.
+---@field materials? table<string, BetaMoonModelMaterial> Explicit bindings for exported material_instance names.
+---@field animation? {asset: BetaMoonAnimationInput, clip: string, speed: number?} Optional automatic clip. Speed 0..100, default 1.
+---@field onPose? fun(ctx: BetaMoonModelPoseContext)|{action: fun(ctx: BetaMoonModelPoseContext)} Runs after automatic animation, from a fresh rest pose each evaluation. Errors suspend the callback.
+---@field mode? 'auto'|'dynamic' Default auto. Dynamic forces per-instance block rendering, including transparent static models.
+---@field display? table<'gui'|'held'|'ground'|'block', BetaMoonModelTransform> Context transform applied after the base transform.
+---@field layers? BetaMoonModelAppearance[] Up to 7 extra flat model layers; nested layers are unsupported.
+
 ---@class BetaMoonAssets
 ---@field textures BetaMoonTextureAssetRegistry
 ---@field sounds BetaMoonSoundAssetRegistry
-local Assets = {textures=TextureAssetRegistry, sounds=SoundAssetRegistry}
+---@field models BetaMoonModelAssetRegistry
+---@field animations BetaMoonAnimationAssetRegistry
+local Assets = {textures=TextureAssetRegistry, sounds=SoundAssetRegistry, models=ModelAssetRegistry, animations=AnimationAssetRegistry}
 
 ---Request asset and texture refresh at the next client tick. Invalid replacements retain usable defaults or previous content.
 function Assets:refresh() end

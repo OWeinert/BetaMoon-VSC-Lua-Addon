@@ -60,6 +60,7 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field where (fun(resource: BetaMoonItemReference): boolean)|nil
 
 ---@class BetaMoonBlockDefinition
+---@field appearance? BetaMoonModelAppearance|false Default model presentation; render.variants entries may replace it or disable it with false. Visuals do not alter gameplay properties.
 ---@field id integer
 ---@field material BetaMoonBlockMaterial
 ---@field key string
@@ -205,6 +206,7 @@ function TickWorld:setBlock(x, y, z, block, damage) return false end
 ---@field base fun(self: BetaMoonBlockDisplayOverrideContext) Runs the next display callback layer once.
 
 ---@class BetaMoonItemDefinition
+---@field appearance? BetaMoonModelAppearance|false Default model for GUI, held, and dropped contexts; render.variants may replace it or disable it with false.
 ---@field id integer
 ---@field type BetaMoonItemType|nil
 ---@field key string
@@ -224,7 +226,7 @@ function TickWorld:setBlock(x, y, z, block, damage) return false end
 ---@field damageVsEntity integer|nil
 ---@field use? BetaMoonItemUseDefinition
 ---@field tool? BetaMoonItemToolDefinition
----@field render? {variants: table<integer, {icon: integer?, color: integer?}>}
+---@field render? {variants: table<integer, BetaMoonItemRenderVariant>} Exact damage/metadata keys in 0..32767.
 ---@field onUseFirst? BetaMoonItemInteractionCallback
 ---@field onUseOnBlock? BetaMoonItemInteractionCallback
 ---@field onUse? BetaMoonItemInteractionCallback
