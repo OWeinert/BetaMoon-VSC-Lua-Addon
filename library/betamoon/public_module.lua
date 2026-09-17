@@ -136,9 +136,15 @@ betamoon = {
 ---@field preset? 'cube'|'cuboid'|'cross'
 ---@field pass? 0|1
 ---@field bounds? BetaMoonLocalBox
----@field variants? table<integer, BetaMoonBlockRenderVariant>
+---@field variants? table<integer, BetaMoonBlockRenderVariant> Exact metadata keys in 0..15.
+
+---@class BetaMoonItemRenderVariant
+---@field icon? integer Ordinary icon atlas index in 0..255. Applies when no model is selected.
+---@field color? integer Ordinary item tint in 0x000000..0xFFFFFF. Model tint uses material.tint.
+---@field appearance? BetaMoonModelAppearance|false Complete replacement; omitted inherits the default, false selects ordinary rendering.
 
 ---@class BetaMoonBlockRenderVariant
+---@field appearance? BetaMoonModelAppearance|false Complete replacement; omitted inherits the default, false selects ordinary rendering. If any appearance is dynamic, every state renders dynamically; all-static blocks use chunk rendering.
 ---@field texture? integer Vanilla atlas index in 0..255.
 ---@field textures? table<string, integer>
 ---@field color? integer RGB color in 0x000000..0xFFFFFF.
