@@ -8,7 +8,7 @@
 
 ---@class BetaMoonAssetDefinition
 ---@field key string Exact lowercase namespace:path key, unique within its asset category.
----@field path string File relative to lua_scripts. PNG textures, OGG/WAV sounds, .json models, or .animation.json clips.
+---@field path? string File relative to lua_scripts. Omit to use namespace/category/key-path with .png, .json, or .animation.json; sounds detect exactly one .ogg or .wav default. An explicit path also sets the pack entry beneath bm_assets/.
 
 ---@class BetaMoonAssetSource
 ---@field kind 'pack'|'script'|'builtin' Actual source of the currently usable content.
@@ -27,7 +27,7 @@ function AssetReference:getKind() return "textures" end
 ---@return string path Script-relative fallback file or packaged path for a built-in model.
 function AssetReference:getPath() return "" end
 
----@return string path Override location beneath bm_assets/, relative to the texture-pack ZIP root.
+---@return string path Script-relative default prefixed with bm_assets/, or the catalog path for a built-in model.
 function AssetReference:getOverridePath() return "" end
 
 ---@return BetaMoonAssetSource source
