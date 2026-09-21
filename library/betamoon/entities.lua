@@ -159,8 +159,8 @@ function EntityTypeReference:getKey() return '' end
 
 ---@class BetaMoonEntityDrop
 ---@field item BetaMoonItemReference|integer Item reference or registered item/block stack ID.
----@field min? integer Minimum count, default 1; range 0..64.
----@field max? integer Maximum count, default min; range min..64.
+---@field min? integer Minimum total item count, default 1; range 0..64. Totals are split into legal native stacks.
+---@field max? integer Maximum total item count, default min; range min..64. Totals are split into legal native stacks.
 ---@field chance? number Independent chance for each loot-table sample, from 0..1; default 1.
 ---@field damage? integer Item damage value, default 0; range 0..32767.
 
