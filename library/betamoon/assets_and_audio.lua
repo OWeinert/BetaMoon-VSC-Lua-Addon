@@ -219,7 +219,7 @@ function ModelPose:applyAnimation(animation, clip, seconds, weight, parts) end
 ---@field animation? {asset: BetaMoonAnimationInput, clip: string, speed: number?} Optional automatic clip. Speed 0..100, default 1.
 ---@field onPose? fun(ctx: BetaMoonModelPoseContext)|{action: fun(ctx: BetaMoonModelPoseContext)} Runs after automatic animation, from a fresh rest pose each evaluation. Errors suspend the callback.
 ---@field mode? 'auto'|'dynamic' Default auto. Dynamic forces per-instance block rendering, including transparent static models.
----@field display? table<'gui'|'held'|'ground'|'block', BetaMoonModelTransform> Context transform applied after the base transform.
+---@field display? table<'gui'|'held'|'ground'|'block'|'entity', BetaMoonModelTransform> Context transform applied after the base transform.
 ---@field layers? BetaMoonModelAppearance[] Up to 7 extra flat model layers; nested layers are unsupported.
 
 ---@class BetaMoonAssets
