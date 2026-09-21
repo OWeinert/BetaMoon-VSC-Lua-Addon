@@ -193,7 +193,7 @@ betamoon = {
 ---@field isLiquid fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Block material is a liquid; false when unloaded.
 ---@field isPowered fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Indirect redstone power; false when unloaded.
 ---@field getClosestPlayer fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity|nil Radius at most 64 around the callback origin.
----@field getNearbyEntities fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity[] Up to 256 within a box around the callback origin.
+---@field getNearbyEntities fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity[] Up to 256 within a true radius of at most 32 around the callback block center.
 ---@field getBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): BetaMoonBlockAtPosition
 ---@field setBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, block: BetaMoonBlockReference|integer, damage?: integer): boolean
 ---@field playSound fun(self: BetaMoonActionWorld, name: string, volume?: number, pitch?: number)
@@ -245,7 +245,7 @@ betamoon = {
 ---@field getPosition fun(self: BetaMoonActionEntity): BetaMoonPositionF Returns a detached position snapshot.
 ---@field setPosition fun(self: BetaMoonActionEntity, x: number, y: number, z: number): boolean Moves to a loaded position; false outside bounds or for part proxies.
 ---@field getRotation fun(self: BetaMoonActionEntity): {yaw: number, pitch: number} Detached facing snapshot.
----@field getNearbyEntities fun(self: BetaMoonActionEntity, radius: number): BetaMoonActionEntity[] Up to 256 within 32 blocks.
+---@field getNearbyEntities fun(self: BetaMoonActionEntity, radius: number): BetaMoonActionEntity[] Up to 256 within a true radius of at most 32 around the exact entity position; excludes self.
 ---@field getPassenger fun(self: BetaMoonActionEntity): BetaMoonActionEntity|nil Current native single-seat passenger.
 ---@field getVehicle fun(self: BetaMoonActionEntity): BetaMoonActionEntity|nil Current native vehicle.
 ---@field dismount fun(self: BetaMoonActionEntity): boolean Dismount this entity; false when it is not riding.
