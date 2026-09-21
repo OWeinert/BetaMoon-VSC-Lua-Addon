@@ -342,6 +342,7 @@ function EntityTypeReference:getKey() return '' end
 ---@class BetaMoonEntitySpawnOptions
 ---@field position BetaMoonPositionF
 ---@field rotation? {yaw: number?, pitch: number?}
+---@field owner? BetaMoonActionEntity Projectile launch owner. Must be live in the same world; invalid for other kinds.
 
 ---@class BetaMoonEntityRegistry
 local Entities = {}

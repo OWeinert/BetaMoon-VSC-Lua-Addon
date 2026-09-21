@@ -256,7 +256,7 @@ betamoon = {
 ---@field getPartRole? fun(self: BetaMoonActionEntity): 'hit'|'interaction' Present on multipart collision parts.
 ---@field getParent? fun(self: BetaMoonActionEntity): BetaMoonActionEntity Present on multipart collision parts.
 ---@field getOwner? fun(self: BetaMoonActionEntity): BetaMoonActionEntity|nil Projectile launch owner, or the currently loaded saved owner when ownership is enabled.
----@field getOwnerIdentity? fun(self: BetaMoonActionEntity): string|nil Stable `player:<name>` or `entity:<identity>` token when ownership is enabled.
+---@field getOwnerIdentity? fun(self: BetaMoonActionEntity): string|nil Stable `player:<name>` or `entity:<identity>` token for a projectile launch owner or ownership capability.
 ---@field setOwner? fun(self: BetaMoonActionEntity, owner?: BetaMoonActionEntity): boolean Saves a player or BetaMoon entity as owner; nil clears it.
 ---@field getTeam? fun(self: BetaMoonActionEntity): string|nil Current namespaced team key.
 ---@field setTeam? fun(self: BetaMoonActionEntity, team?: string): boolean Sets an instance override; nil restores the declaration default.
