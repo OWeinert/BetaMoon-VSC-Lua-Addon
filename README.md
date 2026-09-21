@@ -4,7 +4,7 @@ LuaLS definitions and a VS Code extension for [**BetaMoon**](https://modrinth.co
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
 including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation, events, tile entities and container GUIs.
 
-The model and animation additions target BetaMoon 0.7.0 development.
+The bundled API targets BetaMoon 0.7.0.
 
 The files in `library/betamoon/` are generated from the categories in this repository's local
 `internal/api.lua` reference. Each category retains its declarations, annotations and documentation.
@@ -92,7 +92,7 @@ npm test
 npm run package
 ```
 
-The package command produces `betamoon-lua-api-0.6.0.vsix` locally. It does not publish anything.
+The package command produces `betamoon-lua-api-0.6.2.vsix` locally. It does not publish anything.
 The `publisher` in `package.json` is `OWeinert`; publishing requires ownership of that VS Code Marketplace
 publisher ID. No Marketplace publication is implied by this repository.
 
