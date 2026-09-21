@@ -78,8 +78,8 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrop[]?} Read-only query; nil keeps declared/vanilla drops.
 ---@field state? table<string, BetaMoonBlockStateField>
 ---@field placement? BetaMoonBlockPlacement
----@field collision? {boxes: BetaMoonLocalBox[]}
----@field selection? BetaMoonLocalBox
+---@field collision? {boxes: BetaMoonLocalBox[]} Boxes are authored for the default facing and rotate with horizontal placement state.
+---@field selection? BetaMoonLocalBox Authored for the default facing and rotates with horizontal placement state.
 ---@field opaque? boolean
 ---@field normalCube? boolean Whether vanilla treats this as a full cube for suffocation, player push-out and solid support. Defaults to false for partial/empty collision, partial render bounds or cross rendering; does not remove collision.
 ---@field replaceable? boolean
@@ -227,8 +227,8 @@ function TickWorld:setBlock(x, y, z, block, damage) return false end
 ---@field use? BetaMoonItemUseDefinition
 ---@field tool? BetaMoonItemToolDefinition
 ---@field render? {variants: table<integer, BetaMoonItemRenderVariant>} Exact damage/metadata keys in 0..32767.
----@field onUseFirst? BetaMoonItemInteractionCallback
----@field onUseOnBlock? BetaMoonItemInteractionCallback
+---@field onUseFirst? BetaMoonItemBlockInteractionCallback
+---@field onUseOnBlock? BetaMoonItemBlockInteractionCallback
 ---@field onUse? BetaMoonItemInteractionCallback
 ---@field onUseOnEntity? BetaMoonItemInteractionCallback
 ---@field onHitEntity? BetaMoonItemCallback
