@@ -1,8 +1,10 @@
 # BetaMoon Lua API
 
-LuaLS definitions and a VS Code extension for [**BetaMoon 0.6.X**](https://modrinth.com/mod/betamoon), a mod for Minecraft b1.7.3 providing a Lua scripting framework.
+LuaLS definitions and a VS Code extension for [**BetaMoon**](https://modrinth.com/mod/betamoon), a mod for Minecraft b1.7.3 providing a Lua scripting framework.
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
-including blocks, items, recipes, world generation, events, tile entities and container GUIs.
+including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation, events, tile entities and container GUIs.
+
+The model and animation additions target BetaMoon 0.7.0 development.
 
 The files in `library/betamoon/` are generated from the categories in this repository's local
 `internal/api.lua` reference. Each category retains its declarations, annotations and documentation.
@@ -21,6 +23,7 @@ Edit the reference there, then sync; use the public category files for LuaLS com
 | Stacks, positions, and world information | [stacks_positions_and_world_information.lua](library/betamoon/stacks_positions_and_world_information.lua) |
 | Handles | [handles.lua](library/betamoon/handles.lua) |
 | Blocks and items | [blocks_and_items.lua](library/betamoon/blocks_and_items.lua) |
+| Assets and audio | [assets_and_audio.lua](library/betamoon/assets_and_audio.lua) |
 | Tool and armor materials | [tool_and_armor_materials.lua](library/betamoon/tool_and_armor_materials.lua) |
 | Recipes | [recipes.lua](library/betamoon/recipes.lua) |
 | Overrides | [overrides.lua](library/betamoon/overrides.lua) |

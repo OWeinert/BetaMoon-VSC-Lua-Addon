@@ -60,6 +60,7 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field where (fun(resource: BetaMoonItemReference): boolean)|nil
 
 ---@class BetaMoonBlockDefinition
+---@field appearance? BetaMoonModelAppearance|false Default model presentation; render.variants entries may replace it or disable it with false. Visuals do not alter gameplay properties.
 ---@field id integer
 ---@field material BetaMoonBlockMaterial
 ---@field key string
@@ -70,15 +71,15 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field lightOpacity integer|nil
 ---@field stepSound BetaMoonStepSound|nil
 ---@field unbreakable boolean|nil
----@field texture string|integer|nil
----@field textures table<string, string|integer>|nil
+---@field texture BetaMoonTextureInput|integer|nil
+---@field textures table<string, BetaMoonTextureInput|integer>|nil
 ---@field harvest table<string, integer>|nil
 ---@field drops? BetaMoonBlockDrop[]
 ---@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrop[]?} Read-only query; nil keeps declared/vanilla drops.
 ---@field state? table<string, BetaMoonBlockStateField>
 ---@field placement? BetaMoonBlockPlacement
----@field collision? {boxes: BetaMoonLocalBox[]}
----@field selection? BetaMoonLocalBox
+---@field collision? {boxes: BetaMoonLocalBox[]} Boxes are authored for the default facing and rotate with horizontal placement state.
+---@field selection? BetaMoonLocalBox Authored for the default facing and rotates with horizontal placement state.
 ---@field opaque? boolean
 ---@field normalCube? boolean Whether vanilla treats this as a full cube for suffocation, player push-out and solid support. Defaults to false for partial/empty collision, partial render bounds or cross rendering; does not remove collision.
 ---@field replaceable? boolean
@@ -205,6 +206,7 @@ function TickWorld:setBlock(x, y, z, block, damage) return false end
 ---@field base fun(self: BetaMoonBlockDisplayOverrideContext) Runs the next display callback layer once.
 
 ---@class BetaMoonItemDefinition
+---@field appearance? BetaMoonModelAppearance|false Default model for GUI, held, and dropped contexts; render.variants may replace it or disable it with false.
 ---@field id integer
 ---@field type BetaMoonItemType|nil
 ---@field key string
@@ -216,17 +218,17 @@ function TickWorld:setBlock(x, y, z, block, damage) return false end
 ---@field hasSubtypes boolean|nil
 ---@field full3D boolean|nil
 ---@field icon {x: integer, y: integer}|nil
----@field texture string|nil
----@field modelTexture string|nil Path to the texture drawn on the worn armor model. Cannot be combined with renderIndex.
+---@field texture BetaMoonTextureInput|nil
+---@field modelTexture BetaMoonTextureInput|nil Texture drawn on the worn armor model. Cannot be combined with renderIndex.
 ---@field food {healing: integer, wolfFood: boolean|nil}|nil
 ---@field renderIndex BetaMoonArmorMaterialName|integer|nil Vanilla worn-armor texture. Cannot be combined with modelTexture.
 ---@field efficiency number|nil
 ---@field damageVsEntity integer|nil
 ---@field use? BetaMoonItemUseDefinition
 ---@field tool? BetaMoonItemToolDefinition
----@field render? {variants: table<integer, {icon: integer?, color: integer?}>}
----@field onUseFirst? BetaMoonItemInteractionCallback
----@field onUseOnBlock? BetaMoonItemInteractionCallback
+---@field render? {variants: table<integer, BetaMoonItemRenderVariant>} Exact damage/metadata keys in 0..32767.
+---@field onUseFirst? BetaMoonItemBlockInteractionCallback
+---@field onUseOnBlock? BetaMoonItemBlockInteractionCallback
 ---@field onUse? BetaMoonItemInteractionCallback
 ---@field onUseOnEntity? BetaMoonItemInteractionCallback
 ---@field onHitEntity? BetaMoonItemCallback

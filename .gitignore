@@ -5,5 +5,7 @@ scripts/
 
 *.vsix
 .vscodeignore
+luals-*-diagnostics.json
+luals-*-log/
 
 package-lock.json
