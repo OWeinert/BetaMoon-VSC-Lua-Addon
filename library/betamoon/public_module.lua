@@ -194,7 +194,7 @@ betamoon = {
 ---@field isPowered fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Indirect redstone power; false when unloaded.
 ---@field getClosestPlayer fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity|nil Radius at most 64 around the callback origin.
 ---@field getNearbyEntities fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity[] Up to 256 within a true radius of at most 32 around the callback block center.
----@field getBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): BetaMoonBlockAtPosition
+---@field getBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): BetaMoonBlockAtPosition|nil Detached block snapshot for Y 0-127; nil when the chunk is unloaded.
 ---@field setBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, block: BetaMoonBlockReference|integer, damage?: integer): boolean
 ---@field playSound fun(self: BetaMoonActionWorld, name: string, volume?: number, pitch?: number)
 ---@field spawnParticle fun(self: BetaMoonActionWorld, name: BetaMoonParticleName)
