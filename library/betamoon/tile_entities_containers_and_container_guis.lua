@@ -80,8 +80,9 @@ function TileInventoryAccess:canAdd(slot, stack) return false end
 ---@return boolean
 function TileInventoryAccess:add(slot, stack) return false end
 ---@param slot string
----@return integer
-function TileInventoryAccess:consumeFuel(slot) return 0 end
+---@param set? BetaMoonFuelSetSelector Defaults to `minecraft:fuel/furnace`.
+---@return integer burnTime Zero when no fuel was consumed.
+function TileInventoryAccess:consumeFuel(slot, set) return 0 end
 
 ---@class BetaMoonTileEntityContextValue
 ---@field data BetaMoonTileDataAccess
@@ -101,8 +102,9 @@ function SmeltingRecipeAccess:match(query) end
 ---@class BetaMoonFuelAccess
 local FuelAccess = {}
 ---@param fuel BetaMoonTileInventoryStack|BetaMoonStack|nil
----@return integer
-function FuelAccess:getBurnTime(fuel) return 0 end
+---@param set? BetaMoonFuelSetSelector Defaults to `minecraft:fuel/furnace`.
+---@return integer burnTime Zero when the stack is not accepted.
+function FuelAccess:getBurnTime(fuel, set) return 0 end
 
 ---@class BetaMoonTileTickContext
 ---@field entity BetaMoonTileEntityContextValue
@@ -114,11 +116,8 @@ function FuelAccess:getBurnTime(fuel) return 0 end
 ---@field fuels BetaMoonFuelAccess
 ---@field state BetaMoonBlockStateAccess Block state access for the tile's BetaMoon block.
 
----@class BetaMoonTileWorldAccess
+---@class BetaMoonTileWorldAccess: BetaMoonActionWorld
 local TileWorldAccess = {}
----@return boolean
-function TileWorldAccess:isPowered() return false end
-function TileWorldAccess:notifyNeighbors() end
 
 ---@class BetaMoonNeighborChangedDefinition
 ---@field action fun(ctx: BetaMoonTileNeighborContext)
@@ -140,6 +139,7 @@ function TileWorldAccess:notifyNeighbors() end
 ---@field x integer
 ---@field y integer
 ---@field outputOnly? boolean
+---@field acceptsFuel? BetaMoonFuelSetSelector Restricts manual placement and shift-click insertion.
 
 ---@class BetaMoonPlayerInventoryDefinition
 ---@field x integer

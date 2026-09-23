@@ -185,6 +185,9 @@
 ---@field backgrounds BetaMoonMinecraftGuiBackgrounds
 ---@field sprites BetaMoonMinecraftGuiSprites
 
+---@class BetaMoonMinecraftFuels
+---@field furnace 'minecraft:fuel/furnace' The effective vanilla furnace policy, including BetaMoon additions.
+
 ---@class BetaMoonMinecraftConstants
 ---@field world BetaMoonMinecraftWorldConstants
 ---@field blockMaterials BetaMoonMinecraftBlockMaterials
@@ -198,6 +201,7 @@
 ---@field particles BetaMoonMinecraftParticles
 ---@field sounds BetaMoonMinecraftSounds
 ---@field gui BetaMoonMinecraftGuiConstants
+---@field fuels BetaMoonMinecraftFuels
 
 ---@class BetaMoonTreeModes
 ---@field default 'default'
