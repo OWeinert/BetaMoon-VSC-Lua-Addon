@@ -48,6 +48,10 @@ Use the global `betamoon` directly in scripts. There is no need to `require` a d
 `.minecraft/lua_scripts`. See the [BetaMoon API reference](https://github.com/OWeinert/BetaMoon/wiki/API-Documentation)
 and [example scripts](https://github.com/OWeinert/BetaMoon/tree/main/examples).
 
+For a packaged BetaMoon mod, open its package directory as the workspace folder, or add that directory to a multi-root
+workspace, so LuaLS resolves private modules such as `require("content.items")` from the package root. Enable the API
+for that folder. Cross-mod sharing still uses `betamoon.modules`.
+
 The extension adds its bundled `library` directory to the selected folder's `Lua.workspace.library`.
 It preserves other library entries. If the folder has `.luarc.json` or `.luarc.jsonc`, it updates that file instead,
 preserving comments and other settings. Save pending configuration edits before running the command.
