@@ -373,6 +373,111 @@ local TileWorldAccess = {}
 ---@field tileEntity BetaMoonTileEntityHandle
 ---@field slots BetaMoonContainerSlotDefinition[]
 ---@field playerInventory BetaMoonPlayerInventoryDefinition
+---@field session? table<string, BetaMoonContainerSessionField> Typed values that last until this container closes.
+---@field controls? table<string, BetaMoonContainerControlDefinition>
+---@field onClose? fun(ctx: BetaMoonContainerControlContext)
+
+---@class BetaMoonContainerSessionField
+---@field type 'integer'|'number'|'boolean'|'string'
+---@field default? integer|number|boolean|string
+---@field maxLength? integer String limit, default 256 and maximum 1024.
+
+---@class BetaMoonContainerControlBinding
+---@field data? string Bind to a tile data field.
+---@field session? string Bind to a container-session field.
+
+---@alias BetaMoonCallbackResult 'pass'|'deny'|'handled'
+
+---@class BetaMoonContainerActionControl
+---@field type 'action'
+---@field enabledWhen? BetaMoonGuiCondition
+---@field onActivate? fun(ctx: BetaMoonContainerControlContext): BetaMoonCallbackResult|nil
+
+---@class BetaMoonContainerToggleControl
+---@field type 'toggle'
+---@field bind BetaMoonContainerControlBinding
+---@field enabledWhen? BetaMoonGuiCondition
+---@field beforeChange? BetaMoonContainerBeforeChange
+---@field onChange? fun(ctx: BetaMoonContainerControlContext, value: boolean, previous: boolean)
+
+---@class BetaMoonContainerNumberControl
+---@field type 'number'
+---@field bind BetaMoonContainerControlBinding
+---@field minimum number
+---@field maximum number
+---@field step? number Default 1.
+---@field pageStep? number Default ten steps.
+---@field enabledWhen? BetaMoonGuiCondition
+---@field beforeChange? BetaMoonContainerBeforeChange
+---@field onChange? fun(ctx: BetaMoonContainerControlContext, value: number, previous: number)
+
+---@class BetaMoonContainerTextControl
+---@field type 'text'
+---@field bind BetaMoonContainerControlBinding
+---@field maxLength? integer Default 256 and maximum 1024.
+---@field enabledWhen? BetaMoonGuiCondition
+---@field beforeChange? BetaMoonContainerBeforeChange
+---@field onEdit? fun(ctx: BetaMoonContainerControlContext, draft: string)
+---@field onChange? fun(ctx: BetaMoonContainerControlContext, value: string, previous: string)
+---@field onCommit? fun(ctx: BetaMoonContainerControlContext, value: string, previous: string)
+
+---@class BetaMoonContainerChoiceControl
+---@field type 'choice'
+---@field bind BetaMoonContainerControlBinding
+---@field values (string|number|boolean)[]
+---@field wrap? boolean Default true.
+---@field enabledWhen? BetaMoonGuiCondition
+---@field beforeChange? BetaMoonContainerBeforeChange
+---@field onChange? fun(ctx: BetaMoonContainerControlContext, value: string|number|boolean, previous: string|number|boolean)
+
+---@class BetaMoonContainerCustomControl
+---@field type 'custom'
+---@field enabledWhen? BetaMoonGuiCondition
+---@field onInput? fun(ctx: BetaMoonContainerControlContext, input: BetaMoonContainerInput): BetaMoonCallbackResult|nil
+
+---@alias BetaMoonContainerControlDefinition BetaMoonContainerActionControl|BetaMoonContainerToggleControl|BetaMoonContainerNumberControl|BetaMoonContainerTextControl|BetaMoonContainerChoiceControl|BetaMoonContainerCustomControl
+---@alias BetaMoonContainerBeforeChange fun(ctx: BetaMoonContainerControlContext, proposed: string|number|boolean, current: string|number|boolean): BetaMoonCallbackResult|BetaMoonContainerReplacement|nil
+---@class BetaMoonContainerReplacement
+---@field result 'handled'
+---@field value string|number|boolean
+
+---@class BetaMoonContainerSessionAccess
+local ContainerSessionAccess = {}
+---@param name string
+---@return string|number|boolean
+function ContainerSessionAccess:get(name) end
+---@param name string
+---@param value string|number|boolean
+function ContainerSessionAccess:set(name, value) end
+
+---@class BetaMoonContainerControlInfo
+---@field key string
+---@field type 'action'|'toggle'|'number'|'text'|'choice'|'custom'
+---@field enabled boolean
+
+---@class BetaMoonContainerInput
+---@field source 'mouse'|'keyboard'|'focus'|'script'
+---@field phase? 'press'|'drag'|'release'|'scroll'|'focus'|'blur'
+---@field button? integer
+---@field wheel? integer
+---@field x? integer Element-local coordinate.
+---@field y? integer Element-local coordinate.
+---@field deltaX? integer Pointer movement since the previous captured event.
+---@field deltaY? integer Pointer movement since the previous captured event.
+---@field key? integer
+---@field character? string
+---@field shift? boolean
+---@field control? boolean
+---@field conflicted? boolean True when tile text changed while the editor was focused.
+
+---@class BetaMoonContainerControlContext
+---@field player {name: string}|table
+---@field tile {x: integer, y: integer, z: integer, data: BetaMoonTileDataAccess}
+---@field data BetaMoonTileDataAccess
+---@field inventory BetaMoonTileInventoryAccess
+---@field session BetaMoonContainerSessionAccess
+---@field control BetaMoonContainerControlInfo
+---@field input BetaMoonContainerInput
 
 ---@alias BetaMoonGuiAnchor 'top_left'|'top_center'|'top_right'|'center'|'bottom_left'|'bottom_center'|'bottom_right'
 ---@alias BetaMoonGuiLayer 'background'|'content'|'foreground'
@@ -407,6 +512,7 @@ local TileWorldAccess = {}
 
 ---@class BetaMoonGuiCondition
 ---@field field? string
+---@field session? string Read a container-session field instead of tile data.
 ---@field equals? string|number|boolean
 ---@field notEquals? string|number|boolean
 ---@field greaterThan? number
@@ -483,7 +589,42 @@ local TileWorldAccess = {}
 ---@field type 'group'
 ---@field elements BetaMoonGuiElement[]
 
----@alias BetaMoonGuiElement BetaMoonGuiImageElement|BetaMoonGuiTextElement|BetaMoonGuiProgressElement|BetaMoonGuiStateImageElement|BetaMoonGuiRectangleElement|BetaMoonGuiTooltipElement|BetaMoonGuiItemElement|BetaMoonGuiGroupElement
+---@class BetaMoonGuiNineSlice
+---@field texture BetaMoonTextureInput
+---@field border? integer Equal corner-border size on every side.
+
+---@alias BetaMoonGuiControlVisual BetaMoonTextureInput|BetaMoonGuiNineSlice
+
+---@class BetaMoonGuiControlElementBase: BetaMoonGuiElementBase
+---@field control string
+---@field width? integer
+---@field height? integer Default 20.
+---@field text? string
+---@field focusable? boolean Default true.
+---@field visuals? table<'normal'|'hovered'|'pressed'|'focused'|'disabled'|'selected'|'invalid', BetaMoonGuiControlVisual>
+
+---@class BetaMoonGuiButtonElement: BetaMoonGuiControlElementBase
+---@field type 'button'
+
+---@class BetaMoonGuiToggleElement: BetaMoonGuiControlElementBase
+---@field type 'toggle'
+
+---@class BetaMoonGuiSliderElement: BetaMoonGuiControlElementBase
+---@field type 'slider'
+---@field orientation? 'horizontal'|'vertical'
+---@field captureDrag? boolean Default true.
+
+---@class BetaMoonGuiTextBoxElement: BetaMoonGuiControlElementBase
+---@field type 'text_box'
+
+---@class BetaMoonGuiChoiceElement: BetaMoonGuiControlElementBase
+---@field type 'choice'
+
+---@class BetaMoonGuiInteractiveElement: BetaMoonGuiControlElementBase
+---@field type 'interactive'
+---@field captureDrag? boolean Default true.
+
+---@alias BetaMoonGuiElement BetaMoonGuiImageElement|BetaMoonGuiTextElement|BetaMoonGuiProgressElement|BetaMoonGuiStateImageElement|BetaMoonGuiRectangleElement|BetaMoonGuiTooltipElement|BetaMoonGuiItemElement|BetaMoonGuiGroupElement|BetaMoonGuiButtonElement|BetaMoonGuiToggleElement|BetaMoonGuiSliderElement|BetaMoonGuiTextBoxElement|BetaMoonGuiChoiceElement|BetaMoonGuiInteractiveElement
 
 ---@class BetaMoonContainerGuiDefinition
 ---@field name string
