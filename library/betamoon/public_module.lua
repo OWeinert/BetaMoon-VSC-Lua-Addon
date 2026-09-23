@@ -20,6 +20,9 @@ local BiomeRegistry = require("betamoon.world_generation").BiomeRegistry
 local TileEntityRegistry = require("betamoon.tile_entities_containers_and_container_guis").TileEntityRegistry
 local ContainerRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerRegistry
 local ContainerGuiRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerGuiRegistry
+local Capabilities = require("betamoon.tile_entities_containers_and_container_guis").Capabilities
+local Systems = require("betamoon.tile_entities_containers_and_container_guis").Systems
+local LogicalNetworks = require("betamoon.tile_entities_containers_and_container_guis").LogicalNetworks
 local Events = require("betamoon.events").Events
 local Chat = require("betamoon.chat_modules_and_utilities").Chat
 local Modules = require("betamoon.chat_modules_and_utilities").Modules
@@ -82,6 +85,9 @@ local CallbackResults
 ---@field tileEntities BetaMoonTileEntityRegistry
 ---@field containers BetaMoonContainerRegistry
 ---@field containerGuis BetaMoonContainerGuiRegistry
+---@field capabilities BetaMoonCapabilityRegistry
+---@field systems BetaMoonWorldServiceRegistry
+---@field logicalNetworks BetaMoonLogicalNetworkRegistry
 ---@field stack fun(item: BetaMoonResourceReference|integer, count?: integer, damage?: integer): BetaMoonStack
 ---@type BetaMoonModule
 betamoon = {
@@ -116,6 +122,9 @@ betamoon = {
   tileEntities = TileEntityRegistry,
   containers = ContainerRegistry,
   containerGuis = ContainerGuiRegistry,
+  capabilities = Capabilities,
+  systems = Systems,
+  logicalNetworks = LogicalNetworks,
   stack = stack
 }
 
@@ -175,6 +184,98 @@ betamoon = {
 ---@field isPowered fun(self: BetaMoonBlockPowerAccess, side?: BetaMoonBlockFace): boolean
 ---@field notifyNeighbors fun(self: BetaMoonBlockPowerAccess)
 
+---@class BetaMoonNbtView
+local NbtView = {}
+---@param key string
+---@return boolean
+function NbtView:has(key) return false end
+---@return string[]
+function NbtView:keys() return {} end
+---@param key string
+---@return 'byte'|'short'|'integer'|'long'|'float'|'double'|'byte_array'|'string'|'list'|'compound'|nil
+function NbtView:getType(key) end
+---@param key string
+---@return boolean|number|string|table|BetaMoonNbtView|nil
+function NbtView:get(key) end
+---@param key string
+---@return string|nil
+function NbtView:getString(key) end
+---@param key string
+---@return number|nil
+function NbtView:getNumber(key) end
+---@param key string
+---@return boolean|nil
+function NbtView:getBoolean(key) end
+---@param key string
+---@return BetaMoonNbtView|nil
+function NbtView:getCompound(key) end
+---@param key string
+---@return table|nil
+function NbtView:getList(key) end
+
+---@class BetaMoonWorldDataInfo: BetaMoonWorldInfo
+---@field day integer
+---@field timeOfDay integer
+---@field celestialAngle number
+---@field daytime boolean
+---@field difficulty integer
+---@field height integer
+
+---@class BetaMoonBlockView
+---@field position BetaMoonPositionI
+---@field id integer
+---@field damage integer
+---@field solid boolean
+---@field canSeeSky boolean
+---@field powered boolean
+---@field light integer
+---@field hasTile boolean
+---@field material {liquid: boolean, solid: boolean, burning: boolean, translucent: boolean, mobility: integer}
+
+---@class BetaMoonTileView
+---@field position BetaMoonPositionI
+---@field className string
+---@field valid boolean
+---@field type? string
+---@field data? table<string, BetaMoonSharedDataValue>
+---@field inventorySize? integer
+---@field inventory? table<integer, BetaMoonStack>
+---@field inventoryTruncated? true Present when inventory contains more than the 256 captured slots.
+local TileView = {}
+---@return BetaMoonNbtView|nil
+function TileView:getNbt() end
+
+---@class BetaMoonBiomeView
+---@field name string
+---@field color integer
+---@field topBlockId integer
+---@field fillerBlockId integer
+---@field snow boolean
+---@field rain boolean
+---@field temperature number
+---@field humidity number
+
+---@class BetaMoonChunkView
+---@field x integer
+---@field z integer
+---@field minX integer
+---@field maxX integer
+---@field minZ integer
+---@field maxZ integer
+---@field loaded boolean
+---@field terrainPopulated boolean
+---@field modified boolean
+---@field lowestHeight integer
+---@field entityCount integer
+---@field tileCount integer
+
+---@class BetaMoonPlayerQuery
+---@field x? number
+---@field y? number
+---@field z? number
+---@field radius? number Greater than zero and at most 128; default 128.
+---@field limit? integer From 1 through 128; default 128.
+
 ---@class BetaMoonActionWorld
 ---@field getTime fun(self: BetaMoonActionWorld): integer World ticks.
 ---@field getDayTime fun(self: BetaMoonActionWorld): integer Time of day, 0..23999.
@@ -191,14 +292,23 @@ betamoon = {
 ---@field canSeeSky fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean False when unloaded.
 ---@field isRainingAt fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Local exposed rain, false when unloaded.
 ---@field isLiquid fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Block material is a liquid; false when unloaded.
----@field isPowered fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Indirect redstone power; false when unloaded.
+---@field isPowered fun(self: BetaMoonActionWorld, x?: integer, y?: integer, z?: integer): boolean Coordinates default to the callback origin; false when unloaded.
 ---@field getClosestPlayer fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity|nil Radius at most 64 around the callback origin.
 ---@field getNearbyEntities fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity[] Up to 256 within a true radius of at most 32 around the callback block center.
 ---@field getBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): BetaMoonBlockAtPosition|nil Detached block snapshot for Y 0-127; nil when the chunk is unloaded.
 ---@field setBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, block: BetaMoonBlockReference|integer, damage?: integer): boolean
+---@field notifyNeighbors fun(self: BetaMoonActionWorld, x?: integer, y?: integer, z?: integer): boolean Coordinates default to the callback origin.
 ---@field playSound fun(self: BetaMoonActionWorld, name: string, volume?: number, pitch?: number)
 ---@field spawnParticle fun(self: BetaMoonActionWorld, name: BetaMoonParticleName)
 ---@field spawnEntity fun(self: BetaMoonActionWorld, type: BetaMoonEntityTypeReference|string, options: BetaMoonEntitySpawnOptions): BetaMoonActionEntity|nil, string? Returns nil and a reason when placement fails or onSpawn removes the entity.
+---@field getInfo fun(self: BetaMoonActionWorld): BetaMoonWorldDataInfo
+---@field getBlockView fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, y?: integer, z?: integer): BetaMoonBlockView|nil
+---@field getTile fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, y?: integer, z?: integer): BetaMoonTileView|nil
+---@field getBiomeData fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, z?: integer): BetaMoonBiomeView
+---@field getChunk fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, z?: integer): BetaMoonChunkView|nil
+---@field getPlayers fun(self: BetaMoonActionWorld, options?: BetaMoonPlayerQuery): BetaMoonActionEntity[] Loaded players sorted nearest-first.
+---@field getSystemData fun(self: BetaMoonActionWorld, system: BetaMoonWorldServiceReference|string): table<string, BetaMoonSharedDataValue>|nil
+---@field getCapability fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, yOrCapability: integer|BetaMoonCapabilityReference|string, zOrFace?: integer|BetaMoonBlockFace, capability?: BetaMoonCapabilityReference|string, face?: BetaMoonBlockFace): BetaMoonCapabilityProxy|nil
 
 ---@class BetaMoonActionEntity
 ---@field isPlayer fun(self: BetaMoonActionEntity): boolean

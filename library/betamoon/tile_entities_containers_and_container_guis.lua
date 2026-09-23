@@ -13,6 +13,19 @@
 ---@class BetaMoonContainerGuiHandle
 ---@field name string
 
+---@alias BetaMoonSharedDataValue boolean|integer|number|string|BetaMoonPositionF|BetaMoonPersistentBlockPosition|BetaMoonStack|BetaMoonSharedDataValue[]|table<string, BetaMoonSharedDataValue>
+
+---@class BetaMoonPersistentBlockPosition: BetaMoonPositionI
+---@field dimension integer
+
+---@class BetaMoonSharedDataField
+---@field type 'integer'|'number'|'boolean'|'string'|'vector'|'block_position'|'item_stack'|'content_key'|'list'|'record'
+---@field default? BetaMoonSharedDataValue
+---@field save? true Persistent fields always save; false is rejected.
+---@field element? BetaMoonSharedDataField Required for list fields.
+---@field maxLength? integer List limit from 1 through 256; default 64.
+---@field fields? table<string, BetaMoonSharedDataField> Required for record fields.
+
 ---@class BetaMoonTileInventorySlotDefinition
 ---@field index? integer Explicit persistent index. Omitted slots use stable alphabetical assignment.
 
@@ -20,9 +33,7 @@
 ---@field name? string
 ---@field slots table<string, BetaMoonTileInventorySlotDefinition>
 
----@class BetaMoonTileDataField
----@field type 'integer'|'number'|'boolean'|'string'
----@field default? integer|number|boolean|string
+---@class BetaMoonTileDataField: BetaMoonSharedDataField
 ---@field sync? boolean
 
 ---@class BetaMoonTileTickSchedule
@@ -37,8 +48,9 @@
 
 ---@class BetaMoonTileEntityDefinition
 ---@field name string
----@field inventory BetaMoonTileInventoryDefinition
+---@field inventory? BetaMoonTileInventoryDefinition Omit for a data/capability-only tile with no slots.
 ---@field data? table<string, BetaMoonTileDataField>
+---@field capabilities? BetaMoonCapabilityAttachment[] Reusable behavior contracts implemented by this tile type.
 ---@field onTick? BetaMoonTileTickDefinition
 ---@field onInventoryChanged? BetaMoonTileInventoryChangedDefinition
 
@@ -53,11 +65,219 @@
 ---@class BetaMoonTileDataAccess
 local TileDataAccess = {}
 ---@param name string
----@return integer|number|boolean|string
+---@return BetaMoonSharedDataValue
 function TileDataAccess:get(name) end
 ---@param name string
----@param value integer|number|boolean|string
+---@param value BetaMoonSharedDataValue
 function TileDataAccess:set(name, value) end
+---@return table<string, BetaMoonSharedDataValue> detached
+function TileDataAccess:snapshot() return {} end
+
+---@class BetaMoonCapabilityReference
+---@field key string
+
+---@class BetaMoonCapabilityOperationDefinition
+---@field mode? 'query'|'action' Queries cannot mutate gameplay; default query.
+---@field request? table<string, BetaMoonSharedDataField>
+---@field response? table<string, BetaMoonSharedDataField>
+
+---@class BetaMoonCapabilityDefinition
+---@field key string Must use `namespace:capability/name`.
+---@field state? table<string, BetaMoonSharedDataField> Persistent state for each attached tile.
+---@field config? table<string, BetaMoonSharedDataField> Immutable fields supplied by each attachment.
+---@field operations? table<string, BetaMoonCapabilityOperationDefinition>
+
+---@class BetaMoonCapabilityDataAccess
+local CapabilityDataAccess = {}
+---@param name string
+---@return BetaMoonSharedDataValue
+function CapabilityDataAccess:get(name) end
+---@param name string
+---@param value BetaMoonSharedDataValue
+function CapabilityDataAccess:set(name, value) end
+---@return table<string, BetaMoonSharedDataValue> detached
+function CapabilityDataAccess:snapshot() return {} end
+
+---@class BetaMoonCapabilityCallbackValue
+---@field key string
+---@field data BetaMoonCapabilityDataAccess
+---@field config table<string, BetaMoonSharedDataValue>
+---@field face? BetaMoonBlockFace
+---@field port? string|false
+
+---@class BetaMoonCapabilityCallbackContext
+---@field x integer
+---@field y integer
+---@field z integer
+---@field position BetaMoonPositionI
+---@field world BetaMoonActionWorld
+---@field capability BetaMoonCapabilityCallbackValue
+---@field entity {data: BetaMoonTileDataAccess, capabilities: BetaMoonLocalCapabilities}
+
+---@alias BetaMoonCapabilityOperation fun(ctx: BetaMoonCapabilityCallbackContext, request: table<string, BetaMoonSharedDataValue>): table<string, BetaMoonSharedDataValue>
+
+---@class BetaMoonCapabilityAttachment
+---@field capability BetaMoonCapabilityReference|string
+---@field config? table<string, BetaMoonSharedDataValue>
+---@field operations? table<string, BetaMoonCapabilityOperation>
+---@field ports? table<BetaMoonBlockFace, string|boolean> Absolute or relative face names; false closes a face.
+
+---@class BetaMoonCapabilityProxy
+---@field key string
+---@field position BetaMoonPositionI
+---@field face? BetaMoonBlockFace
+---@field port? string|false
+---@field config table<string, BetaMoonSharedDataValue>
+---@field data? BetaMoonCapabilityDataAccess Present only for the tile's local capability.
+local CapabilityProxy = {}
+---@param operation string
+---@param request? table<string, BetaMoonSharedDataValue>
+---@return table<string, BetaMoonSharedDataValue>
+function CapabilityProxy:call(operation, request) return {} end
+
+---@class BetaMoonLocalCapabilities
+local LocalCapabilities = {}
+---@param capability BetaMoonCapabilityReference|string
+---@return BetaMoonCapabilityProxy|nil
+function LocalCapabilities:get(capability) end
+---@param capability BetaMoonCapabilityReference|string
+---@return BetaMoonCapabilityProxy
+function LocalCapabilities:getRequired(capability) return CapabilityProxy end
+
+---@class BetaMoonCapabilityRegistry
+local Capabilities = {}
+---@param definition BetaMoonCapabilityDefinition
+---@return BetaMoonCapabilityReference
+function Capabilities:add(definition) return {} end
+---@param key string
+---@return BetaMoonCapabilityReference|nil
+function Capabilities:get(key) end
+---@param key string
+---@return BetaMoonCapabilityReference
+function Capabilities:getRequired(key) return {} end
+
+---@class BetaMoonWorldServiceReference
+---@field key string
+
+---@class BetaMoonWorldServiceContext
+---@field key string
+---@field world BetaMoonActionWorld
+---@field data BetaMoonCapabilityDataAccess Persistent per-world data.
+
+---@class BetaMoonWorldServiceDefinition
+---@field key string Must use `namespace:system/name`.
+---@field data? table<string, BetaMoonSharedDataField>
+---@field tick? {interval: integer}
+---@field onLoad? fun(ctx: BetaMoonWorldServiceContext)
+---@field onTick? fun(ctx: BetaMoonWorldServiceContext)
+---@field onUnload? fun(ctx: BetaMoonWorldServiceContext)
+
+---@class BetaMoonWorldServiceRegistry
+local Systems = {}
+---@param definition BetaMoonWorldServiceDefinition
+---@return BetaMoonWorldServiceReference
+function Systems:add(definition) return {} end
+---@param key string
+---@return BetaMoonWorldServiceReference|nil
+function Systems:get(key) end
+---@param key string
+---@return BetaMoonWorldServiceReference
+function Systems:getRequired(key) return {} end
+
+---@alias BetaMoonLogicalNetworkTopology 'adjacent'|'wireless'|'explicit'|'hybrid'
+---@alias BetaMoonLogicalNetworkAggregate 'latest'|'any'|'all'|'maximum'|'minimum'|'sum'
+
+---@class BetaMoonLogicalNetworkReference
+---@field key string
+
+---@class BetaMoonLogicalNetworkTopologyDefinition
+---@field type BetaMoonLogicalNetworkTopology
+---@field directions? 'orthogonal'
+---@field scope? 'dimension'
+---@field range? number Omit for unlimited wireless range; maximum 1024.
+---@field channelField? string Required by wireless and hybrid topology.
+---@field roleField? string Capability string field; transmitter, receiver, transceiver, or another value for local-only.
+---@field rangeField? string Capability integer/number field overriding range per transmitter.
+---@field enabledField? string Capability boolean field.
+---@field endpointField? string Capability string/content_key field required by explicit topology.
+---@field compatibilityFields? string[] Scalar capability fields that must match.
+
+---@class BetaMoonLogicalNetworkSignalDefinition
+---@field mode? 'state'|'pulse'|'both'
+---@field value BetaMoonSharedDataField
+---@field aggregate? BetaMoonLogicalNetworkAggregate
+---@field retainWithoutTransmitters? boolean Persist the last wireless publication after its transmitter unloads.
+
+---@class BetaMoonLogicalNetworkDefinition
+---@field key string Must use `namespace:network/name`.
+---@field capability BetaMoonCapabilityReference|string
+---@field topology BetaMoonLogicalNetworkTopologyDefinition
+---@field tick? {interval: integer}
+---@field signal? BetaMoonLogicalNetworkSignalDefinition
+---@field canConnect? fun(ctx: {first: BetaMoonNetworkCapabilityView, second: BetaMoonNetworkCapabilityView}): boolean
+---@field onTick? fun(ctx: BetaMoonLogicalNetworkContext)
+---@field onPulse? fun(ctx: BetaMoonLogicalNetworkPulseContext)
+
+---@class BetaMoonNetworkCapabilityView: BetaMoonCapabilityProxy
+---@field port? string|false
+
+---@class BetaMoonLogicalNetworkNodeHandle
+---@field key string
+---@field position BetaMoonPositionI
+---@field capability BetaMoonCapabilityProxy
+local LogicalNetworkNodeHandle = {}
+function LogicalNetworkNodeHandle:markDirty() end
+---@param value BetaMoonSharedDataValue
+function LogicalNetworkNodeHandle:publish(value) end
+---@param value BetaMoonSharedDataValue
+function LogicalNetworkNodeHandle:pulse(value) end
+---@param endpoint string
+---@return boolean changed
+function LogicalNetworkNodeHandle:link(endpoint) return false end
+---@param endpoint string
+---@return boolean changed
+function LogicalNetworkNodeHandle:unlink(endpoint) return false end
+
+---@class BetaMoonLogicalNetworkNode: BetaMoonCapabilityProxy
+---@field endpoint? string
+---@field network BetaMoonLogicalNetworkNodeHandle
+
+---@class BetaMoonLogicalNetworkNodeList: table<integer, BetaMoonLogicalNetworkNode>
+local LogicalNetworkNodeList = {}
+---@param query? {config: table<string, BetaMoonSharedDataValue>?, endpoint: string?}
+---@return BetaMoonLogicalNetworkNode[]
+function LogicalNetworkNodeList:find(query) return {} end
+
+---@class BetaMoonLogicalNetworkContext
+---@field network {key: string, topology: BetaMoonLogicalNetworkTopology, id: integer, size: integer}
+---@field nodes BetaMoonLogicalNetworkNodeList
+---@field world BetaMoonActionWorld
+---@field signal? BetaMoonSharedDataValue
+
+---@class BetaMoonLogicalNetworkPulseContext: BetaMoonLogicalNetworkContext
+---@field pulse BetaMoonSharedDataValue
+---@field source BetaMoonPositionI
+
+---@class BetaMoonLocalLogicalNetworks
+local LocalLogicalNetworks = {}
+---@param network BetaMoonLogicalNetworkReference|string
+---@return BetaMoonLogicalNetworkNodeHandle|nil
+function LocalLogicalNetworks:get(network) end
+---@param network BetaMoonLogicalNetworkReference|string
+---@return BetaMoonLogicalNetworkNodeHandle
+function LocalLogicalNetworks:getRequired(network) return LogicalNetworkNodeHandle end
+
+---@class BetaMoonLogicalNetworkRegistry
+local LogicalNetworks = {}
+---@param definition BetaMoonLogicalNetworkDefinition
+---@return BetaMoonLogicalNetworkReference
+function LogicalNetworks:add(definition) return {} end
+---@param key string
+---@return BetaMoonLogicalNetworkReference|nil
+function LogicalNetworks:get(key) end
+---@param key string
+---@return BetaMoonLogicalNetworkReference
+function LogicalNetworks:getRequired(key) return {} end
 
 ---@class BetaMoonTileInventoryAccess
 local TileInventoryAccess = {}
@@ -86,6 +306,8 @@ function TileInventoryAccess:consumeFuel(slot) return 0 end
 ---@class BetaMoonTileEntityContextValue
 ---@field data BetaMoonTileDataAccess
 ---@field inventory BetaMoonTileInventoryAccess
+---@field capabilities BetaMoonLocalCapabilities
+---@field networks BetaMoonLocalLogicalNetworks
 local TileEntityContextValue = {}
 function TileEntityContextValue:markDirty() end
 
@@ -291,5 +513,8 @@ function ContainerGuiRegistry:add(definition) end
 return {
     TileEntityRegistry = TileEntityRegistry,
     ContainerRegistry = ContainerRegistry,
-    ContainerGuiRegistry = ContainerGuiRegistry
+    ContainerGuiRegistry = ContainerGuiRegistry,
+    Capabilities = Capabilities,
+    Systems = Systems,
+    LogicalNetworks = LogicalNetworks
 }
