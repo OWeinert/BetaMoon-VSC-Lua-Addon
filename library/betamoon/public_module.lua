@@ -17,6 +17,7 @@ local RecipeMatcherRegistry = require("betamoon.recipes").RecipeMatcherRegistry
 local Overrides = require("betamoon.overrides").Overrides
 local OreRegistry = require("betamoon.world_generation").OreRegistry
 local BiomeRegistry = require("betamoon.world_generation").BiomeRegistry
+local Fuels = require("betamoon.fuels").Fuels
 local TileEntityRegistry = require("betamoon.tile_entities_containers_and_container_guis").TileEntityRegistry
 local ContainerRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerRegistry
 local ContainerGuiRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerGuiRegistry
@@ -66,6 +67,7 @@ local CallbackResults
 ---@field armor BetaMoonItemRegistry
 ---@field assets BetaMoonAssets
 ---@field entities BetaMoonEntityRegistry
+---@field fuels BetaMoonFuels
 ---@field soundEvents BetaMoonSoundEventRegistry
 ---@field audio BetaMoonAudio
 ---@field materials {tools: BetaMoonToolMaterialRegistry, armor: BetaMoonArmorMaterialRegistry}
@@ -93,6 +95,7 @@ betamoon = {
   armor = ItemRegistry,
   assets = Assets,
   entities = Entities,
+  fuels = Fuels,
   soundEvents = SoundEvents,
   audio = Audio,
   materials = {
