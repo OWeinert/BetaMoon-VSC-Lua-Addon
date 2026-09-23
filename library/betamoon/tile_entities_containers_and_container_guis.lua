@@ -116,11 +116,8 @@ function FuelAccess:getBurnTime(fuel, set) return 0 end
 ---@field fuels BetaMoonFuelAccess
 ---@field state BetaMoonBlockStateAccess Block state access for the tile's BetaMoon block.
 
----@class BetaMoonTileWorldAccess
+---@class BetaMoonTileWorldAccess: BetaMoonActionWorld
 local TileWorldAccess = {}
----@return boolean
-function TileWorldAccess:isPowered() return false end
-function TileWorldAccess:notifyNeighbors() end
 
 ---@class BetaMoonNeighborChangedDefinition
 ---@field action fun(ctx: BetaMoonTileNeighborContext)

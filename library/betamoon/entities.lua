@@ -292,7 +292,8 @@ function EntityTypeReference:getKey() return '' end
 ---@field world BetaMoonActionWorld
 ---@field attacker? BetaMoonActionEntity Entity credited with the hit, when known.
 ---@field directSource? BetaMoonActionEntity Direct source, such as a BetaMoon projectile, when known.
----@field cause 'projectile'|'script'|'entity'|'environment' Best-known cause; native damage without a known attacker is environment.
+---@field cause 'projectile'|'explosion'|'script'|'entity'|'environment' Best-known cause; native damage without a known attacker is environment.
+---@field explosion? BetaMoonExplosionContext Present for damage caused by a BetaMoon-created explosion.
 ---@field amount integer Requested damage before this callback.
 ---@field health? integer Current health when available.
 
@@ -301,7 +302,8 @@ function EntityTypeReference:getKey() return '' end
 ---@field world BetaMoonActionWorld
 ---@field attacker? BetaMoonActionEntity Entity credited with the hit, when known.
 ---@field directSource? BetaMoonActionEntity Direct source when known.
----@field cause 'projectile'|'script'|'entity'|'environment' Best-known cause.
+---@field cause 'projectile'|'explosion'|'script'|'entity'|'environment' Best-known cause.
+---@field explosion? BetaMoonExplosionContext Present for damage caused by a BetaMoon-created explosion.
 ---@field requestedAmount integer Damage before onBeforeDamage.
 ---@field amount integer Damage submitted to native handling after onBeforeDamage.
 ---@field accepted boolean Whether BetaMoon or the native handler accepted the hit.
