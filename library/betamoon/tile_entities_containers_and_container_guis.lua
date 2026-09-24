@@ -601,13 +601,25 @@ function ContainerSessionAccess:set(name, value) end
 ---@field height? integer Default 20.
 ---@field text? string
 ---@field focusable? boolean Default true.
----@field visuals? table<'normal'|'hovered'|'pressed'|'focused'|'disabled'|'selected'|'invalid', BetaMoonGuiControlVisual>
+---@field style? 'betamoon:classic' Built-in visual style. This is the default.
+---@field visuals? table<'normal'|'hovered'|'pressed'|'focused'|'disabled'|'selected'|'invalid'|'selected_hovered'|'selected_pressed'|'selected_focused'|'selected_disabled'|'selected_invalid', BetaMoonGuiControlVisual> Optional state overrides; omitted states use the built-in style.
 
 ---@class BetaMoonGuiButtonElement: BetaMoonGuiControlElementBase
 ---@field type 'button'
 
+---@class BetaMoonGuiIconButtonElement: BetaMoonGuiControlElementBase
+---@field type 'icon_button'
+---@field icon? BetaMoonTextureInput Custom icon texture.
+---@field iconBuiltin? 'close'|'confirm'|'plus'|'minus' Built-in icon. Use either this or `icon`.
+
+---@class BetaMoonGuiCheckboxElement: BetaMoonGuiControlElementBase
+---@field type 'checkbox'
+
+---@class BetaMoonGuiToggleButtonElement: BetaMoonGuiControlElementBase
+---@field type 'toggle_button'
+
 ---@class BetaMoonGuiToggleElement: BetaMoonGuiControlElementBase
----@field type 'toggle'
+---@field type 'toggle' Compatibility alias for `toggle_button`.
 
 ---@class BetaMoonGuiSliderElement: BetaMoonGuiControlElementBase
 ---@field type 'slider'
@@ -624,7 +636,7 @@ function ContainerSessionAccess:set(name, value) end
 ---@field type 'interactive'
 ---@field captureDrag? boolean Default true.
 
----@alias BetaMoonGuiElement BetaMoonGuiImageElement|BetaMoonGuiTextElement|BetaMoonGuiProgressElement|BetaMoonGuiStateImageElement|BetaMoonGuiRectangleElement|BetaMoonGuiTooltipElement|BetaMoonGuiItemElement|BetaMoonGuiGroupElement|BetaMoonGuiButtonElement|BetaMoonGuiToggleElement|BetaMoonGuiSliderElement|BetaMoonGuiTextBoxElement|BetaMoonGuiChoiceElement|BetaMoonGuiInteractiveElement
+---@alias BetaMoonGuiElement BetaMoonGuiImageElement|BetaMoonGuiTextElement|BetaMoonGuiProgressElement|BetaMoonGuiStateImageElement|BetaMoonGuiRectangleElement|BetaMoonGuiTooltipElement|BetaMoonGuiItemElement|BetaMoonGuiGroupElement|BetaMoonGuiButtonElement|BetaMoonGuiIconButtonElement|BetaMoonGuiCheckboxElement|BetaMoonGuiToggleButtonElement|BetaMoonGuiToggleElement|BetaMoonGuiSliderElement|BetaMoonGuiTextBoxElement|BetaMoonGuiChoiceElement|BetaMoonGuiInteractiveElement
 
 ---@class BetaMoonContainerGuiDefinition
 ---@field name string
