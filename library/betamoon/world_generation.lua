@@ -29,6 +29,8 @@
 
 ---@class BetaMoonWorldFeaturePlaceOptions
 ---@field seed? integer Extra deterministic seed salt.
+---@field rotation? 'none'|'clockwise_90'|'clockwise_180'|'counterclockwise_90'|'random'|'random_horizontal' Structure rotation override.
+---@field mirror? 'none'|'left_right'|'front_back'|'random' Structure mirror override.
 
 ---@class BetaMoonWorldFeatureReference
 local WorldFeatureReference = {}
@@ -41,6 +43,13 @@ function WorldFeatureReference:getKey() return '' end
 ---@param options? BetaMoonWorldFeaturePlaceOptions
 ---@return BetaMoonWorldFeatureResult
 function WorldFeatureReference:place(world, x, y, z, options) return {} end
+---@param world BetaMoonActionWorld
+---@param x integer
+---@param y integer
+---@param z integer
+---@param options? BetaMoonWorldFeaturePlaceOptions
+---@return BetaMoonWorldFeatureResult
+function WorldFeatureReference:preview(world, x, y, z, options) return {} end
 
 ---@class BetaMoonWorldPlacementReference
 local WorldPlacementReference = {}
@@ -76,6 +85,121 @@ function WorldFeatures:get(key) end
 ---@param key string
 ---@return BetaMoonWorldFeatureReference
 function WorldFeatures:getRequired(key) return WorldFeatureReference end
+
+---@class BetaMoonTreeTrunkDefinition
+---@field block BetaMoonBlockReference|integer|string
+---@field metadata? integer
+---@field height integer|{min: integer, max: integer}
+---@field radius? integer One or two blocks.
+---@field bend? number Chance to bend each trunk level, from 0 through 1.
+
+---@class BetaMoonTreeBranchDefinition
+---@field start? number Fraction of trunk height where branches may start.
+---@field count integer|{min: integer, max: integer}
+---@field length integer|{min: integer, max: integer}
+---@field upwardBias? number From 0 through 1.
+
+---@class BetaMoonTreeCanopyDefinition
+---@field block BetaMoonBlockReference|integer|string
+---@field metadata? integer
+---@field shape 'sphere'|'layered_disk'|'cone'|'clustered_sphere'
+---@field radius integer|{min: integer, max: integer}
+---@field density? number From 0.05 through 1.
+
+---@class BetaMoonProceduralTreeDefinition
+---@field key string
+---@field trunk BetaMoonTreeTrunkDefinition
+---@field branches? BetaMoonTreeBranchDefinition
+---@field canopy BetaMoonTreeCanopyDefinition
+---@field ground? (BetaMoonBlockReference|integer|string)[]
+---@field replace? (BetaMoonBlockReference|integer|string)[]
+
+---@class BetaMoonVanillaTreeDefinition
+---@field key string
+---@field generator 'normal'|'big'|'taiga'|'minecraft:normal'|'minecraft:big'|'minecraft:taiga'
+---@field trunk? BetaMoonBlockReference|integer|string
+---@field trunkMetadata? integer
+---@field leaves? BetaMoonBlockReference|integer|string
+---@field leavesMetadata? integer
+---@field ground? (BetaMoonBlockReference|integer|string)[]
+---@field replace? (BetaMoonBlockReference|integer|string)[]
+
+---@class BetaMoonStructureTreeTemplate
+---@field structure BetaMoonWorldFeatureSelector
+---@field weight? integer
+
+---@class BetaMoonStructureTreeDefinition
+---@field key string
+---@field templates BetaMoonStructureTreeTemplate[]
+---@field rotation? 'none'|'clockwise_90'|'clockwise_180'|'counterclockwise_90'|'random'|'random_horizontal'
+---@field mirror? 'none'|'left_right'|'front_back'|'random'
+---@field ground? (BetaMoonBlockReference|integer|string)[]
+
+---@alias BetaMoonTreeDefinition BetaMoonProceduralTreeDefinition|BetaMoonVanillaTreeDefinition|BetaMoonStructureTreeDefinition
+
+---@class BetaMoonTreeRegistry
+local WorldTrees = {}
+---@param definition BetaMoonTreeDefinition
+---@return BetaMoonWorldFeatureReference
+function WorldTrees:add(definition) return WorldFeatureReference end
+---@param key string
+---@return BetaMoonWorldFeatureReference|nil
+function WorldTrees:get(key) end
+---@param key string
+---@return BetaMoonWorldFeatureReference
+function WorldTrees:getRequired(key) return WorldFeatureReference end
+
+---@class BetaMoonStructureReplacement
+---@field from BetaMoonBlockReference|integer|string
+---@field to BetaMoonBlockReference|integer|string
+
+---@class BetaMoonStructureMetadataTransform
+---@field block BetaMoonBlockReference|integer|string
+---@field clockwise? integer[] Exactly 16 outputs for metadata inputs 0 through 15.
+---@field leftRight? integer[] Exactly 16 outputs for metadata inputs 0 through 15.
+---@field frontBack? integer[] Exactly 16 outputs for metadata inputs 0 through 15.
+
+---@class BetaMoonStructureProcessors
+---@field includeAir? boolean Air is ignored by default.
+---@field replace? BetaMoonStructureReplacement[]
+---@field decay? number Deterministic removal probability from 0 through 1.
+---@field replaceOnly? (BetaMoonBlockReference|integer|string)[]
+---@field tileCollision? 'reject'|'preserve' Existing tile entities reject the structure by default.
+---@field unknownMetadata? 'reject'|'preserve' Transformed nonzero metadata without an adapter rejects by default.
+---@field metadataTransforms? BetaMoonStructureMetadataTransform[]
+
+---@class BetaMoonStructureDefinition
+---@field key string
+---@field path? string Package-relative gameplay-data path under assets/. Defaults to assets/<namespace>/worldgen/structures/<key>.json.
+---@field rotation? 'none'|'clockwise_90'|'clockwise_180'|'counterclockwise_90'|'random'|'random_horizontal'
+---@field mirror? 'none'|'left_right'|'front_back'|'random'
+---@field processors? BetaMoonStructureProcessors
+
+---@class BetaMoonStructureExportOptions
+---@field includeAir? boolean
+---@field origin? BetaMoonPositionI Must be inside the selected cuboid.
+
+---@class BetaMoonStructureRegistry
+local WorldStructures = {}
+---@param definition BetaMoonStructureDefinition
+---@return BetaMoonWorldFeatureReference
+function WorldStructures:add(definition) return WorldFeatureReference end
+---@param key string
+---@return BetaMoonWorldFeatureReference|nil
+function WorldStructures:get(key) end
+---@param key string
+---@return BetaMoonWorldFeatureReference
+function WorldStructures:getRequired(key) return WorldFeatureReference end
+---@param world BetaMoonActionWorld
+---@param minX integer
+---@param minY integer
+---@param minZ integer
+---@param maxX integer
+---@param maxY integer
+---@param maxZ integer
+---@param options? BetaMoonStructureExportOptions
+---@return string json Validated readable structure JSON for the caller to save in its package.
+function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, options) return '' end
 
 ---@class BetaMoonWorldHeightProvider
 ---@field type? 'uniform'|'triangular'|'normal'|'fixed'|'surface'|'ocean_floor'|'ceiling'
