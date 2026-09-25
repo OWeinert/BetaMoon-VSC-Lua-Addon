@@ -96,7 +96,7 @@ npm test
 npm run package
 ```
 
-The package command produces `betamoon-lua-api-0.6.0.vsix` locally. It does not publish anything.
+The package command produces `betamoon-lua-api-0.6.2.vsix` locally. It does not publish anything.
 The `publisher` in `package.json` is `OWeinert`; publishing requires ownership of that VS Code Marketplace
 publisher ID. No Marketplace publication is implied by this repository.
 
