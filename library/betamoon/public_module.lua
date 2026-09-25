@@ -78,7 +78,7 @@ local CallbackResults
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
 ---@field recipeMatchers BetaMoonRecipeMatcherRegistry
----@field worldgen {ores: BetaMoonOreRegistry, biomes: BetaMoonBiomeRegistry, treeModes: BetaMoonTreeModes}
+---@field worldgen {features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, biomes: BetaMoonBiomeRegistry, treeModes: BetaMoonTreeModes}
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
 ---@field chat BetaMoonChat
@@ -113,6 +113,10 @@ betamoon = {
   recipeBindings = RecipeBindingRegistry,
   recipeMatchers = RecipeMatcherRegistry,
   worldgen = {
+    features = WorldFeatures,
+    placements = WorldPlacements,
+    trees = WorldTrees,
+    structures = WorldStructures,
     ores = OreRegistry,
     biomes = BiomeRegistry,
     treeModes = TreeModes
