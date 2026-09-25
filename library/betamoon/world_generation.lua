@@ -19,7 +19,7 @@
 
 ---@alias BetaMoonWorldFeatureSelector string|BetaMoonWorldFeatureReference
 ---@alias BetaMoonWorldPlacementSelector string|BetaMoonWorldPlacementReference
----@alias BetaMoonWorldGenerationStage 'underground_features'|'surface_features'|'vegetation'|'structures'|'entities'|'post_process'
+---@alias BetaMoonWorldGenerationStage 'underground_features'|'surface_features'|'entities'|'post_process'
 
 ---@class BetaMoonWorldFeatureResult
 ---@field placed boolean
@@ -225,7 +225,7 @@ function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, optio
 ---@field attempts? integer|{min: integer, max: integer}|{perChunk: integer|{min: integer, max: integer}, extraChance: number?, probability: number?, rarity: integer?}
 ---@field position? {height: integer|BetaMoonWorldHeightProvider, horizontal: 'chunk'|'grid'?, gridSpacing: integer?}
 ---@field conditions? BetaMoonWorldPlacementConditions
----@field biomes? BetaMoonBiomeName[]|{include: BetaMoonBiomeName[]?, exclude: BetaMoonBiomeName[]?}
+---@field biomes? string[]|{include: string[]?, exclude: string[]?, includeTags: string[]?, excludeTags: string[]?} Display names, keyed biome IDs, and tag filters are supported.
 ---@field before? BetaMoonWorldPlacementSelector[]
 ---@field after? BetaMoonWorldPlacementSelector[]
 ---@field priority? integer Lower priorities execute first after explicit dependencies.
@@ -248,16 +248,99 @@ function WorldPlacements:getRequired(key) return WorldPlacementReference end
 ---@field entity BetaMoonBiomeEntity
 ---@field weight integer
 
+---@class BetaMoonSurfaceLayer
+---@field block BetaMoonBlockReference|integer|string
+---@field depth integer|{min: integer, max: integer} Layer thickness from 1 through 32.
+
+---@class BetaMoonSurfaceDefinition
+---@field key string
+---@field replace? (BetaMoonBlockReference|integer|string)[]|BetaMoonBlockReference|integer|string Existing base blocks the surface may replace.
+---@field layers BetaMoonSurfaceLayer[] One through sixteen top-to-bottom layers, with a combined maximum depth of 64.
+---@field underwaterBlock? BetaMoonBlockReference|integer|string Replaces the first layer below sea level.
+---@field seaLevel? integer Defaults to 64.
+
+---@class BetaMoonSurfaceReference
+local WorldSurfaceReference = {}
+---@return string
+function WorldSurfaceReference:getKey() return '' end
+
+---@class BetaMoonSurfaceRegistry
+local WorldSurfaces = {}
+---@param definition BetaMoonSurfaceDefinition
+---@return BetaMoonSurfaceReference
+function WorldSurfaces:add(definition) return WorldSurfaceReference end
+---@param key string
+---@return BetaMoonSurfaceReference|nil
+function WorldSurfaces:get(key) end
+---@param key string
+---@return BetaMoonSurfaceReference
+function WorldSurfaces:getRequired(key) return WorldSurfaceReference end
+
+---@class BetaMoonBiomeReference
+local WorldBiomeReference = {}
+---@return string
+function WorldBiomeReference:getKey() return '' end
+
+---@alias BetaMoonBiomeSelector string|BetaMoonBiomeReference
+---@alias BetaMoonSurfaceSelector string|BetaMoonSurfaceReference
+
+---@class BetaMoonBiomeDecorator
+---@field placements (BetaMoonWorldPlacementSelector|BetaMoonWorldPlacementDefinition)[] Existing placements become templates and inline placements default to `surface_features`.
+
 ---@class BetaMoonBiomeDefinition
+---@field key? string Stable biome key. Omit it only for the legacy range facade.
 ---@field name string
 ---@field basedOn BetaMoonBiomeName|nil
 ---@field color integer|nil
 ---@field foliageColor integer|nil
----@field surface {top: BetaMoonBlockReference|integer|nil, filler: BetaMoonBlockReference|integer|nil}|nil
----@field range {temperature: {min: number, max: number}|nil, humidity: {min: number, max: number}|nil}|nil
----@field trees {type: BetaMoonBiomeTreeMode|nil, bigTreeChance: integer|nil}|nil
+---@field tags? string[] Keyed tags used by placement and BetaMoon entity-spawn filters.
+---@field surface BetaMoonSurfaceSelector|{top: BetaMoonBlockReference|integer|nil, filler: BetaMoonBlockReference|integer|nil, rule: BetaMoonSurfaceSelector|nil}|nil
+---@field surfaceRule? BetaMoonSurfaceSelector Alias for `surface.rule` when retaining legacy top/filler fields.
+---@field decorator? BetaMoonBiomeDecorator
+---@field decorators? (BetaMoonWorldPlacementSelector|BetaMoonWorldPlacementDefinition)[] Compact alias for `decorator.placements`.
+---@field range {temperature: {min: number, max: number}|nil, humidity: {min: number, max: number}|nil}|nil Legacy vanilla-climate mapping; prefer a biome source for keyed biomes.
+---@field trees {type: BetaMoonBiomeTreeMode|nil, bigTreeChance: integer|nil}|nil Legacy unkeyed biome tree selection; keyed biomes use decorators.
 ---@field weather {snow: boolean|nil, rain: boolean|nil}|nil
 ---@field spawns table<BetaMoonBiomeSpawnGroup, BetaMoonBiomeSpawn[]>|nil
+
+---@class BetaMoonBiomeClimateEntry
+---@field biome BetaMoonBiomeSelector
+---@field temperature number[]|{min: number, max: number}
+---@field humidity number[]|{min: number, max: number}
+---@field priority? integer Higher priority wins overlapping climate cells; equal priorities use canonical biome-key order.
+
+---@class BetaMoonFixedBiomeSourceDefinition
+---@field key string
+---@field type 'fixed'
+---@field biome BetaMoonBiomeSelector
+---@field active? boolean
+---@field priority? integer
+
+---@class BetaMoonVanillaClimateBiomeSourceDefinition
+---@field key string
+---@field type 'vanilla_climate'
+---@field entries BetaMoonBiomeClimateEntry[] One through 256 entries.
+---@field active? boolean
+---@field priority? integer
+
+---@alias BetaMoonBiomeSourceDefinition BetaMoonFixedBiomeSourceDefinition|BetaMoonVanillaClimateBiomeSourceDefinition
+
+---@class BetaMoonBiomeSourceReference
+local WorldBiomeSourceReference = {}
+---@return string
+function WorldBiomeSourceReference:getKey() return '' end
+
+---@class BetaMoonBiomeSourceRegistry
+local WorldBiomeSources = {}
+---@param definition BetaMoonBiomeSourceDefinition
+---@return BetaMoonBiomeSourceReference
+function WorldBiomeSources:add(definition) return WorldBiomeSourceReference end
+---@param key string
+---@return BetaMoonBiomeSourceReference|nil
+function WorldBiomeSources:get(key) end
+---@param key string
+---@return BetaMoonBiomeSourceReference
+function WorldBiomeSources:getRequired(key) return WorldBiomeSourceReference end
 
 ---@class BetaMoonOreRegistry
 local OreRegistry = {}
@@ -270,9 +353,22 @@ function OreRegistry:add(definition) return WorldPlacementReference end
 local BiomeRegistry = {}
 
 ---@param definition BetaMoonBiomeDefinition
-function BiomeRegistry:add(definition) end
+---@return BetaMoonBiomeReference
+function BiomeRegistry:add(definition) return WorldBiomeReference end
+---@param key string
+---@return BetaMoonBiomeReference|nil
+function BiomeRegistry:get(key) end
+---@param key string
+---@return BetaMoonBiomeReference
+function BiomeRegistry:getRequired(key) return WorldBiomeReference end
 
 return {
+    WorldFeatures = WorldFeatures,
+    WorldPlacements = WorldPlacements,
+    WorldTrees = WorldTrees,
+    WorldStructures = WorldStructures,
+    WorldSurfaces = WorldSurfaces,
+    WorldBiomeSources = WorldBiomeSources,
     OreRegistry = OreRegistry,
     BiomeRegistry = BiomeRegistry
 }
