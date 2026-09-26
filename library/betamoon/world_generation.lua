@@ -175,6 +175,49 @@ function WorldTrees:getRequired(key) return WorldFeatureReference end
 ---@field mirror? 'none'|'left_right'|'front_back'|'random'
 ---@field processors? BetaMoonStructureProcessors
 
+---@class BetaMoonRegionalStructurePiece
+---@field pool string Connector pool read from `connector` markers in the referenced template.
+---@field structure BetaMoonWorldFeatureSelector Local structure template eligible for this pool.
+---@field weight? integer Positive selection weight; defaults to 1.
+
+---@class BetaMoonRegionalStructureMarkers
+---@field entities? boolean Run `entity` markers after a chunk slice commits.
+---@field loot? boolean Run inventory `loot` markers after a chunk slice commits.
+
+---@class BetaMoonRegionalStructureDefinition
+---@field key string
+---@field start BetaMoonWorldFeatureSelector Root local structure template.
+---@field dimensions? BetaMoonDimensionName[]|BetaMoonDimensionName Defaults to the overworld.
+---@field spacing? integer Region spacing in chunks, from 2 through 512; defaults to 32.
+---@field separation? integer Minimum region-edge separation, from 0 through spacing - 1; defaults to 8.
+---@field salt? integer Stable seed salt.
+---@field height? integer|{type: 'surface', offset: integer?}|{type: 'fixed', value: integer} Defaults to surface height.
+---@field pieces? BetaMoonRegionalStructurePiece[] Weighted connector-pool pieces. Omit for a root-only structure.
+---@field maxDepth? integer Connector depth from 0 through 16; defaults to 4.
+---@field maxPieces? integer Total piece limit from 1 through 128; defaults to 32.
+---@field maxDistance? integer Maximum horizontal distance from the start, from 16 through 512 and no more than spacing * 16; defaults to 128.
+---@field terminationChance? number Per-connector stop chance from 0 through 1; defaults to 0.2.
+---@field markers? BetaMoonRegionalStructureMarkers Optional post-block marker passes.
+
+---@class BetaMoonRegionalStructureLocation
+---@field x integer
+---@field y integer|nil Available after the start plan has been generated.
+---@field z integer
+---@field chunkX integer
+---@field chunkZ integer
+---@field generated boolean Whether the start is already recorded in the current world.
+
+---@class BetaMoonRegionalStructureReference
+local RegionalStructureReference = {}
+---@return string
+function RegionalStructureReference:getKey() return '' end
+---@param world BetaMoonActionWorld
+---@param x integer
+---@param z integer
+---@param maxRegions? integer Search radius from 0 through 128; defaults to 32.
+---@return BetaMoonRegionalStructureLocation|nil
+function RegionalStructureReference:locate(world, x, z, maxRegions) end
+
 ---@class BetaMoonStructureExportOptions
 ---@field includeAir? boolean
 ---@field origin? BetaMoonPositionI Must be inside the selected cuboid.
@@ -190,6 +233,15 @@ function WorldStructures:get(key) end
 ---@param key string
 ---@return BetaMoonWorldFeatureReference
 function WorldStructures:getRequired(key) return WorldFeatureReference end
+---@param definition BetaMoonRegionalStructureDefinition
+---@return BetaMoonRegionalStructureReference
+function WorldStructures:addRegional(definition) return RegionalStructureReference end
+---@param key string
+---@return BetaMoonRegionalStructureReference|nil
+function WorldStructures:getRegional(key) end
+---@param key string
+---@return BetaMoonRegionalStructureReference
+function WorldStructures:getRegionalRequired(key) return RegionalStructureReference end
 ---@param world BetaMoonActionWorld
 ---@param minX integer
 ---@param minY integer
