@@ -4,7 +4,7 @@ LuaLS definitions and a VS Code extension for [**BetaMoon**](https://modrinth.co
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
 including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation, events, tile entities and container GUIs.
 
-The definitions target BetaMoon 0.7.2 development.
+The definitions target BetaMoon 0.7.2.
 
 The files in `library/betamoon/` are generated from the categories in this repository's local
 `internal/api.lua` reference. Each category retains its declarations, annotations and documentation.
