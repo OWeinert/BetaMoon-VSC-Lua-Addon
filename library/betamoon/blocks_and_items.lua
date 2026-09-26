@@ -141,40 +141,32 @@ local DisplayTickWorld = {}
 ---@param x integer
 ---@param y integer
 ---@param z integer
----@return BetaMoonBlockAtPosition
+---@return BetaMoonBlockAtPosition|nil Nil when the chunk is unloaded.
 function DisplayTickWorld:getBlock(x, y, z) end
 
 ---@param name BetaMoonParticleName
----@param options BetaMoonParticleOptions
+---@param options? BetaMoonParticleOptions Defaults to the callback block center with zero velocity.
 function DisplayTickWorld:spawnParticle(name, options) end
 
 ---@param name string
----@param options BetaMoonSoundOptions
+---@param options? BetaMoonSoundOptions Defaults to the callback block center, volume 1, and pitch 1.
 function DisplayTickWorld:playSound(name, options) end
 
----@class BetaMoonTickWorld: BetaMoonDisplayTickWorld
+---@class BetaMoonTickWorld: BetaMoonActionWorld
 local TickWorld = {}
 
----@param x integer
----@param y integer
----@param z integer
----@param block BetaMoonBlockReference|integer
----@param damage? integer
----@return boolean
-function TickWorld:setBlock(x, y, z, block, damage) return false end
-
 ---@class BetaMoonParticleOptions
----@field x number
----@field y number
----@field z number
+---@field x? number
+---@field y? number
+---@field z? number
 ---@field velocityX? number
 ---@field velocityY? number
 ---@field velocityZ? number
 
 ---@class BetaMoonSoundOptions
----@field x number
----@field y number
----@field z number
+---@field x? number
+---@field y? number
+---@field z? number
 ---@field volume? number
 ---@field pitch? number
 

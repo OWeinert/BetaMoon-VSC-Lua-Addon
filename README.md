@@ -4,7 +4,7 @@ LuaLS definitions and a VS Code extension for [**BetaMoon**](https://modrinth.co
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
 including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation, events, tile entities and container GUIs.
 
-The bundled API targets BetaMoon 0.7.0.
+The definitions target BetaMoon 0.7.2.
 
 The files in `library/betamoon/` are generated from the categories in this repository's local
 `internal/api.lua` reference. Each category retains its declarations, annotations and documentation.
@@ -47,6 +47,10 @@ ordering follow the source file, including the supporting types currently declar
 Use the global `betamoon` directly in scripts. There is no need to `require` a definitions file or copy it into
 `.minecraft/lua_scripts`. See the [BetaMoon API reference](https://github.com/OWeinert/BetaMoon/wiki/API-Documentation)
 and [example scripts](https://github.com/OWeinert/BetaMoon/tree/main/examples).
+
+For a packaged BetaMoon mod, open its package directory as the workspace folder, or add that directory to a multi-root
+workspace, so LuaLS resolves private modules such as `require("content.items")` from the package root. Enable the API
+for that folder. Cross-mod sharing still uses `betamoon.modules`.
 
 The extension adds its bundled `library` directory to the selected folder's `Lua.workspace.library`.
 It preserves other library entries. If the folder has `.luarc.json` or `.luarc.jsonc`, it updates that file instead,
