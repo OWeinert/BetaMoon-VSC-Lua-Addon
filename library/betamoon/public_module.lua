@@ -15,6 +15,12 @@ local RecipeRegistry = require("betamoon.recipes").RecipeRegistry
 local RecipeBindingRegistry = require("betamoon.recipes").RecipeBindingRegistry
 local RecipeMatcherRegistry = require("betamoon.recipes").RecipeMatcherRegistry
 local Overrides = require("betamoon.overrides").Overrides
+local WorldFeatures = require("betamoon.world_generation").WorldFeatures
+local WorldPlacements = require("betamoon.world_generation").WorldPlacements
+local WorldTrees = require("betamoon.world_generation").WorldTrees
+local WorldStructures = require("betamoon.world_generation").WorldStructures
+local WorldSurfaces = require("betamoon.world_generation").WorldSurfaces
+local WorldBiomeSources = require("betamoon.world_generation").WorldBiomeSources
 local OreRegistry = require("betamoon.world_generation").OreRegistry
 local BiomeRegistry = require("betamoon.world_generation").BiomeRegistry
 local Fuels = require("betamoon.fuels").Fuels
@@ -78,7 +84,7 @@ local CallbackResults
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
 ---@field recipeMatchers BetaMoonRecipeMatcherRegistry
----@field worldgen {ores: BetaMoonOreRegistry, biomes: BetaMoonBiomeRegistry, treeModes: BetaMoonTreeModes}
+---@field worldgen {features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
 ---@field chat BetaMoonChat
@@ -113,8 +119,14 @@ betamoon = {
   recipeBindings = RecipeBindingRegistry,
   recipeMatchers = RecipeMatcherRegistry,
   worldgen = {
+    features = WorldFeatures,
+    placements = WorldPlacements,
+    trees = WorldTrees,
+    structures = WorldStructures,
     ores = OreRegistry,
+    surfaces = WorldSurfaces,
     biomes = BiomeRegistry,
+    biomeSources = WorldBiomeSources,
     treeModes = TreeModes
   },
   events = Events,
