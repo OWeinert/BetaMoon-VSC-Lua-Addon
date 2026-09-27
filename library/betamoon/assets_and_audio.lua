@@ -241,7 +241,24 @@ function Assets:refresh() end
 ---@field range? number Positional attenuation distance in blocks, 0.01..1024; default 16.
 
 ---@class BetaMoonSoundEventReference
+---@field key string
+---@field owner string
+---@field exists boolean
+---@field enabled boolean
+---@field clips {sound: BetaMoonSoundInput, weight: number}[]
+---@field volume number
+---@field pitch {min: number, max: number}
+---@field range number
 ---@field getKey fun(self: BetaMoonSoundEventReference): string
+local SoundEventReference = {}
+---@param definition {priority: integer?, when: BetaMoonOverrideCondition?, changes: BetaMoonSoundEventDefinition?, clips: table?, volume: number?, pitch: number|table?, range: number?, enabled: boolean?}
+---@return BetaMoonOverrideHandle
+function SoundEventReference:override(definition) return {} end
+
+---@class BetaMoonSoundEventQuery
+---@field key? string
+---@field owner? string
+---@field enabled? boolean
 
 ---@class BetaMoonSoundEventRegistry
 local SoundEvents = {}
@@ -258,6 +275,16 @@ function SoundEvents:get(key) return nil end
 ---@param key string Exact namespaced event key. Raises an error when missing.
 ---@return BetaMoonSoundEventReference
 function SoundEvents:getRequired(key) return {} end
+
+---@param query? BetaMoonSoundEventQuery
+---@return BetaMoonResultList<BetaMoonSoundEventReference>
+function SoundEvents:find(query) return {} end
+---@param query? BetaMoonSoundEventQuery
+---@return BetaMoonSoundEventReference|nil
+function SoundEvents:first(query) end
+---@param query? BetaMoonSoundEventQuery
+---@return BetaMoonSoundEventReference|nil
+function SoundEvents:one(query) end
 
 ---@class BetaMoonAudioPlayOptions
 ---@field position? BetaMoonPositionF World coordinates; requires a mono clip. Omit for nonpositional playback.

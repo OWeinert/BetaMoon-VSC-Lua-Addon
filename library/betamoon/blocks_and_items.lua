@@ -32,6 +32,10 @@ end
 ---@field lightOpacity integer
 ---@field hardness number
 ---@field resistance number
+---@field stepSound BetaMoonStepSound
+---@field slipperiness number
+---@field unbreakable boolean
+---@field fire {spread: integer, burn: integer}
 local BlockReference = {} ---@as BetaMoonBlockReference
 
 ---@class BetaMoonItemReference: BetaMoonResourceReference
@@ -41,6 +45,9 @@ local BlockReference = {} ---@as BetaMoonBlockReference
 ---@field maxDamage integer
 ---@field hasSubtypes boolean
 ---@field icon integer
+---@field full3D boolean
+---@field efficiency number|nil
+---@field damageVsEntity integer|nil
 local ItemReference = {} ---@as BetaMoonItemReference
 
 ---@class BetaMoonResourceQuery

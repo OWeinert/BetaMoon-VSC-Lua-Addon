@@ -7,10 +7,27 @@
 -- --------------------------------------------------------------------------
 
 ---@class BetaMoonEntityTypeReference
+---@field key string
+---@field owner string
+---@field exists boolean
+---@field kind BetaMoonEntityKind
+---@field displayName string
+---@field width number
+---@field height number
+---@field tickInterval integer
 local EntityTypeReference = {}
 
 ---@return string key
 function EntityTypeReference:getKey() return '' end
+
+---@param definition table Non-structural entity fields and callbacks only.
+---@return BetaMoonOverrideHandle
+function EntityTypeReference:override(definition) return {} end
+
+---@class BetaMoonEntityTypeQuery
+---@field key? string
+---@field owner? string
+---@field kind? BetaMoonEntityKind
 
 ---@alias BetaMoonEntityDataValue boolean|integer|number|string|BetaMoonPositionF|BetaMoonResourceReference|BetaMoonEntityDataItemStack|BetaMoonEntityDataReference|table
 
@@ -361,6 +378,16 @@ function Entities:get(key) return nil end
 ---@param key string Raises when no type matches.
 ---@return BetaMoonEntityTypeReference
 function Entities:getRequired(key) return EntityTypeReference end
+
+---@param query? BetaMoonEntityTypeQuery
+---@return BetaMoonResultList<BetaMoonEntityTypeReference>
+function Entities:find(query) return {} end
+---@param query? BetaMoonEntityTypeQuery
+---@return BetaMoonEntityTypeReference|nil
+function Entities:first(query) end
+---@param query? BetaMoonEntityTypeQuery
+---@return BetaMoonEntityTypeReference|nil
+function Entities:one(query) end
 
 return {
     Entities = Entities

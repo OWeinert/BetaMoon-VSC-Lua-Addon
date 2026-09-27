@@ -19,6 +19,7 @@
 ---@field item integer
 ---@field damage integer|nil Nil means every damage value.
 ---@field burnTime integer
+---@field enabled boolean
 ---@field set string
 ---@field owner string
 ---@field exists boolean
@@ -26,6 +27,10 @@ local FuelRegistrationReference = {}
 
 ---@return boolean removed
 function FuelRegistrationReference:remove() return false end
+
+---@param definition table
+---@return BetaMoonOverrideHandle
+function FuelRegistrationReference:override(definition) return {} end
 
 ---@class BetaMoonFuelSetDefinition
 ---@field key string Must use `namespace:fuel/name`.
@@ -35,6 +40,7 @@ function FuelRegistrationReference:remove() return false end
 ---@field key string
 ---@field owner string
 ---@field exists boolean
+---@field include string[]
 local FuelSetReference = {}
 
 ---@param stack BetaMoonFuelItem
@@ -47,6 +53,17 @@ function FuelSetReference:contains(stack) return false end
 
 ---@return boolean removed
 function FuelSetReference:remove() return false end
+
+---@param definition table Supports a complete `include` replacement.
+---@return BetaMoonOverrideHandle
+function FuelSetReference:override(definition) return {} end
+
+---@class BetaMoonFuelQuery
+---@field owner? string
+---@field set? BetaMoonFuelSetSelector
+---@field item? BetaMoonFuelItem
+---@field damage? integer
+---@field enabled? boolean
 
 ---@class BetaMoonFuelSetRegistry
 local FuelSets = {}
@@ -85,6 +102,16 @@ function Fuels:getBurnTime(stack, set) return 0 end
 ---@param set? BetaMoonFuelSetSelector Defaults to `minecraft:fuel/furnace`.
 ---@return boolean
 function Fuels:isFuel(stack, set) return false end
+
+---@param query? BetaMoonFuelQuery
+---@return BetaMoonResultList<BetaMoonFuelRegistrationReference>
+function Fuels:find(query) return {} end
+---@param query? BetaMoonFuelQuery
+---@return BetaMoonFuelRegistrationReference|nil
+function Fuels:first(query) end
+---@param query? BetaMoonFuelQuery
+---@return BetaMoonFuelRegistrationReference|nil
+function Fuels:one(query) end
 
 return {
     Fuels = Fuels
