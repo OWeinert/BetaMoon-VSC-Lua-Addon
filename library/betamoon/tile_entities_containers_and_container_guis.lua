@@ -8,10 +8,29 @@
 
 ---@class BetaMoonTileEntityHandle
 ---@field name string
+---@field owner string
+---@field exists boolean
+---@field tickMode 'none'|'continuous'|'random'|'scheduled'
+---@field initialTickDelay integer
+---@field repeatTickDelay integer
+---@field randomTickChance number
+---@field override fun(self: BetaMoonTileEntityHandle, definition: table): BetaMoonOverrideHandle
 ---@class BetaMoonContainerHandle
 ---@field name string
+---@field owner string
+---@field exists boolean
+---@field tileEntity string
+---@field override fun(self: BetaMoonContainerHandle, definition: table): BetaMoonOverrideHandle
 ---@class BetaMoonContainerGuiHandle
 ---@field name string
+---@field owner string
+---@field exists boolean
+---@field container string
+---@field width integer
+---@field height integer
+---@field pauseGame boolean
+---@field elementCount integer
+---@field override fun(self: BetaMoonContainerGuiHandle, definition: BetaMoonContainerGuiDefinition): BetaMoonOverrideHandle
 
 ---@alias BetaMoonSharedDataValue boolean|integer|number|string|BetaMoonPositionF|BetaMoonPersistentBlockPosition|BetaMoonStack|BetaMoonSharedDataValue[]|table<string, BetaMoonSharedDataValue>
 
@@ -75,6 +94,9 @@ function TileDataAccess:snapshot() return {} end
 
 ---@class BetaMoonCapabilityReference
 ---@field key string
+---@field owner string
+---@field exists boolean
+---@field override fun(self: BetaMoonCapabilityReference, definition: table): BetaMoonOverrideHandle
 
 ---@class BetaMoonCapabilityOperationDefinition
 ---@field mode? 'query'|'action' Queries cannot mutate gameplay; default query.
@@ -155,9 +177,22 @@ function Capabilities:get(key) end
 ---@param key string
 ---@return BetaMoonCapabilityReference
 function Capabilities:getRequired(key) return {} end
+---@param query? {key: string?, owner: string?}
+---@return BetaMoonResultList<BetaMoonCapabilityReference>
+function Capabilities:find(query) return {} end
+---@param query? {key: string?, owner: string?}
+---@return BetaMoonCapabilityReference|nil
+function Capabilities:first(query) end
+---@param query? {key: string?, owner: string?}
+---@return BetaMoonCapabilityReference|nil
+function Capabilities:one(query) end
 
 ---@class BetaMoonWorldServiceReference
 ---@field key string
+---@field owner string
+---@field exists boolean
+---@field tickInterval integer
+---@field override fun(self: BetaMoonWorldServiceReference, definition: table): BetaMoonOverrideHandle
 
 ---@class BetaMoonWorldServiceContext
 ---@field key string
@@ -183,12 +218,26 @@ function Systems:get(key) end
 ---@param key string
 ---@return BetaMoonWorldServiceReference
 function Systems:getRequired(key) return {} end
+---@param query? {key: string?, owner: string?}
+---@return BetaMoonResultList<BetaMoonWorldServiceReference>
+function Systems:find(query) return {} end
+---@param query? {key: string?, owner: string?}
+---@return BetaMoonWorldServiceReference|nil
+function Systems:first(query) end
+---@param query? {key: string?, owner: string?}
+---@return BetaMoonWorldServiceReference|nil
+function Systems:one(query) end
 
 ---@alias BetaMoonLogicalNetworkTopology 'adjacent'|'wireless'|'explicit'|'hybrid'
 ---@alias BetaMoonLogicalNetworkAggregate 'latest'|'any'|'all'|'maximum'|'minimum'|'sum'
 
 ---@class BetaMoonLogicalNetworkReference
 ---@field key string
+---@field owner string
+---@field exists boolean
+---@field topology BetaMoonLogicalNetworkTopology
+---@field tickInterval integer
+---@field override fun(self: BetaMoonLogicalNetworkReference, definition: table): BetaMoonOverrideHandle
 
 ---@class BetaMoonLogicalNetworkTopologyDefinition
 ---@field type BetaMoonLogicalNetworkTopology
@@ -278,6 +327,15 @@ function LogicalNetworks:get(key) end
 ---@param key string
 ---@return BetaMoonLogicalNetworkReference
 function LogicalNetworks:getRequired(key) return {} end
+---@param query? {key: string?, owner: string?, topology: BetaMoonLogicalNetworkTopology?}
+---@return BetaMoonResultList<BetaMoonLogicalNetworkReference>
+function LogicalNetworks:find(query) return {} end
+---@param query? {key: string?, owner: string?, topology: BetaMoonLogicalNetworkTopology?}
+---@return BetaMoonLogicalNetworkReference|nil
+function LogicalNetworks:first(query) end
+---@param query? {key: string?, owner: string?, topology: BetaMoonLogicalNetworkTopology?}
+---@return BetaMoonLogicalNetworkReference|nil
+function LogicalNetworks:one(query) end
 
 ---@class BetaMoonTileInventoryAccess
 local TileInventoryAccess = {}
@@ -650,18 +708,63 @@ local TileEntityRegistry = {}
 ---@param definition BetaMoonTileEntityDefinition
 ---@return BetaMoonTileEntityHandle
 function TileEntityRegistry:add(definition) end
+---@param name string
+---@return BetaMoonTileEntityHandle|nil
+function TileEntityRegistry:get(name) end
+---@param name string
+---@return BetaMoonTileEntityHandle
+function TileEntityRegistry:getRequired(name) return {} end
+---@param query? {name: string?, owner: string?}
+---@return BetaMoonResultList<BetaMoonTileEntityHandle>
+function TileEntityRegistry:find(query) return {} end
+---@param query? {name: string?, owner: string?}
+---@return BetaMoonTileEntityHandle|nil
+function TileEntityRegistry:first(query) end
+---@param query? {name: string?, owner: string?}
+---@return BetaMoonTileEntityHandle|nil
+function TileEntityRegistry:one(query) end
 
 ---@class BetaMoonContainerRegistry
 local ContainerRegistry = {}
 ---@param definition BetaMoonContainerDefinition
 ---@return BetaMoonContainerHandle
 function ContainerRegistry:add(definition) end
+---@param name string
+---@return BetaMoonContainerHandle|nil
+function ContainerRegistry:get(name) end
+---@param name string
+---@return BetaMoonContainerHandle
+function ContainerRegistry:getRequired(name) return {} end
+---@param query? {name: string?, owner: string?, tileEntity: string?}
+---@return BetaMoonResultList<BetaMoonContainerHandle>
+function ContainerRegistry:find(query) return {} end
+---@param query? {name: string?, owner: string?, tileEntity: string?}
+---@return BetaMoonContainerHandle|nil
+function ContainerRegistry:first(query) end
+---@param query? {name: string?, owner: string?, tileEntity: string?}
+---@return BetaMoonContainerHandle|nil
+function ContainerRegistry:one(query) end
 
 ---@class BetaMoonContainerGuiRegistry
 local ContainerGuiRegistry = {}
 ---@param definition BetaMoonContainerGuiDefinition
 ---@return BetaMoonContainerGuiHandle
 function ContainerGuiRegistry:add(definition) end
+---@param name string
+---@return BetaMoonContainerGuiHandle|nil
+function ContainerGuiRegistry:get(name) end
+---@param name string
+---@return BetaMoonContainerGuiHandle
+function ContainerGuiRegistry:getRequired(name) return {} end
+---@param query? {name: string?, owner: string?, container: string?}
+---@return BetaMoonResultList<BetaMoonContainerGuiHandle>
+function ContainerGuiRegistry:find(query) return {} end
+---@param query? {name: string?, owner: string?, container: string?}
+---@return BetaMoonContainerGuiHandle|nil
+function ContainerGuiRegistry:first(query) end
+---@param query? {name: string?, owner: string?, container: string?}
+---@return BetaMoonContainerGuiHandle|nil
+function ContainerGuiRegistry:one(query) end
 
 return {
     TileEntityRegistry = TileEntityRegistry,

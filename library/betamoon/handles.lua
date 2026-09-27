@@ -7,7 +7,7 @@
 -- --------------------------------------------------------------------------
 
 ---@class BetaMoonOverrideHandle
----@field target BetaMoonResourceReference|BetaMoonRecipeReference
+---@field target BetaMoonResourceReference|BetaMoonRecipeReference|BetaMoonSoundEventReference|BetaMoonEntityTypeReference|BetaMoonFuelRegistrationReference|BetaMoonFuelSetReference|BetaMoonBiomeReference|BetaMoonTileEntityHandle|BetaMoonContainerHandle|BetaMoonContainerGuiHandle|BetaMoonCapabilityReference|BetaMoonWorldServiceReference|BetaMoonLogicalNetworkReference
 ---@field active boolean
 ---@field reason string|nil
 local OverrideHandle = {}
