@@ -156,6 +156,7 @@ function RecipeTypeRegistry:one(query) end
 ---@field data table<string, BetaMoonRecipeScalar> Custom recipes only.
 ---@field conditions table<string, BetaMoonRecipePredicate> Custom recipes only.
 ---@field priority integer Custom recipes only.
+---@field input table Native shaped pattern/key, native shapeless ingredient list, or native smelting input.
 local RecipeReference = {}
 
 ---@class BetaMoonRecipeChanges
@@ -166,6 +167,7 @@ local RecipeReference = {}
 ---@field conditions? table<string, BetaMoonRecipePredicate> Complete replacement map.
 ---@field enabled? boolean
 ---@field priority? integer Recipe matching priority.
+---@field input? table|string[]|BetaMoonRecipeIngredient Complete native shaped, shapeless, or smelting input replacement.
 
 ---@class BetaMoonRecipeOverride: BetaMoonRecipeChanges
 ---@field when? BetaMoonOverrideCondition
