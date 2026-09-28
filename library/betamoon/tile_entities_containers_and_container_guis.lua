@@ -297,8 +297,19 @@ local LogicalNetworkNodeList = {}
 ---@return BetaMoonLogicalNetworkNode[]
 function LogicalNetworkNodeList:find(query) return {} end
 
+---@class BetaMoonLogicalNetworkComponent
+---@field key string
+---@field topology BetaMoonLogicalNetworkTopology
+---@field id integer
+---@field size integer
+local LogicalNetworkComponent = {}
+---@param first BetaMoonLogicalNetworkNode A node from the current ctx.nodes list.
+---@param second BetaMoonLogicalNetworkNode A node from the current ctx.nodes list.
+---@return integer distance Shortest path length measured in logical-network edges.
+function LogicalNetworkComponent:pathDistance(first, second) return 0 end
+
 ---@class BetaMoonLogicalNetworkContext
----@field network {key: string, topology: BetaMoonLogicalNetworkTopology, id: integer, size: integer}
+---@field network BetaMoonLogicalNetworkComponent
 ---@field nodes BetaMoonLogicalNetworkNodeList
 ---@field world BetaMoonActionWorld
 ---@field signal? BetaMoonSharedDataValue

@@ -479,6 +479,31 @@ function TileView:getNbt() end
 ---@field current table<string, boolean>
 ---@field initial boolean First observation, including after cache eviction.
 
+---@class BetaMoonBlockEventOverrideContext: BetaMoonBlockActionContext
+---@field base fun(self: BetaMoonBlockEventOverrideContext) Runs the next callback layer once.
+
+---@class BetaMoonBlockBooleanOverrideContext: BetaMoonBlockActionContext
+---@field base fun(self: BetaMoonBlockBooleanOverrideContext): boolean Runs the next callback layer once.
+
+---@class BetaMoonBlockInteractionOverrideContext: BetaMoonBlockActionContext
+---@field base fun(self: BetaMoonBlockInteractionOverrideContext): BetaMoonInteractionResult Runs the next callback layer once.
+
+---@class BetaMoonBlockDropsOverrideContext: BetaMoonBlockActionContext
+---@field base fun(self: BetaMoonBlockDropsOverrideContext): BetaMoonBlockDrop[] Runs the next callback layer once.
+
+---@class BetaMoonBlockInputOverrideContext: BetaMoonBlockInputContext
+---@field base fun(self: BetaMoonBlockInputOverrideContext) Runs the next callback layer once.
+
+---@class BetaMoonBlockTickOverrideContext: BetaMoonBlockTickContext
+---@field base fun(self: BetaMoonBlockTickOverrideContext) Runs the next callback layer once.
+
+---@alias BetaMoonBlockEventOverride (fun(ctx: BetaMoonBlockEventOverrideContext))|{action: fun(ctx: BetaMoonBlockEventOverrideContext)}
+---@alias BetaMoonBlockBooleanOverride (fun(ctx: BetaMoonBlockBooleanOverrideContext): boolean?)|{action: fun(ctx: BetaMoonBlockBooleanOverrideContext): boolean?}
+---@alias BetaMoonBlockInteractionOverride (fun(ctx: BetaMoonBlockInteractionOverrideContext): BetaMoonInteractionResult?)|{action: fun(ctx: BetaMoonBlockInteractionOverrideContext): BetaMoonInteractionResult?}
+---@alias BetaMoonBlockDropsOverride (fun(ctx: BetaMoonBlockDropsOverrideContext): BetaMoonBlockDrop[]?)|{action: fun(ctx: BetaMoonBlockDropsOverrideContext): BetaMoonBlockDrop[]?}
+---@alias BetaMoonBlockInputOverride (fun(ctx: BetaMoonBlockInputOverrideContext))|{action: fun(ctx: BetaMoonBlockInputOverrideContext)}
+---@alias BetaMoonBlockTickOverride (fun(ctx: BetaMoonBlockTickOverrideContext))|{action: fun(ctx: BetaMoonBlockTickOverrideContext)}
+
 ---@class BetaMoonBlockCallback
 ---@field action fun(ctx: BetaMoonBlockActionContext)
 
@@ -498,6 +523,25 @@ function TileView:getNbt() end
 ---@field face BetaMoonBlockFace
 ---@field position BetaMoonPositionI
 
+---@class BetaMoonItemEventOverrideContext: BetaMoonItemActionContext
+---@field base fun(self: BetaMoonItemEventOverrideContext) Runs the next callback layer once.
+
+---@class BetaMoonItemInteractionOverrideContext: BetaMoonItemActionContext
+---@field base fun(self: BetaMoonItemInteractionOverrideContext): BetaMoonInteractionResult Runs the next callback layer once.
+
+---@class BetaMoonItemBlockInteractionOverrideContext: BetaMoonItemBlockActionContext
+---@field base fun(self: BetaMoonItemBlockInteractionOverrideContext): BetaMoonInteractionResult Runs the next callback layer once.
+
+---@class BetaMoonItemBlockDestroyedOverrideContext: BetaMoonItemActionContext
+---@field blockId integer ID of the block passed to the native item callback.
+---@field base fun(self: BetaMoonItemBlockDestroyedOverrideContext) Runs the next callback layer once.
+
+---@alias BetaMoonItemEventOverride (fun(ctx: BetaMoonItemEventOverrideContext))|{action: fun(ctx: BetaMoonItemEventOverrideContext)}
+---@alias BetaMoonItemInteractionOverride (fun(ctx: BetaMoonItemInteractionOverrideContext): BetaMoonInteractionResult?)|{action: fun(ctx: BetaMoonItemInteractionOverrideContext): BetaMoonInteractionResult?}
+---@alias BetaMoonItemBlockInteractionOverride (fun(ctx: BetaMoonItemBlockInteractionOverrideContext): BetaMoonInteractionResult?)|{action: fun(ctx: BetaMoonItemBlockInteractionOverrideContext): BetaMoonInteractionResult?}
+---@alias BetaMoonItemBlockDestroyedOverride (fun(ctx: BetaMoonItemBlockDestroyedOverrideContext))|{action: fun(ctx: BetaMoonItemBlockDestroyedOverrideContext)}
+---@alias BetaMoonItemInventoryOverride (fun(ctx: BetaMoonItemEventOverrideContext))|{action: fun(ctx: BetaMoonItemEventOverrideContext), interval: integer?, when: 'always'|'selected'?}
+
 ---@class BetaMoonItemCallback
 ---@field action fun(ctx: BetaMoonItemActionContext)
 
@@ -514,6 +558,15 @@ function TileView:getNbt() end
 ---@class BetaMoonMiningQueryContext
 ---@field itemId integer
 ---@field block BetaMoonBlockAtPosition
+
+---@class BetaMoonMiningBooleanOverrideContext: BetaMoonMiningQueryContext
+---@field base fun(self: BetaMoonMiningBooleanOverrideContext): boolean Runs the next callback layer once.
+
+---@class BetaMoonMiningNumberOverrideContext: BetaMoonMiningQueryContext
+---@field base fun(self: BetaMoonMiningNumberOverrideContext): number Runs the next callback layer once.
+
+---@alias BetaMoonMiningBooleanOverride (fun(ctx: BetaMoonMiningBooleanOverrideContext): boolean?)|{action: fun(ctx: BetaMoonMiningBooleanOverrideContext): boolean?}
+---@alias BetaMoonMiningNumberOverride (fun(ctx: BetaMoonMiningNumberOverrideContext): number?)|{action: fun(ctx: BetaMoonMiningNumberOverrideContext): number?}
 
 ---@class BetaMoonItemUseDefinition
 ---@field consume? integer Consumption on general right-click use. Food always consumes one.

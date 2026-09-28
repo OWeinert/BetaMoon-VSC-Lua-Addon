@@ -46,6 +46,31 @@ local OverrideHandle = require("betamoon.handles").OverrideHandle
 ---@field enabled boolean|nil
 ---@field output BetaMoonStack|BetaMoonResourceReference|integer|nil
 ---@field onDisplayTick {action: fun(ctx: BetaMoonBlockDisplayOverrideContext), chance: number?, attempts: integer?}|nil Block display callback override.
+---@field onTick? BetaMoonBlockTickOverride
+---@field onActivate? BetaMoonBlockInteractionOverride
+---@field onClick? BetaMoonBlockEventOverride
+---@field canPlace? BetaMoonBlockBooleanOverride
+---@field onPlaced? BetaMoonBlockEventOverride
+---@field onAdded? BetaMoonBlockEventOverride
+---@field onRemoved? BetaMoonBlockEventOverride
+---@field onNeighborChanged? BetaMoonBlockEventOverride
+---@field canBreak? BetaMoonBlockBooleanOverride
+---@field onBroken? BetaMoonBlockEventOverride
+---@field onExploded? BetaMoonBlockEventOverride
+---@field onEntityWalk? BetaMoonBlockEventOverride
+---@field onEntityCollide? BetaMoonBlockEventOverride
+---@field getDrops? BetaMoonBlockDropsOverride
+---@field onInputChanged? BetaMoonBlockInputOverride
+---@field onUseFirst? BetaMoonItemBlockInteractionOverride
+---@field onUseOnBlock? BetaMoonItemBlockInteractionOverride
+---@field onUse? BetaMoonItemInteractionOverride
+---@field onUseOnEntity? BetaMoonItemInteractionOverride
+---@field onHitEntity? BetaMoonItemEventOverride
+---@field onBlockDestroyed? BetaMoonItemBlockDestroyedOverride
+---@field onCrafted? BetaMoonItemEventOverride
+---@field canHarvest? BetaMoonMiningBooleanOverride
+---@field getMiningSpeed? BetaMoonMiningNumberOverride
+---@field onInventoryTick? BetaMoonItemInventoryOverride
 
 ---@class BetaMoonBulkOverrideDefinition
 ---@field priority integer|nil
