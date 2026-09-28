@@ -21,6 +21,7 @@
 ---@alias BetaMoonBiomeName 'Rainforest'|'Swampland'|'Seasonal Forest'|'Forest'|'Savanna'|'Shrubland'|'Taiga'|'Desert'|'Plains'|'Ice Desert'|'Tundra'|'Hell'|'Sky'
 ---@alias BetaMoonBiomeTreeMode 'default'|'big'|'normal'|'none'
 ---@alias BetaMoonBiomeSpawnGroup 'monsters'|'creatures'|'water'
+---@alias BetaMoonEntityKind 'prop'|'projectile'|'living'|'pickup'
 ---@alias BetaMoonEntityName 'Item'|'Painting'|'Arrow'|'Snowball'|'PrimedTnt'|'FallingSand'|'Minecart'|'Boat'|'Mob'|'Monster'|'Creeper'|'Skeleton'|'Spider'|'Giant'|'Zombie'|'Slime'|'Ghast'|'PigZombie'|'Pig'|'Sheep'|'Cow'|'Chicken'|'Squid'|'Wolf'
 ---@alias BetaMoonBiomeEntityName 'Creeper'|'Skeleton'|'Spider'|'Giant'|'Zombie'|'Slime'|'Ghast'|'PigZombie'|'Pig'|'Sheep'|'Cow'|'Chicken'|'Squid'|'Wolf'
 ---@alias BetaMoonBiomeEntity BetaMoonBiomeEntityName|integer|{name: BetaMoonBiomeEntityName}|{id: integer}

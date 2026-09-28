@@ -45,9 +45,12 @@ local BlockReference = {} ---@as BetaMoonBlockReference
 ---@field maxDamage integer
 ---@field hasSubtypes boolean
 ---@field icon integer
+---@field texture integer Alias for icon.
 ---@field full3D boolean
 ---@field efficiency number|nil
 ---@field damageVsEntity integer|nil
+---@field healing integer|nil Food healing amount.
+---@field wolfFood boolean|nil Whether a food item can be fed to wolves.
 local ItemReference = {} ---@as BetaMoonItemReference
 
 ---@class BetaMoonResourceQuery
