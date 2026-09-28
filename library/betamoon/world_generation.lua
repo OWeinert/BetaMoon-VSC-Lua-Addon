@@ -79,6 +79,19 @@ local WorldPlacementReference = {}
 function WorldPlacementReference:getKey() return '' end
 ---@return BetaMoonWorldFeatureReference
 function WorldPlacementReference:getFeature() return WorldFeatureReference end
+---@param world BetaMoonActionWorld
+---@param x integer
+---@param z integer
+---@param maxChunks? integer Search radius in chunks, from 0 to 128. Defaults to 32.
+---@return BetaMoonWorldPlacementCandidate|nil
+function WorldPlacementReference:locateCandidate(world, x, z, maxChunks) end
+
+---@class BetaMoonWorldPlacementCandidate
+---@field x integer Block X at the candidate chunk center.
+---@field z integer Block Z at the candidate chunk center.
+---@field chunkX integer Candidate chunk X.
+---@field chunkZ integer Candidate chunk Z.
+---@field loaded boolean Whether the candidate chunk is currently loaded; this does not prove placement succeeded.
 
 ---@class BetaMoonWorldFeatureBase
 ---@field key string
