@@ -45,9 +45,24 @@
 
 ---@class BetaMoonWorldFeatureResult
 ---@field placed boolean
----@field reason? 'blocked'|'out_of_bounds'|'unloaded_chunk'|'invalid_ground'|'protected'|'budget_exceeded'|'no_changes'|'runtime_error'
+---@field reason? 'blocked'|'out_of_bounds'|'unloaded_chunk'|'invalid_ground'|'protected'|'budget_exceeded'|'no_changes'|'runtime_error'|'terrain_unreadable'|'terrain_slope'|'terrain_step'|'terrain_support'|'foundation_too_deep'|'terrace_cut_limit'|'terrace_fill_limit'|'terrain_protected_block'|'terrain_tile_collision'|'site_wrong_surface_relation'|'site_wrong_medium'|'site_fluid_coverage'|'site_fluid_depth'|'site_depth'|'site_insufficient_cover'|'site_insufficient_cavity'|'site_sky_mismatch'|'conform_path_failed'
 ---@field blocksChanged integer
 ---@field bounds? {min: BetaMoonPositionI, max: BetaMoonPositionI}
+---@field details? BetaMoonWorldFeatureDetails Structure terrain and site diagnostics when applicable.
+
+---@class BetaMoonWorldFeatureDetails
+---@field terrainMode? string
+---@field terrainSurface? string
+---@field siteType? string
+---@field supportColumns? integer
+---@field requestedAnchorY? integer
+---@field resolvedAnchorY? integer
+---@field sampledMinimumY? integer
+---@field sampledMaximumY? integer
+---@field supportRatio? number
+---@field fluidCoverage? number
+---@field existingAirRatio? number
+---@field terrainBlocksPlanned? integer
 
 ---@class BetaMoonWorldFeaturePlaceOptions
 ---@field seed? integer Extra deterministic seed salt.
@@ -203,12 +218,34 @@ function WorldTrees:getRequired(key) return WorldFeatureReference end
 ---@field unknownMetadata? 'reject'|'preserve' Transformed nonzero metadata without an adapter rejects by default.
 ---@field metadataTransforms? BetaMoonStructureMetadataTransform[]
 
+---@alias BetaMoonTerrainSurface 'world_surface'|'surface'|'solid_surface'|'ocean_floor'|'fluid_surface'
+
+---@class BetaMoonStructureTerrain
+---@field mode? 'exact'|'fit'|'foundation'|'terrace'|'conform' Defaults to exact, preserving the supplied Y without terrain adaptation.
+---@field surface? BetaMoonTerrainSurface Surface sampled by adaptive modes; defaults to solid_surface.
+---@field anchor? 'minimum'|'maximum'|'median'|'mean'|'center'|'percentile' Rigid fit anchor; defaults to median.
+---@field percentile? number Anchor percentile from 0 through 1 when anchor is percentile.
+---@field maxSlope? integer Maximum height range across the support footprint, from 0 through 32; defaults to 2.
+---@field maxStep? integer Maximum height change between neighboring support columns, from 0 through 32; defaults to maxSlope.
+---@field requireSupportRatio? number Required directly supported footprint fraction from 0 through 1.
+---@field verticalOffset? integer Final fitted offset from -32 through 32.
+---@field foundationBlock? BetaMoonBlockReference|integer|string Foundation fill block; defaults to cobblestone in foundation mode and sampled local material in terrace mode.
+---@field foundationMeta? integer Foundation metadata from 0 through 15.
+---@field maxFoundationDepth? integer Maximum fill below each support column, from 1 through 32; defaults to 6.
+---@field maxCutDepth? integer Terrace cut limit from 0 through 16; defaults to 3.
+---@field maxFillDepth? integer Terrace fill limit from 0 through 16; defaults to 3.
+---@field padding? integer Terrace padding from 0 through 8.
+---@field blendRadius? integer Terrace transition radius from 0 through 8.
+---@field maxBlendStep? integer Maximum height adjustment per blend ring, from 1 through 8.
+---@field maxConformDisplacement? integer Maximum vertical movement for terrain_conform columns, from 1 through 16.
+
 ---@class BetaMoonStructureDefinition
 ---@field key string
 ---@field path? string Package-relative gameplay-data path under assets/. Defaults to assets/<namespace>/worldgen/structures/<key>.json.
 ---@field rotation? 'none'|'clockwise_90'|'clockwise_180'|'counterclockwise_90'|'random'|'random_horizontal'
 ---@field mirror? 'none'|'left_right'|'front_back'|'random'
 ---@field processors? BetaMoonStructureProcessors
+---@field terrain? BetaMoonStructureTerrain Optional terrain relationship. Omit to retain exact placement.
 
 ---@class BetaMoonRegionalStructurePiece
 ---@field pool string Connector pool read from `connector` markers in the referenced template.
@@ -226,7 +263,10 @@ function WorldTrees:getRequired(key) return WorldFeatureReference end
 ---@field spacing? integer Region spacing in chunks, from 2 through 512; defaults to 32.
 ---@field separation? integer Minimum region-edge separation, from 0 through spacing - 1; defaults to 8.
 ---@field salt? integer Stable seed salt.
----@field height? integer|{type: 'surface', offset: integer?}|{type: 'fixed', value: integer} Defaults to surface height.
+---@field height? integer|{type: BetaMoonTerrainSurface, offset: integer?}|{type: 'fixed', value: integer} Defaults to world-surface height.
+---@field site? BetaMoonStructureSite|string Optional footprint-aware environment profile shared by every rigid piece.
+---@field siteSearch? {attempts: integer?, radius: integer?} Bounded deterministic fallback positions inside the candidate chunk; defaults to no fallback.
+---@field connectorVerticalTolerance? integer Maximum terrain-fit vertical shift for child pieces, from 0 through 16; defaults to 0.
 ---@field pieces? BetaMoonRegionalStructurePiece[] Weighted connector-pool pieces. Omit for a root-only structure.
 ---@field maxDepth? integer Connector depth from 0 through 16; defaults to 4.
 ---@field maxPieces? integer Total piece limit from 1 through 128; defaults to 32.
@@ -289,11 +329,29 @@ function WorldStructures:getRegionalRequired(key) return RegionalStructureRefere
 function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, options) return '' end
 
 ---@class BetaMoonWorldHeightProvider
----@field type? 'uniform'|'triangular'|'normal'|'fixed'|'surface'|'ocean_floor'|'ceiling'
+---@field type? 'uniform'|'triangular'|'normal'|'fixed'|'surface'|'world_surface'|'solid_surface'|'ocean_floor'|'fluid_surface'|'underground'|'cave_floor'|'ceiling'
 ---@field min? integer
 ---@field max? integer
 ---@field value? integer Fixed height.
 ---@field offset? integer Surface offset.
+---@field minDepth? integer Minimum depth below solid_surface for underground sampling.
+---@field maxDepth? integer Maximum depth below solid_surface for underground sampling.
+---@field minimumClearance? integer Required open height for cave_floor sampling.
+
+---@class BetaMoonStructureSite
+---@field type? 'any'|'land_surface'|'underwater'|'underground'|'cave'|'fluid_surface'
+---@field scope? 'origin'|'support_footprint'|'clearance_mask'|'full_bounds'
+---@field medium? 'any'|'air'|'water'|'lava'|'any_fluid'|'solid'
+---@field minDepthBelowSurface? integer
+---@field maxDepthBelowSurface? integer
+---@field minFluidDepth? integer
+---@field maxFluidDepth? integer
+---@field minFluidCoverage? number Fraction from 0 through 1.
+---@field maxFluidCoverage? number Fraction from 0 through 1.
+---@field minExistingAirRatio? number Fraction from 0 through 1 used for cave validation.
+---@field minSolidCover? integer
+---@field maxSolidCover? integer
+---@field requireSky? boolean Applies to every position selected by scope.
 
 ---@class BetaMoonWorldPlacementConditions
 ---@field ground? (BetaMoonBlockReference|integer|string)[]|BetaMoonBlockReference|integer|string
@@ -303,6 +361,7 @@ function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, optio
 ---@field lava? boolean
 ---@field minLight? integer
 ---@field maxLight? integer
+---@field site? BetaMoonStructureSite|string Optional footprint-aware structure environment profile.
 
 ---@class BetaMoonWorldPlacementDefinition
 ---@field key string
