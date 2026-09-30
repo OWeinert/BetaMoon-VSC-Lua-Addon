@@ -19,6 +19,7 @@ local WorldFeatures = require("betamoon.world_generation").WorldFeatures
 local WorldPlacements = require("betamoon.world_generation").WorldPlacements
 local WorldTrees = require("betamoon.world_generation").WorldTrees
 local WorldStructures = require("betamoon.world_generation").WorldStructures
+local LootTables = require("betamoon.world_generation").LootTables
 local WorldSurfaces = require("betamoon.world_generation").WorldSurfaces
 local WorldBiomeSources = require("betamoon.world_generation").WorldBiomeSources
 local OreRegistry = require("betamoon.world_generation").OreRegistry
@@ -84,6 +85,7 @@ local CallbackResults
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
 ---@field recipeMatchers BetaMoonRecipeMatcherRegistry
+---@field lootTables BetaMoonLootTableRegistry
 ---@field worldgen {features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
@@ -118,6 +120,7 @@ betamoon = {
   recipeTypes = RecipeTypeRegistry,
   recipeBindings = RecipeBindingRegistry,
   recipeMatchers = RecipeMatcherRegistry,
+  lootTables = LootTables,
   worldgen = {
     features = WorldFeatures,
     placements = WorldPlacements,

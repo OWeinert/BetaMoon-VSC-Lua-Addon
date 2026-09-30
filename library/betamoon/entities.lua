@@ -178,7 +178,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field item BetaMoonItemReference|integer Item reference or registered item/block stack ID.
 ---@field min? integer Minimum total item count, default 1; range 0..64. Totals are split into legal native stacks.
 ---@field max? integer Maximum total item count, default min; range min..64. Totals are split into legal native stacks.
----@field chance? number Independent chance for each loot-table sample, from 0..1; default 1.
+---@field chance? number Independent chance for this legacy shorthand entry, from 0..1; default 1.
 ---@field damage? integer Item damage value, default 0; range 0..32767.
 
 ---@class BetaMoonEntitySpawnRange
@@ -260,7 +260,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field living? BetaMoonEntityLivingDefinition Requires kind living.
 ---@field pickup? BetaMoonEntityPickupDefinition Requires kind pickup.
 ---@field health? BetaMoonEntityHealthDefinition Optional destructible health for props, projectiles, and pickups.
----@field drops? BetaMoonEntityDrop[] Immutable loot choices sampled on death and by every dropLoot call.
+---@field drops? BetaMoonEntityDrops Legacy shorthand entries, inline loot pools, or a registered loot table; resampled on death and by every dropLoot call.
 ---@field physics? BetaMoonEntityPhysicsDefinition Motion mode for any kind; simulation parameters are prop-only.
 ---@field parts? table<string, BetaMoonEntityPartDefinition> Named model parts; optional hitboxes are separate from visuals.
 ---@field sensors? table<string, BetaMoonEntitySensorDefinition> Up to 16 named non-colliding overlap sensors.

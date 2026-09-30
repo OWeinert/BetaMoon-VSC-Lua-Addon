@@ -9,10 +9,12 @@
 ---@class BetaMoonChat
 local Chat = {}
 
+---Display a local chat message prefixed with the current mod's declared metadata name.
 ---@param format string
 ---@param ... any
 function Chat:send(format, ...) end
 
+---Broadcast a message prefixed with the current mod's declared metadata name; singleplayer falls back to local chat.
 ---@param format string
 ---@param ... any
 function Chat:broadcast(format, ...) end

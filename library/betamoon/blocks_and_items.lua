@@ -84,8 +84,8 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field texture BetaMoonTextureInput|integer|nil
 ---@field textures table<string, BetaMoonTextureInput|integer>|nil
 ---@field harvest table<string, integer>|nil
----@field drops? BetaMoonBlockDrop[]
----@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrop[]?} Read-only query; nil keeps declared/vanilla drops.
+---@field drops? BetaMoonBlockDrops Legacy shorthand entries, an inline loot pool source, or a registered loot table.
+---@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrops?} Read-only query; nil keeps declared/vanilla drops.
 ---@field state? table<string, BetaMoonBlockStateField>
 ---@field placement? BetaMoonBlockPlacement
 ---@field collision? {boxes: BetaMoonLocalBox[]} Boxes are authored for the default facing and rotate with horizontal placement state.

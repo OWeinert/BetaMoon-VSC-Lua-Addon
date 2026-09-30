@@ -31,6 +31,22 @@
         "title": "Disable API for Workspace Folder",
         "category": "BetaMoon"
       }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "**/assets/*/worldgen/structures/*.json",
+          "**/assets/*/worldgen/structures/**/*.json"
+        ],
+        "url": "./schemas/betamoon-structure.schema.json"
+      },
+      {
+        "fileMatch": [
+          "**/assets/*/loot_tables/*.json",
+          "**/assets/*/loot_tables/**/*.json"
+        ],
+        "url": "./schemas/betamoon-loot-table.schema.json"
+      }
     ]
   },
   "scripts": {
