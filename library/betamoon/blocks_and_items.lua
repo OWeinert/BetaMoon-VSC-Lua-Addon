@@ -27,6 +27,8 @@ function ResourceReference:override(definition)
 end
 
 ---@class BetaMoonBlockReference: BetaMoonResourceReference
+---@field fluid? BetaMoonFluidReference Present for flowing/still fluid blocks.
+---@field fluidRole? 'flowing'|'still'
 ---@field texture integer
 ---@field light integer
 ---@field lightOpacity integer
@@ -39,6 +41,7 @@ end
 local BlockReference = {} ---@as BetaMoonBlockReference
 
 ---@class BetaMoonItemReference: BetaMoonResourceReference
+---@field fluid? BetaMoonFluidReference Present for filled fluid buckets.
 ---@field type BetaMoonItemType
 ---@field category 'item'|'tool'|'armor'
 ---@field maxStackSize integer
@@ -290,7 +293,7 @@ function BlockRegistry:first(query) end
 ---@return BetaMoonBlockReference|nil
 function BlockRegistry:one(query) end
 
----@param definition BetaMoonBlockDefinition
+---@param definition BetaMoonBlockDefinition|BetaMoonFluidBlockDefinition
 ---@return BetaMoonBlockReference
 function BlockRegistry:add(definition)
   return BlockReference
@@ -323,7 +326,7 @@ function ItemRegistry:first(query) end
 ---@return BetaMoonItemReference|nil
 function ItemRegistry:one(query) end
 
----@param definition BetaMoonItemDefinition
+---@param definition BetaMoonItemDefinition|BetaMoonFluidBucketDefinition
 ---@return BetaMoonItemReference
 function ItemRegistry:add(definition)
   return ItemReference

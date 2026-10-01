@@ -4,6 +4,7 @@
 
 local BlockRegistry = require("betamoon.blocks_and_items").BlockRegistry
 local ItemRegistry = require("betamoon.blocks_and_items").ItemRegistry
+local Fluids = require("betamoon.fluids").Fluids
 local Assets = require("betamoon.assets_and_audio").Assets
 local SoundEvents = require("betamoon.assets_and_audio").SoundEvents
 local Audio = require("betamoon.assets_and_audio").Audio
@@ -79,6 +80,7 @@ local CallbackResults
 ---@field assets BetaMoonAssets
 ---@field entities BetaMoonEntityRegistry
 ---@field fuels BetaMoonFuels
+---@field fluids BetaMoonFluidRegistry
 ---@field soundEvents BetaMoonSoundEventRegistry
 ---@field audio BetaMoonAudio
 ---@field input BetaMoonInput
@@ -112,6 +114,7 @@ betamoon = {
   assets = Assets,
   entities = Entities,
   fuels = Fuels,
+  fluids = Fluids,
   soundEvents = SoundEvents,
   audio = Audio,
   input = Input,
