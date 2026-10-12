@@ -1,0 +1,12 @@
+**
+!package.json
+!BetaMoon_icon.png
+!README.md
+!LICENSE
+!config.json
+!src/**
+!schemas/*.json
+!library/betamoon/*.lua
+!node_modules/jsonc-parser/package.json
+!node_modules/jsonc-parser/LICENSE.md
+!node_modules/jsonc-parser/lib/umd/**

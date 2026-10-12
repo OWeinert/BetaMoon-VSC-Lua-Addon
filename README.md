@@ -6,7 +6,7 @@ including blocks, items, texture/sound/model/animation assets, procedural poses,
 Packaged `assets/<namespace>/worldgen/structures/*.json` and `assets/<namespace>/loot_tables/*.json` files also receive
 completion and validation from the bundled BetaMoon schemas.
 
-The definitions target BetaMoon 0.7.4.
+The definitions target BetaMoon 0.8.0.
 
 The files in `library/betamoon/` are generated from the categories in this repository's local
 `internal/api.lua` reference. Each category retains its declarations, annotations and documentation.
