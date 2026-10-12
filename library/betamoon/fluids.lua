@@ -34,6 +34,21 @@
 ---@class BetaMoonFluidDisplacementDefinition
 ---@field blocks? BetaMoonFluidDisplacement Behavior for eligible non-fluid blocks; tile entities and other fluids are always protected.
 
+---@class BetaMoonFluidEntityPolicy
+---@field movement? 'none'|'water'|'lava' Native-compatible movement profile; independent of the carrier material.
+---@field currentScale? number Current acceleration multiplier in 0..8.
+---@field drowning? boolean Consume air while a living entity's eye is immersed.
+---@field countsAsWet? boolean Count body contact as wet.
+---@field extinguishesFire? boolean Clear fire on body contact.
+---@field ignitesEntities? boolean Ignite entities on body contact.
+---@field contactDamage? integer Nonnegative environmental damage per contact interval.
+---@field contactIntervalTicks? integer Damage interval in 5..200 ticks; defaults to 10.
+
+---@class BetaMoonFluidCameraPolicy
+---@field fogColor? integer 24-bit RGB color at the camera eye.
+---@field fogDensity? number Exponential fog density in 0..1; zero disables fluid fog.
+---@field overlay? BetaMoonTextureInput|false Full-screen warped texture; false suppresses the preset overlay.
+
 ---@class BetaMoonFluidBlockShorthand
 ---@field id integer Native block ID in 1..255.
 ---@field key string Canonical block key.
@@ -57,6 +72,8 @@
 ---@field appearance BetaMoonFluidAppearance
 ---@field flow? BetaMoonFluidFlow
 ---@field displacement? BetaMoonFluidDisplacementDefinition
+---@field entity? BetaMoonFluidEntityPolicy Movement, breathing, wetness, fire, and interval damage; defaults come from preset.
+---@field camera? BetaMoonFluidCameraPolicy Eye-fluid fog and overlay; defaults come from preset.
 
 ---@class BetaMoonFluidShorthandDefinition: BetaMoonFluidDefinition
 ---@field blocks BetaMoonFluidBlocksShorthand
