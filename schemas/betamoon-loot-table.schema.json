@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/OWeinert/BetaMoon/schemas/betamoon-loot-table.schema.json",
+  "title": "BetaMoon loot table",
+  "description": "A deterministic reusable BetaMoon loot table.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "pools"],
+  "properties": {
+    "format": { "const": "betamoon_loot_table" },
+    "pools": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "$ref": "#/definitions/pool" }
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+    },
+    "item": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 32767 },
+        { "type": "string", "minLength": 1 }
+      ]
+    },
+    "countRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "max": { "type": "integer", "minimum": 1, "maximum": 64 }
+      }
+    },
+    "metadataRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "maximum": 32767 },
+        "max": { "type": "integer", "minimum": 0, "maximum": 32767 }
+      }
+    },
+    "rollRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "max": { "type": "integer", "minimum": 0, "maximum": 64 }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item"],
+      "properties": {
+        "item": { "$ref": "#/definitions/item" },
+        "count": {
+          "oneOf": [
+            { "type": "integer", "minimum": 1, "maximum": 64 },
+            { "$ref": "#/definitions/countRange" }
+          ]
+        },
+        "damage": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0, "maximum": 32767 },
+            { "$ref": "#/definitions/metadataRange" }
+          ]
+        }
+      }
+    },
+    "entry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "stack"],
+          "properties": {
+            "type": { "const": "item" },
+            "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+            "stack": { "$ref": "#/definitions/stack" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "empty" },
+            "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "table"],
+          "properties": {
+            "type": { "const": "table" },
+            "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+            "table": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "pool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "entries"],
+      "properties": {
+        "key": { "$ref": "#/definitions/identifier" },
+        "rolls": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0, "maximum": 64 },
+            { "$ref": "#/definitions/rollRange" }
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": { "$ref": "#/definitions/entry" }
+        }
+      }
+    }
+  }
+}
