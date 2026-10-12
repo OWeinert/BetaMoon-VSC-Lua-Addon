@@ -19,7 +19,8 @@
 ---@field tickRate? integer Update interval in 1..1200 ticks.
 ---@field levelStep? integer Horizontal level increase in 1..7.
 ---@field slopeSearch? integer Bounded drop search depth in 0..8.
----@field sourceCreation? BetaMoonFluidSourceCreation
+---@field finite? boolean True prevents new sources; false uses the two-adjacent-source rule. Defaults to false for water, true otherwise.
+---@field sourceCreation? BetaMoonFluidSourceCreation Detailed source-renewal rule; must agree with finite when both are set.
 ---@field retreatDelayChance? number Chance in 0..1 to retain a receding level for one update.
 ---@field dimensions? table<'nether'|'hell'|'minecraft:dimension/hell', BetaMoonFluidDimensionFlow> Nether-specific partial overrides.
 
