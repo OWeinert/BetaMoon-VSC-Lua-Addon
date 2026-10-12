@@ -4,7 +4,6 @@ scripts/
 .vscode/
 
 *.vsix
-.vscodeignore
 luals-*-diagnostics.json
 luals-*-log/
 

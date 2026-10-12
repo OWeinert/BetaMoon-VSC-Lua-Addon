@@ -1,0 +1,810 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/OWeinert/BetaMoon/schemas/betamoon-structure.schema.json",
+  "title": "BetaMoon structure",
+  "description": "A bounded declarative BetaMoon world-generation structure.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "palette", "elements"],
+  "properties": {
+    "format": { "const": "betamoon_structure" },
+    "bounds": { "$ref": "#/definitions/bounds" },
+    "palette": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 4096,
+      "propertyNames": { "$ref": "#/definitions/identifier" },
+      "additionalProperties": { "$ref": "#/definitions/paletteState" }
+    },
+    "templates": {
+      "type": "object",
+      "maxProperties": 256,
+      "propertyNames": { "$ref": "#/definitions/identifier" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["elements"],
+        "properties": {
+          "elements": { "$ref": "#/definitions/elements" }
+        }
+      }
+    },
+    "elements": { "$ref": "#/definitions/elements" },
+    "processors": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "#/definitions/processor" }
+    }
+  },
+  "definitions": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+    },
+    "vector": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": [
+        { "type": "integer", "minimum": -32, "maximum": 32 },
+        { "type": "integer", "minimum": -127, "maximum": 127 },
+        { "type": "integer", "minimum": -32, "maximum": 32 }
+      ],
+      "additionalItems": false
+    },
+    "positiveVector": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "integer", "minimum": 1, "maximum": 256 }
+    },
+    "bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "$ref": "#/definitions/vector" },
+        "max": { "$ref": "#/definitions/vector" }
+      }
+    },
+    "block": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0, "maximum": 255 },
+        { "type": "string", "minLength": 1 }
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/definitions/identifier" }
+    },
+    "weightedStateValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["block"],
+      "properties": {
+        "block": { "$ref": "#/definitions/block" },
+        "meta": { "type": "integer", "minimum": 0, "maximum": 15 },
+        "data": { "type": "object" },
+        "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+      }
+    },
+    "paletteState": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["block"],
+          "properties": {
+            "block": { "$ref": "#/definitions/block" },
+            "meta": { "type": "integer", "minimum": 0, "maximum": 15 },
+            "data": { "type": "object" },
+            "tags": { "$ref": "#/definitions/tags" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["variants"],
+          "properties": {
+            "variants": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 64,
+              "items": { "$ref": "#/definitions/weightedStateValue" }
+            },
+            "tags": { "$ref": "#/definitions/tags" }
+          }
+        }
+      ]
+    },
+    "stateName": { "$ref": "#/definitions/identifier" },
+    "write": { "enum": ["error", "replace"] },
+    "face": { "enum": ["down", "up", "north", "south", "west", "east"] },
+    "horizontalFacing": { "enum": ["north", "east", "south", "west"] },
+    "rotation": { "enum": ["none", "clockwise_90", "clockwise_180", "counterclockwise_90"] },
+    "mirror": { "enum": ["none", "left_right", "front_back"] },
+    "elements": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/element" }
+    },
+    "blockElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "pos", "state"],
+      "properties": {
+        "type": { "const": "block" },
+        "pos": { "$ref": "#/definitions/vector" },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" }
+      }
+    },
+    "fillElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to", "state"],
+      "properties": {
+        "type": { "const": "fill" },
+        "from": { "$ref": "#/definitions/vector" },
+        "to": { "$ref": "#/definitions/vector" },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" }
+      }
+    },
+    "shellElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to", "state"],
+      "properties": {
+        "type": { "const": "shell" },
+        "from": { "$ref": "#/definitions/vector" },
+        "to": { "$ref": "#/definitions/vector" },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" },
+        "thickness": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "faces": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/face" }
+        }
+      }
+    },
+    "frameElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to", "state"],
+      "properties": {
+        "type": { "const": "frame" },
+        "from": { "$ref": "#/definitions/vector" },
+        "to": { "$ref": "#/definitions/vector" },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" },
+        "thickness": { "type": "integer", "minimum": 1, "maximum": 32 }
+      }
+    },
+    "lineElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to", "state"],
+      "properties": {
+        "type": { "const": "line" },
+        "from": { "$ref": "#/definitions/vector" },
+        "to": { "$ref": "#/definitions/vector" },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" }
+      }
+    },
+    "staircaseElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to", "state"],
+      "properties": {
+        "type": { "const": "staircase" },
+        "from": { "$ref": "#/definitions/vector" },
+        "to": { "$ref": "#/definitions/vector" },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" },
+        "width": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "facing": { "$ref": "#/definitions/horizontalFacing" }
+      }
+    },
+    "radius2": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 32 },
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1, "maximum": 32 }
+        }
+      ]
+    },
+    "radius3": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 32 },
+        {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": [
+            { "type": "integer", "minimum": 1, "maximum": 32 },
+            { "type": "integer", "minimum": 1, "maximum": 127 },
+            { "type": "integer", "minimum": 1, "maximum": 32 }
+          ],
+          "additionalItems": false
+        }
+      ]
+    },
+    "cylinderElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "base", "radius", "height", "state"],
+      "properties": {
+        "type": { "const": "cylinder" },
+        "base": { "$ref": "#/definitions/vector" },
+        "radius": { "$ref": "#/definitions/radius2" },
+        "height": { "type": "integer", "minimum": 1, "maximum": 128 },
+        "axis": { "enum": ["x", "y", "z"] },
+        "mode": { "enum": ["solid", "shell"] },
+        "thickness": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "caps": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["top", "bottom"] }
+        },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" }
+      }
+    },
+    "ellipsoidElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "center", "radius", "state"],
+      "properties": {
+        "type": { "const": "ellipsoid" },
+        "center": { "$ref": "#/definitions/vector" },
+        "radius": { "$ref": "#/definitions/radius3" },
+        "mode": { "enum": ["solid", "shell"] },
+        "thickness": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "state": { "$ref": "#/definitions/stateName" },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" }
+      }
+    },
+    "voxelMapElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "at", "legend", "layers"],
+      "properties": {
+        "type": { "const": "voxel_map" },
+        "at": { "$ref": "#/definitions/vector" },
+        "legend": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1, "maxLength": 1 },
+          "additionalProperties": {
+            "oneOf": [
+              { "$ref": "#/definitions/stateName" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "tags": { "$ref": "#/definitions/tags" },
+        "write": { "$ref": "#/definitions/write" }
+      }
+    },
+    "clearElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to"],
+      "properties": {
+        "type": { "const": "clear" },
+        "from": { "$ref": "#/definitions/vector" },
+        "to": { "$ref": "#/definitions/vector" }
+      }
+    },
+    "replaceStateElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to", "replace", "with"],
+      "properties": {
+        "type": { "const": "replace_state" },
+        "from": { "$ref": "#/definitions/vector" },
+        "to": { "$ref": "#/definitions/vector" },
+        "replace": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/stateName" }
+        },
+        "with": { "$ref": "#/definitions/stateName" }
+      }
+    },
+    "templateElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name"],
+      "properties": {
+        "type": { "const": "template" },
+        "name": { "$ref": "#/definitions/identifier" },
+        "at": { "$ref": "#/definitions/vector" },
+        "rotation": { "$ref": "#/definitions/rotation" },
+        "mirror": { "$ref": "#/definitions/mirror" },
+        "states": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/definitions/identifier" },
+          "additionalProperties": { "$ref": "#/definitions/stateName" }
+        }
+      }
+    },
+    "arrayElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "template", "count", "step"],
+      "properties": {
+        "type": { "const": "array" },
+        "template": { "$ref": "#/definitions/identifier" },
+        "at": { "$ref": "#/definitions/vector" },
+        "count": { "$ref": "#/definitions/positiveVector" },
+        "step": { "$ref": "#/definitions/vector" },
+        "rotation": { "$ref": "#/definitions/rotation" },
+        "mirror": { "$ref": "#/definitions/mirror" },
+        "states": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/definitions/identifier" },
+          "additionalProperties": { "$ref": "#/definitions/stateName" }
+        }
+      }
+    },
+    "repeatElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "count", "step", "element"],
+      "properties": {
+        "type": { "const": "repeat" },
+        "count": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "step": { "$ref": "#/definitions/vector" },
+        "element": { "$ref": "#/definitions/element" }
+      }
+    },
+    "lootIntegerRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "maximum": 32767 },
+        "max": { "type": "integer", "minimum": 0, "maximum": 32767 }
+      }
+    },
+    "lootCountRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "max": { "type": "integer", "minimum": 1, "maximum": 64 }
+      }
+    },
+    "lootRollRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "max": { "type": "integer", "minimum": 0, "maximum": 64 }
+      }
+    },
+    "lootItem": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 32767 },
+        { "type": "string", "minLength": 1 }
+      ]
+    },
+    "exactItemStack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item"],
+      "properties": {
+        "item": { "$ref": "#/definitions/lootItem" },
+        "count": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "damage": { "type": "integer", "minimum": 0, "maximum": 32767 }
+      }
+    },
+    "lootStackTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item"],
+      "properties": {
+        "item": { "$ref": "#/definitions/lootItem" },
+        "count": {
+          "oneOf": [
+            { "type": "integer", "minimum": 1, "maximum": 64 },
+            { "$ref": "#/definitions/lootCountRange" }
+          ]
+        },
+        "damage": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0, "maximum": 32767 },
+            { "$ref": "#/definitions/lootIntegerRange" }
+          ]
+        }
+      }
+    },
+    "lootEntry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "stack"],
+          "properties": {
+            "type": { "const": "item" },
+            "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+            "stack": { "$ref": "#/definitions/lootStackTemplate" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "empty" },
+            "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "table"],
+          "properties": {
+            "type": { "const": "table" },
+            "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+            "table": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "lootPool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "entries"],
+      "properties": {
+        "key": { "$ref": "#/definitions/identifier" },
+        "rolls": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0, "maximum": 64 },
+            { "$ref": "#/definitions/lootRollRange" }
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": { "$ref": "#/definitions/lootEntry" }
+        }
+      }
+    },
+    "fixedLootItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot", "stack"],
+      "properties": {
+        "slot": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "stack": { "$ref": "#/definitions/exactItemStack" }
+      }
+    },
+    "lootElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "pos"],
+      "properties": {
+        "type": { "const": "loot" },
+        "pos": { "$ref": "#/definitions/vector" },
+        "key": { "$ref": "#/definitions/identifier" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": { "$ref": "#/definitions/fixedLootItem" }
+        },
+        "pools": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/definitions/lootPool" }
+        },
+        "table": { "type": "string", "minLength": 1 },
+        "slots": {
+          "oneOf": [
+            { "enum": ["random_empty", "ordered_empty"] },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 256,
+              "uniqueItems": true,
+              "items": { "type": "integer", "minimum": 0, "maximum": 255 }
+            }
+          ]
+        },
+        "existing": { "enum": ["require_empty", "preserve", "replace"] },
+        "overflow": { "enum": ["discard", "reject"] }
+      },
+      "oneOf": [
+        {
+          "required": ["items"],
+          "not": {
+            "anyOf": [
+              { "required": ["key"] },
+              { "required": ["pools"] },
+              { "required": ["table"] },
+              { "required": ["slots"] },
+              { "required": ["overflow"] }
+            ]
+          }
+        },
+        {
+          "required": ["key", "pools"],
+          "not": { "anyOf": [{ "required": ["items"] }, { "required": ["table"] }] }
+        },
+        {
+          "required": ["key", "table"],
+          "not": { "anyOf": [{ "required": ["items"] }, { "required": ["pools"] }] }
+        }
+      ]
+    },
+    "markerElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "pos", "name"],
+      "properties": {
+        "type": { "const": "marker" },
+        "pos": { "$ref": "#/definitions/vector" },
+        "name": { "$ref": "#/definitions/identifier" },
+        "value": {}
+      }
+    },
+    "chanceElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "key", "chance", "elements"],
+      "properties": {
+        "type": { "const": "chance" },
+        "key": { "$ref": "#/definitions/identifier" },
+        "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "elements": { "$ref": "#/definitions/elements" }
+      }
+    },
+    "choiceElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "key", "choices"],
+      "properties": {
+        "type": { "const": "choice" },
+        "key": { "$ref": "#/definitions/identifier" },
+        "choices": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["elements"],
+            "properties": {
+              "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+              "elements": { "$ref": "#/definitions/elements" }
+            }
+          }
+        }
+      }
+    },
+    "element": {
+      "oneOf": [
+        { "$ref": "#/definitions/blockElement" },
+        { "$ref": "#/definitions/fillElement" },
+        { "$ref": "#/definitions/shellElement" },
+        { "$ref": "#/definitions/frameElement" },
+        { "$ref": "#/definitions/lineElement" },
+        { "$ref": "#/definitions/staircaseElement" },
+        { "$ref": "#/definitions/cylinderElement" },
+        { "$ref": "#/definitions/ellipsoidElement" },
+        { "$ref": "#/definitions/voxelMapElement" },
+        { "$ref": "#/definitions/clearElement" },
+        { "$ref": "#/definitions/replaceStateElement" },
+        { "$ref": "#/definitions/templateElement" },
+        { "$ref": "#/definitions/arrayElement" },
+        { "$ref": "#/definitions/repeatElement" },
+        { "$ref": "#/definitions/lootElement" },
+        { "$ref": "#/definitions/markerElement" },
+        { "$ref": "#/definitions/chanceElement" },
+        { "$ref": "#/definitions/choiceElement" }
+      ]
+    },
+    "markerDistance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/definitions/identifier" },
+        "distance": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "value": {}
+      }
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "states": { "type": "array", "items": { "$ref": "#/definitions/stateName" } },
+        "excludeStates": { "type": "array", "items": { "$ref": "#/definitions/stateName" } },
+        "tags": { "$ref": "#/definitions/tags" },
+        "match": { "enum": ["any", "all"] },
+        "excludeTags": { "$ref": "#/definitions/tags" },
+        "bounds": { "$ref": "#/definitions/bounds" },
+        "height": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "integer", "minimum": -127, "maximum": 127 },
+            "max": { "type": "integer", "minimum": -127, "maximum": 127 }
+          }
+        },
+        "faces": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/face" }
+        },
+        "exposed": { "type": "boolean" },
+        "minExposedFaces": { "type": "integer", "minimum": 0, "maximum": 6 },
+        "maxExposedFaces": { "type": "integer", "minimum": 0, "maximum": 6 },
+        "nearMarker": { "$ref": "#/definitions/markerDistance" },
+        "excludeMarkers": { "$ref": "#/definitions/tags" }
+      }
+    },
+    "pattern": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": { "type": { "const": "independent" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "noise" },
+            "scale": { "type": "integer", "minimum": 1, "maximum": 32 },
+            "threshold": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "clusters" },
+            "radius": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "density": { "type": "number", "minimum": 0, "maximum": 1 },
+            "falloff": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      ]
+    },
+    "weightedState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": { "$ref": "#/definitions/stateName" },
+        "weight": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+      }
+    },
+    "targetState": {
+      "oneOf": [
+        { "$ref": "#/definitions/stateName" },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": { "$ref": "#/definitions/weightedState" }
+        }
+      ]
+    },
+    "processor": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "key"],
+          "oneOf": [
+            { "required": ["with"], "not": { "required": ["map"] } },
+            { "required": ["map"], "not": { "required": ["with"] } }
+          ],
+          "properties": {
+            "type": { "const": "recolor" },
+            "key": { "$ref": "#/definitions/identifier" },
+            "select": { "$ref": "#/definitions/selector" },
+            "with": { "$ref": "#/definitions/stateName" },
+            "map": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": { "$ref": "#/definitions/identifier" },
+              "additionalProperties": { "$ref": "#/definitions/stateName" }
+            },
+            "allowProtected": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "key", "with"],
+          "properties": {
+            "type": { "const": "replace" },
+            "key": { "$ref": "#/definitions/identifier" },
+            "select": { "$ref": "#/definitions/selector" },
+            "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pattern": { "$ref": "#/definitions/pattern" },
+            "with": { "$ref": "#/definitions/targetState" },
+            "allowProtected": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "key"],
+          "properties": {
+            "type": { "const": "decay" },
+            "key": { "$ref": "#/definitions/identifier" },
+            "select": { "$ref": "#/definitions/selector" },
+            "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pattern": { "$ref": "#/definitions/pattern" },
+            "allowProtected": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "key"],
+          "properties": {
+            "type": { "const": "erode" },
+            "key": { "$ref": "#/definitions/identifier" },
+            "select": { "$ref": "#/definitions/selector" },
+            "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pattern": { "$ref": "#/definitions/pattern" },
+            "iterations": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "allowProtected": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "key", "with"],
+          "properties": {
+            "type": { "const": "deposit" },
+            "key": { "$ref": "#/definitions/identifier" },
+            "select": { "$ref": "#/definitions/selector" },
+            "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pattern": { "$ref": "#/definitions/pattern" },
+            "with": { "$ref": "#/definitions/targetState" },
+            "distance": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "onConflict": { "enum": ["skip", "error", "replace"] },
+            "allowProtected": { "type": "boolean" }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -27,6 +27,8 @@ function ResourceReference:override(definition)
 end
 
 ---@class BetaMoonBlockReference: BetaMoonResourceReference
+---@field fluid? BetaMoonFluidReference Present for flowing/still fluid blocks.
+---@field fluidRole? 'flowing'|'still'
 ---@field texture integer
 ---@field light integer
 ---@field lightOpacity integer
@@ -39,6 +41,7 @@ end
 local BlockReference = {} ---@as BetaMoonBlockReference
 
 ---@class BetaMoonItemReference: BetaMoonResourceReference
+---@field fluid? BetaMoonFluidReference Present for filled fluid buckets.
 ---@field type BetaMoonItemType
 ---@field category 'item'|'tool'|'armor'
 ---@field maxStackSize integer
@@ -84,8 +87,8 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field texture BetaMoonTextureInput|integer|nil
 ---@field textures table<string, BetaMoonTextureInput|integer>|nil
 ---@field harvest table<string, integer>|nil
----@field drops? BetaMoonBlockDrop[]
----@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrop[]?} Read-only query; nil keeps declared/vanilla drops.
+---@field drops? BetaMoonBlockDrops Legacy shorthand entries, an inline loot pool source, or a registered loot table.
+---@field getDrops? {action: fun(ctx: BetaMoonBlockActionContext): BetaMoonBlockDrops?} Read-only query; nil keeps declared/vanilla drops.
 ---@field state? table<string, BetaMoonBlockStateField>
 ---@field placement? BetaMoonBlockPlacement
 ---@field collision? {boxes: BetaMoonLocalBox[]} Boxes are authored for the default facing and rotate with horizontal placement state.
@@ -290,7 +293,7 @@ function BlockRegistry:first(query) end
 ---@return BetaMoonBlockReference|nil
 function BlockRegistry:one(query) end
 
----@param definition BetaMoonBlockDefinition
+---@param definition BetaMoonBlockDefinition|BetaMoonFluidBlockDefinition
 ---@return BetaMoonBlockReference
 function BlockRegistry:add(definition)
   return BlockReference
@@ -323,7 +326,7 @@ function ItemRegistry:first(query) end
 ---@return BetaMoonItemReference|nil
 function ItemRegistry:one(query) end
 
----@param definition BetaMoonItemDefinition
+---@param definition BetaMoonItemDefinition|BetaMoonFluidBucketDefinition
 ---@return BetaMoonItemReference
 function ItemRegistry:add(definition)
   return ItemReference

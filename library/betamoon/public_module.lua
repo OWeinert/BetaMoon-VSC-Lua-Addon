@@ -4,6 +4,7 @@
 
 local BlockRegistry = require("betamoon.blocks_and_items").BlockRegistry
 local ItemRegistry = require("betamoon.blocks_and_items").ItemRegistry
+local Fluids = require("betamoon.fluids").Fluids
 local Assets = require("betamoon.assets_and_audio").Assets
 local SoundEvents = require("betamoon.assets_and_audio").SoundEvents
 local Audio = require("betamoon.assets_and_audio").Audio
@@ -15,6 +16,13 @@ local RecipeRegistry = require("betamoon.recipes").RecipeRegistry
 local RecipeBindingRegistry = require("betamoon.recipes").RecipeBindingRegistry
 local RecipeMatcherRegistry = require("betamoon.recipes").RecipeMatcherRegistry
 local Overrides = require("betamoon.overrides").Overrides
+local WorldFeatures = require("betamoon.world_generation").WorldFeatures
+local WorldPlacements = require("betamoon.world_generation").WorldPlacements
+local WorldTrees = require("betamoon.world_generation").WorldTrees
+local WorldStructures = require("betamoon.world_generation").WorldStructures
+local LootTables = require("betamoon.world_generation").LootTables
+local WorldSurfaces = require("betamoon.world_generation").WorldSurfaces
+local WorldBiomeSources = require("betamoon.world_generation").WorldBiomeSources
 local OreRegistry = require("betamoon.world_generation").OreRegistry
 local BiomeRegistry = require("betamoon.world_generation").BiomeRegistry
 local Fuels = require("betamoon.fuels").Fuels
@@ -25,6 +33,7 @@ local Capabilities = require("betamoon.tile_entities_containers_and_container_gu
 local Systems = require("betamoon.tile_entities_containers_and_container_guis").Systems
 local LogicalNetworks = require("betamoon.tile_entities_containers_and_container_guis").LogicalNetworks
 local Events = require("betamoon.events").Events
+local Input = require("betamoon.input_and_controls").Input
 local Chat = require("betamoon.chat_modules_and_utilities").Chat
 local Modules = require("betamoon.chat_modules_and_utilities").Modules
 local Positions = require("betamoon.chat_modules_and_utilities").Positions
@@ -71,14 +80,17 @@ local CallbackResults
 ---@field assets BetaMoonAssets
 ---@field entities BetaMoonEntityRegistry
 ---@field fuels BetaMoonFuels
+---@field fluids BetaMoonFluidRegistry
 ---@field soundEvents BetaMoonSoundEventRegistry
 ---@field audio BetaMoonAudio
+---@field input BetaMoonInput
 ---@field materials {tools: BetaMoonToolMaterialRegistry, armor: BetaMoonArmorMaterialRegistry}
 ---@field recipes BetaMoonRecipeRegistry
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
 ---@field recipeMatchers BetaMoonRecipeMatcherRegistry
----@field worldgen {ores: BetaMoonOreRegistry, biomes: BetaMoonBiomeRegistry, treeModes: BetaMoonTreeModes}
+---@field lootTables BetaMoonLootTableRegistry
+---@field worldgen {features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
 ---@field chat BetaMoonChat
@@ -102,8 +114,10 @@ betamoon = {
   assets = Assets,
   entities = Entities,
   fuels = Fuels,
+  fluids = Fluids,
   soundEvents = SoundEvents,
   audio = Audio,
+  input = Input,
   materials = {
     tools = ToolMaterialRegistry,
     armor = ArmorMaterialRegistry
@@ -112,9 +126,16 @@ betamoon = {
   recipeTypes = RecipeTypeRegistry,
   recipeBindings = RecipeBindingRegistry,
   recipeMatchers = RecipeMatcherRegistry,
+  lootTables = LootTables,
   worldgen = {
+    features = WorldFeatures,
+    placements = WorldPlacements,
+    trees = WorldTrees,
+    structures = WorldStructures,
     ores = OreRegistry,
+    surfaces = WorldSurfaces,
     biomes = BiomeRegistry,
+    biomeSources = WorldBiomeSources,
     treeModes = TreeModes
   },
   events = Events,

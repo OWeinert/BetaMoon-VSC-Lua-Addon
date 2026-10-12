@@ -35,14 +35,27 @@ function AssetReference:getSource() return {kind="script", name="", path=""} end
 
 ---@class BetaMoonTextureAsset: BetaMoonAssetReference
 ---@class BetaMoonSoundAsset: BetaMoonAssetReference
----@alias BetaMoonTextureInput BetaMoonTextureAsset|string Texture reference, namespaced key, or relative PNG path.
+---@class BetaMoonTextureAnimation
+---@field layout? 'vertical' Vertical square-frame PNG strip; default vertical.
+---@field frameTicks? integer Client ticks per frame, 1..1200; default 1.
+---@field sequence? integer[] One-based frame order, up to 256 entries; loops. Default image order.
+---@field clock? 'client'|'unpaused' Client ticks continue in menus/paused screens; unpaused stops while the game is paused.
+
+---@class BetaMoonTextureDescriptor
+---@field asset BetaMoonTextureAsset|string Registered texture, namespaced key, or relative PNG path.
+---@field animation? BetaMoonTextureAnimation|false Playback override; false selects the strip's first frame.
+
+---@class BetaMoonTextureAssetDefinition: BetaMoonAssetDefinition
+---@field animation? BetaMoonTextureAnimation Vertical strip playback shared by uses of this asset.
+
+---@alias BetaMoonTextureInput BetaMoonTextureAsset|string|BetaMoonTextureDescriptor Texture reference, key, path, or animated descriptor.
 ---@alias BetaMoonSoundInput BetaMoonSoundAsset|string Sound reference, namespaced key, or relative OGG/WAV path.
 
 ---@class BetaMoonTextureAssetRegistry
 local TextureAssetRegistry = {}
 
 ---Declare during modInit/modReload. The selected valid pack override takes precedence over the script file.
----@param definition BetaMoonAssetDefinition
+---@param definition BetaMoonTextureAssetDefinition
 ---@return BetaMoonTextureAsset
 function TextureAssetRegistry:add(definition) return {} end
 
