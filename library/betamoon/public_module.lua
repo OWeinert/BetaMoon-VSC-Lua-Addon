@@ -34,6 +34,7 @@ local Systems = require("betamoon.tile_entities_containers_and_container_guis").
 local LogicalNetworks = require("betamoon.tile_entities_containers_and_container_guis").LogicalNetworks
 local Events = require("betamoon.events").Events
 local Input = require("betamoon.input_and_controls").Input
+local Config = require("betamoon.chat_modules_and_utilities").Config
 local Chat = require("betamoon.chat_modules_and_utilities").Chat
 local Modules = require("betamoon.chat_modules_and_utilities").Modules
 local Positions = require("betamoon.chat_modules_and_utilities").Positions
@@ -84,6 +85,7 @@ local CallbackResults
 ---@field soundEvents BetaMoonSoundEventRegistry
 ---@field audio BetaMoonAudio
 ---@field input BetaMoonInput
+---@field config fun(key: string, defaults: table<string, boolean|number|string|table>): BetaMoonConfig
 ---@field materials {tools: BetaMoonToolMaterialRegistry, armor: BetaMoonArmorMaterialRegistry}
 ---@field recipes BetaMoonRecipeRegistry
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
@@ -118,6 +120,7 @@ betamoon = {
   soundEvents = SoundEvents,
   audio = Audio,
   input = Input,
+  config = Config,
   materials = {
     tools = ToolMaterialRegistry,
     armor = ArmorMaterialRegistry
