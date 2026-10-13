@@ -47,7 +47,7 @@ ordering follow the source file, including the supporting types currently declar
 3. Run **BetaMoon: Enable API for Workspace Folder**. In a workspace with multiple folders, select the scripts folder.
 
 Use the global `betamoon` directly in scripts. There is no need to `require` a definitions file or copy it into
-`.minecraft/lua_scripts`. See the [BetaMoon API reference](https://github.com/OWeinert/BetaMoon/wiki/API-Documentation)
+`.minecraft/betamoon/scripts`. See the [BetaMoon API reference](https://github.com/OWeinert/BetaMoon/wiki/API-Documentation)
 and [example scripts](https://github.com/OWeinert/BetaMoon/tree/main/examples).
 
 For a packaged BetaMoon mod, open its package directory as the workspace folder, or add that directory to a multi-root

@@ -8,7 +8,7 @@
 
 ---@class BetaMoonAssetDefinition
 ---@field key string Exact lowercase namespace:path key, unique within its asset category.
----@field path? string File relative to lua_scripts for a single-file mod or assets/ for a manifest package. Omit to use namespace/category/key-path with .png, .json, or .animation.json; sounds detect exactly one .ogg or .wav default. An explicit path also sets the pack entry beneath bm_assets/.
+---@field path? string File relative to betamoon/scripts for a single-file mod or assets/ for a manifest package. Omit to use namespace/category/key-path with .png, .json, or .animation.json; sounds detect exactly one .ogg or .wav default. An explicit path also sets the pack entry beneath bm_assets/.
 
 ---@class BetaMoonAssetSource
 ---@field kind 'pack'|'script'|'builtin' Actual source of the currently usable content.
