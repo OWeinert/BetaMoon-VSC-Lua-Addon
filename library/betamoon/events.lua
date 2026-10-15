@@ -20,8 +20,8 @@ local Subscription = require("betamoon.handles").Subscription
 ---@field previousName string|nil
 
 ---@class BetaMoonGameEvent
----@field worldName string
----@field worldInfo BetaMoonWorldInfo
+---@field worldName? string Present only with an active world.
+---@field worldInfo? BetaMoonWorldInfo Detached snapshot; absent in menus without a world.
 
 ---@class BetaMoonInputEvent
 ---@field type 'key'|'mouse'
@@ -57,10 +57,13 @@ local Subscription = require("betamoon.handles").Subscription
 
 ---@alias BetaMoonEvent BetaMoonWorldEvent|BetaMoonPlayerEvent|BetaMoonGuiEvent|BetaMoonGameEvent|BetaMoonInputEvent|BetaMoonBlockEvent|BetaMoonItemUseEvent|BetaMoonDimensionEvent
 
+---Tick events require the Java agent. game_tick runs after every logical client tick, including menus and paused screens.
+---gui_tick follows game_tick when a screen is open. world_tick runs after an actual client-world simulation tick,
+---including non-pausing screens and remote-world updates. World ticks precede the corresponding game/gui ticks.
 ---@class BetaMoonEvents
 local Events = {}
 
----@overload fun(name: 'world_join'|'world_leave', callback: fun(event: BetaMoonWorldEvent)): BetaMoonSubscription
+---@overload fun(name: 'world_join'|'world_leave'|'world_tick', callback: fun(event: BetaMoonWorldEvent)): BetaMoonSubscription
 ---@overload fun(name: 'player_join'|'player_leave', callback: fun(event: BetaMoonPlayerEvent)): BetaMoonSubscription
 ---@overload fun(name: 'gui_opened'|'gui_closed'|'gui_tick'|'screen_changed', callback: fun(event: BetaMoonGuiEvent)): BetaMoonSubscription
 ---@overload fun(name: 'game_tick', callback: fun(event: BetaMoonGameEvent)): BetaMoonSubscription
