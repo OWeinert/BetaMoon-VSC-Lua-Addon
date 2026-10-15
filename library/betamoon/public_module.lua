@@ -8,6 +8,7 @@ local Fluids = require("betamoon.fluids").Fluids
 local Assets = require("betamoon.assets_and_audio").Assets
 local SoundEvents = require("betamoon.assets_and_audio").SoundEvents
 local Audio = require("betamoon.assets_and_audio").Audio
+local Particles = require("betamoon.particles").Particles
 local Entities = require("betamoon.entities").Entities
 local ToolMaterialRegistry = require("betamoon.tool_and_armor_materials").ToolMaterialRegistry
 local ArmorMaterialRegistry = require("betamoon.tool_and_armor_materials").ArmorMaterialRegistry
@@ -79,6 +80,7 @@ local CallbackResults
 ---@field tools BetaMoonItemRegistry
 ---@field armor BetaMoonItemRegistry
 ---@field assets BetaMoonAssets
+---@field particles BetaMoonParticleRegistry
 ---@field entities BetaMoonEntityRegistry
 ---@field fuels BetaMoonFuels
 ---@field fluids BetaMoonFluidRegistry
@@ -114,6 +116,7 @@ betamoon = {
   tools = ItemRegistry,
   armor = ItemRegistry,
   assets = Assets,
+  particles = Particles,
   entities = Entities,
   fuels = Fuels,
   fluids = Fluids,
@@ -365,7 +368,8 @@ function TileView:getNbt() end
 ---@field setBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, block: BetaMoonBlockReference|integer, damage?: integer): boolean
 ---@field notifyNeighbors fun(self: BetaMoonActionWorld, x?: integer, y?: integer, z?: integer): boolean Coordinates default to the callback origin. Explicit unloaded coordinates return false.
 ---@field playSound fun(self: BetaMoonActionWorld, name: string, volume?: number, pitch?: number)|fun(self: BetaMoonActionWorld, name: string, options?: BetaMoonSoundOptions)
----@field spawnParticle fun(self: BetaMoonActionWorld, name: BetaMoonParticleName, options?: BetaMoonParticleOptions)
+---@field spawnParticle fun(self: BetaMoonActionWorld, name: BetaMoonParticleName|BetaMoonParticleTypeReference|string, options?: BetaMoonParticleOptions)
+---@field playParticleEffect fun(self: BetaMoonActionWorld, effect: BetaMoonParticleEffectReference|string, options?: BetaMoonParticleEffectOptions): BetaMoonParticleEffectHandle?, string?
 ---@field spawnEntity fun(self: BetaMoonActionWorld, type: BetaMoonEntityTypeReference|string, options: BetaMoonEntitySpawnOptions): BetaMoonActionEntity|nil, string? Returns nil and a reason when placement fails or onSpawn removes the entity.
 ---@field createExplosion fun(self: BetaMoonActionWorld, options: BetaMoonExplosionOptions): BetaMoonExplosionResult Creates an authoritative configurable explosion. Unavailable in queries and client-only display callbacks.
 ---@field getInfo fun(self: BetaMoonActionWorld): BetaMoonWorldDataInfo

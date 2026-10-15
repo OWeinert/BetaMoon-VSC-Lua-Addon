@@ -26,6 +26,7 @@ Edit the reference there, then sync; use the public category files for LuaLS com
 | Handles | [handles.lua](library/betamoon/handles.lua) |
 | Blocks and items | [blocks_and_items.lua](library/betamoon/blocks_and_items.lua) |
 | Assets and audio | [assets_and_audio.lua](library/betamoon/assets_and_audio.lua) |
+| Particles | [particles.lua](library/betamoon/particles.lua) |
 | Tool and armor materials | [tool_and_armor_materials.lua](library/betamoon/tool_and_armor_materials.lua) |
 | Recipes | [recipes.lua](library/betamoon/recipes.lua) |
 | Overrides | [overrides.lua](library/betamoon/overrides.lua) |
