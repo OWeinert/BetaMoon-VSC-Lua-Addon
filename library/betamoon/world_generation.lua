@@ -1516,6 +1516,75 @@ function SpatialAnchors:getOriginalSpawn(world) end
 ---@return BetaMoonGeneratorProfileReference|nil
 function GeneratorProfiles:getSelected(world) end
 
+---@class BetaMoonAtmosphereFog
+---@field color? integer|number[] RGB integer or normalized RGB/RGBA array.
+---@field near? number
+---@field far? number
+---@field density? number 0 selects linear fog; otherwise exponential fog density.
+---@class BetaMoonAtmosphereSound
+---@field event string|BetaMoonSoundEventReference
+---@field volume? number 0..4.
+---@field loopIntervalTicks? integer 1..24000.
+---@field fadeTicks? integer 0..1200.
+---@class BetaMoonAtmosphereDefinition
+---@field key string
+---@field fog? BetaMoonAtmosphereFog
+---@field sky? {color: integer|number[]}
+---@field lightTone? integer|number[] Normalized client color multiplier; does not change world light levels.
+---@field ambientSound? string|BetaMoonSoundEventReference|BetaMoonAtmosphereSound
+---@field weatherSound? string|BetaMoonSoundEventReference|BetaMoonAtmosphereSound
+---@class BetaMoonAtmosphereScope
+---@field type 'dimension'|'biome'|'region_tag'|'sphere'|'box'
+---@field id? integer Dimension scopes.
+---@field keys? string[] Biome scopes.
+---@field tags? string[] Biome scopes.
+---@field tag? string Registered regional-structure tag.
+---@field center? {x: number, y: number, z: number} Temporary spheres.
+---@field radius? number Temporary spheres, at most 4096.
+---@field min? {x: number, y: number, z: number} Temporary boxes.
+---@field max? {x: number, y: number, z: number} Temporary boxes.
+---@class BetaMoonAtmosphereBinding
+---@field profile string|BetaMoonAtmosphereReference
+---@field scope BetaMoonAtmosphereScope Structural bindings use dimension, biome or region_tag.
+---@field priority? integer
+---@field blendBlocks? integer 0..256.
+---@class BetaMoonAtmosphereActivation
+---@field world BetaMoonActionWorld
+---@field scope BetaMoonAtmosphereScope Temporary scopes use sphere or box.
+---@field priority? integer
+---@field blendBlocks? integer 0..256.
+---@field durationTicks? integer 1..24000; omitted means until closed or the world/owner changes.
+---@field fadeTicks? integer 0..1200, default 20.
+---@class BetaMoonAtmosphereHandle
+local AtmosphereHandle = {}
+function AtmosphereHandle:close() end
+---@return boolean
+function AtmosphereHandle:isActive() return false end
+---@class BetaMoonAtmosphereReference: BetaMoonGenerationReference
+local AtmosphereReference = {}
+---@param options BetaMoonAtmosphereActivation
+---@return BetaMoonAtmosphereHandle|nil, string? reason
+function AtmosphereReference:activate(options) end
+---@class BetaMoonAtmosphereRegistry
+local Atmospheres = {}
+---@param definition BetaMoonAtmosphereDefinition
+---@return BetaMoonAtmosphereReference
+function Atmospheres:add(definition) return AtmosphereReference end
+---@param key string
+---@return BetaMoonAtmosphereReference|nil
+function Atmospheres:get(key) end
+---@param key string
+---@return BetaMoonAtmosphereReference
+function Atmospheres:getRequired(key) return AtmosphereReference end
+---@param definition BetaMoonAtmosphereBinding
+function Atmospheres:bind(definition) end
+---@param world BetaMoonActionWorld
+---@param x number
+---@param y number
+---@param z number
+---@return {profiles: {key: string, weight: number, priority: integer}[], channels: table<string, {key: string, weight: number, priority: integer}[]>}
+function Atmospheres:getActive(world, x, y, z) return {profiles={}} end
+
 ---@class BetaMoonOreRegistry
 local OreRegistry = {}
 ---@type BetaMoonOreReference
@@ -1580,5 +1649,6 @@ return {
     MaterialRules = MaterialRules,
     PopulationPolicies = PopulationPolicies,
     WorldCarvers = WorldCarvers,
-    GeneratorProfiles = GeneratorProfiles
+    GeneratorProfiles = GeneratorProfiles,
+    Atmospheres = Atmospheres
 }

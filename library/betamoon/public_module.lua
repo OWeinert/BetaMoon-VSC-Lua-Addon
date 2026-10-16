@@ -36,6 +36,7 @@ local MaterialRules = require("betamoon.world_generation").MaterialRules
 local PopulationPolicies = require("betamoon.world_generation").PopulationPolicies
 local WorldCarvers = require("betamoon.world_generation").WorldCarvers
 local GeneratorProfiles = require("betamoon.world_generation").GeneratorProfiles
+local Atmospheres = require("betamoon.world_generation").Atmospheres
 local Fuels = require("betamoon.fuels").Fuels
 local TileEntityRegistry = require("betamoon.tile_entities_containers_and_container_guis").TileEntityRegistry
 local ContainerRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerRegistry
@@ -145,6 +146,7 @@ betamoon = {
   recipeBindings = RecipeBindingRegistry,
   recipeMatchers = RecipeMatcherRegistry,
   lootTables = LootTables,
+  client = {visuals = {atmospheres = Atmospheres}},
   worldgen = {
     spatial = {noises = SpatialNoises, fields = SpatialFields, anchors = SpatialAnchors},
     terrain = {sources = TerrainSources, profiles = TerrainProfiles},
