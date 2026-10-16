@@ -45,11 +45,21 @@ ordering follow the source file, including the supporting types currently declar
 
 ## Install in VS Code
 
-1. Install the extension's `.vsix` using **Extensions: Install from VSIX...** in the command palette.
-   VS Code installs the declared dependency, [Lua by LuaLS](https://marketplace.visualstudio.com/items?itemName=sumneko.lua),
-   when it is available from the Marketplace. Offline installations need both extensions installed manually.
-2. Open your BetaMoon scripts folder.
-3. Run **BetaMoon: Enable API for Workspace Folder**. In a workspace with multiple folders, select the scripts folder.
+1. Open [BetaMoon API on the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=OWeinert.betamoon-api) and select **Install** to open VS Code.
+   Alternatively, search the Extensions view for `@id:OWeinert.betamoon-api`.
+2. Confirm installation. [Lua by LuaLS](https://marketplace.visualstudio.com/items?itemName=sumneko.lua)
+   is installed as a dependency.
+3. Open your BetaMoon scripts folder.
+4. Run **BetaMoon: Enable API for Workspace Folder**. For multiple folders, select the scripts folder.
+
+You can also install from the command line:
+
+```sh
+code --install-extension OWeinert.betamoon-api
+```
+
+For a local `.vsix`, run **Extensions: Install from VSIX...**. Offline installations need Lua by LuaLS
+installed manually as well.
 
 Use the global `betamoon` directly in scripts. There is no need to `require` a definitions file or copy it into
 `.minecraft/betamoon/scripts`. See the [BetaMoon API reference](https://github.com/OWeinert/BetaMoon/wiki/API-Documentation)
