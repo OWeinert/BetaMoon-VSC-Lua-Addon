@@ -6,7 +6,7 @@ including blocks, items, texture/sound/model/animation assets, procedural poses,
 Packaged `assets/<namespace>/worldgen/structures/*.json` and `assets/<namespace>/loot_tables/*.json` files also receive
 completion and validation from the bundled BetaMoon schemas.
 
-The definitions target BetaMoon 0.8.0.
+The definitions target BetaMoon 0.9.0.
 
 The files in `library/betamoon/` are generated from the categories in this repository's local
 `internal/api.lua` reference. Each category retains its declarations, annotations and documentation.
@@ -26,6 +26,7 @@ Edit the reference there, then sync; use the public category files for LuaLS com
 | Handles | [handles.lua](library/betamoon/handles.lua) |
 | Blocks and items | [blocks_and_items.lua](library/betamoon/blocks_and_items.lua) |
 | Assets and audio | [assets_and_audio.lua](library/betamoon/assets_and_audio.lua) |
+| Particles | [particles.lua](library/betamoon/particles.lua) |
 | Tool and armor materials | [tool_and_armor_materials.lua](library/betamoon/tool_and_armor_materials.lua) |
 | Recipes | [recipes.lua](library/betamoon/recipes.lua) |
 | Overrides | [overrides.lua](library/betamoon/overrides.lua) |
@@ -47,7 +48,7 @@ ordering follow the source file, including the supporting types currently declar
 3. Run **BetaMoon: Enable API for Workspace Folder**. In a workspace with multiple folders, select the scripts folder.
 
 Use the global `betamoon` directly in scripts. There is no need to `require` a definitions file or copy it into
-`.minecraft/lua_scripts`. See the [BetaMoon API reference](https://github.com/OWeinert/BetaMoon/wiki/API-Documentation)
+`.minecraft/betamoon/scripts`. See the [BetaMoon API reference](https://github.com/OWeinert/BetaMoon/wiki/API-Documentation)
 and [example scripts](https://github.com/OWeinert/BetaMoon/tree/main/examples).
 
 For a packaged BetaMoon mod, open its package directory as the workspace folder, or add that directory to a multi-root
