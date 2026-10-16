@@ -8,6 +8,7 @@ local Fluids = require("betamoon.fluids").Fluids
 local Assets = require("betamoon.assets_and_audio").Assets
 local SoundEvents = require("betamoon.assets_and_audio").SoundEvents
 local Audio = require("betamoon.assets_and_audio").Audio
+local Multiblocks = require("betamoon.multiblocks").Multiblocks
 local Particles = require("betamoon.particles").Particles
 local Entities = require("betamoon.entities").Entities
 local ToolMaterialRegistry = require("betamoon.tool_and_armor_materials").ToolMaterialRegistry
@@ -81,6 +82,7 @@ local CallbackResults
 ---@field armor BetaMoonItemRegistry
 ---@field assets BetaMoonAssets
 ---@field particles BetaMoonParticleRegistry
+---@field multiblocks BetaMoonMultiblockRegistry
 ---@field entities BetaMoonEntityRegistry
 ---@field fuels BetaMoonFuels
 ---@field fluids BetaMoonFluidRegistry
@@ -117,6 +119,7 @@ betamoon = {
   armor = ItemRegistry,
   assets = Assets,
   particles = Particles,
+  multiblocks = Multiblocks,
   entities = Entities,
   fuels = Fuels,
   fluids = Fluids,
@@ -187,7 +190,7 @@ betamoon = {
 ---@class BetaMoonBlockRender
 ---@field preset? 'cube'|'cuboid'|'cross'
 ---@field pass? 0|1
----@field bounds? BetaMoonLocalBox
+---@field bounds? BetaMoonLocalBox Authored for the default facing and rotates with horizontal placement state.
 ---@field variants? table<integer, BetaMoonBlockRenderVariant> Exact metadata keys in 0..15.
 
 ---@class BetaMoonItemRenderVariant
@@ -346,6 +349,10 @@ function TileView:getNbt() end
 ---@field limit? integer From 1 through 128; default 128.
 
 ---@class BetaMoonActionWorld
+---@field findMultiblocks fun(self: BetaMoonActionWorld, definition: BetaMoonMultiblockReference, options: BetaMoonMultiblockFindOptions): BetaMoonMultiblockFindResult Pure bounded placement search; no instance allocation.
+---@field getMultiblocksAt fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, options?: {definition: BetaMoonMultiblockReference?}): BetaMoonMultiblockInstance[] Known memberships including required air and owned outputs; no discovery side effects.
+---@field checkMultiblock fun(self: BetaMoonActionWorld, definition: BetaMoonMultiblockReference, x: integer, y: integer, z: integer, options?: BetaMoonMultiblockCheckOptions): BetaMoonMultiblockReport Pure loaded-only diagnostic.
+---@field getMultiblock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): BetaMoonMultiblockInstance|nil Scoped authoritative controller instance.
 ---@field getTime fun(self: BetaMoonActionWorld): integer World ticks.
 ---@field getDayTime fun(self: BetaMoonActionWorld): integer Time of day, 0..23999.
 ---@field isDaytime fun(self: BetaMoonActionWorld): boolean Current sky daylight state.
@@ -482,6 +489,7 @@ function TileView:getNbt() end
 ---@field face? BetaMoonBlockFace
 
 ---@class BetaMoonBlockActionContext
+---@field multiblock? BetaMoonMultiblockInstance Present for managed controllers.
 ---@field id integer
 ---@field damage integer Metadata at callback entry.
 ---@field x integer
@@ -536,6 +544,7 @@ function TileView:getNbt() end
 ---@field action fun(ctx: BetaMoonBlockActionContext)
 
 ---@class BetaMoonItemActionContext
+---@field activateMultiblock fun(self: BetaMoonItemActionContext, definition: BetaMoonMultiblockReference, x: integer, y: integer, z: integer, options?: BetaMoonMultiblockActivateOptions): BetaMoonMultiblockActivationResult Revalidates managed placement and current held-item eligibility/cost; use clicked/face for ray-traced onUse.
 ---@field world BetaMoonActionWorld
 ---@field stack BetaMoonActionStack
 ---@field target BetaMoonActionTarget

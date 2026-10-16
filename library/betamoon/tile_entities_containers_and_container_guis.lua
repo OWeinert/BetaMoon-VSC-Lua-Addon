@@ -398,6 +398,7 @@ local FuelAccess = {}
 function FuelAccess:getBurnTime(fuel, set) return 0 end
 
 ---@class BetaMoonTileTickContext
+---@field multiblock? BetaMoonMultiblockInstance Present for managed controllers.
 ---@field entity BetaMoonTileEntityContextValue
 ---@field x integer
 ---@field y integer
@@ -553,7 +554,7 @@ function ContainerSessionAccess:set(name, value) end
 ---@alias BetaMoonGuiAlignment 'left'|'center'|'right'
 ---@alias BetaMoonGuiColor 'black'|'dark_gray'|'gray'|'white'|'red'|'dark_red'|'green'|'dark_green'|'yellow'|'gold'|'blue'|'aqua'|integer
 ---@alias BetaMoonGuiPreset 'minecraft:container'|'minecraft:chest'|'minecraft:dispenser'|'minecraft:furnace'|'minecraft:crafting'|'minecraft:inventory'
----@alias BetaMoonGuiBuiltinSprite 'minecraft:furnace_flame'|'minecraft:furnace_arrow'|'minecraft:crafting_arrow'|'minecraft:slot'|'minecraft:output_slot'
+---@alias BetaMoonGuiBuiltinSprite 'minecraft:furnace_flame_background'|'minecraft:furnace_flame'|'minecraft:furnace_arrow'|'minecraft:furnace_arrow_background'|'minecraft:crafting_arrow'|'minecraft:slot'|'minecraft:output_slot'
 
 ---@class BetaMoonGuiLabel
 ---@field text? string
