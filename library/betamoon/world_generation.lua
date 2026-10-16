@@ -41,7 +41,7 @@
 
 ---@alias BetaMoonWorldFeatureSelector string|BetaMoonWorldFeatureReference
 ---@alias BetaMoonWorldPlacementSelector string|BetaMoonWorldPlacementReference
----@alias BetaMoonWorldGenerationStage 'underground_features'|'surface_features'|'entities'|'post_process'
+---@alias BetaMoonWorldGenerationStage 'underground_structures'|'underground_features'|'surface_structures'|'surface_features'|'vegetation'|'entities'|'post_process'
 
 ---@class BetaMoonWorldFeatureResult
 ---@field placed boolean
@@ -134,6 +134,7 @@ function WorldPlacementReference:locateCandidate(world, x, z, maxChunks) end
 ---@field loaded boolean Whether the candidate chunk is currently loaded; this does not prove placement succeeded.
 
 ---@class BetaMoonWorldFeatureBase
+---@field tags? string[] Namespaced generation tags.
 ---@field key string
 ---@field type 'ore_vein'|'block_patch'|'column'|'disk'|'weighted'|'sequence'|'no_op'
 ---@field block? BetaMoonBlockReference|integer|string
@@ -380,6 +381,7 @@ function WorldTrees:getRequired(key) return WorldFeatureReference end
 ---@alias BetaMoonLootEntry BetaMoonLootItemEntry|BetaMoonLootEmptyEntry|BetaMoonLootTableEntry
 
 ---@class BetaMoonLootPool
+---@field when? {spatial: BetaMoonSpatialSelector} A missing location or failed condition emits nothing.
 ---@field key string Stable pool key unique within this table.
 ---@field rolls? integer|BetaMoonLootIntegerRange Number of weighted selections; defaults to 1.
 ---@field entries BetaMoonLootEntry[]
@@ -763,6 +765,9 @@ function StructureBuilder:clone() return StructureBuilder end
 ---@field entities? boolean Run `entity` markers after a chunk slice commits.
 
 ---@class BetaMoonRegionalStructureDefinition
+---@field stage? 'surface_structures'|'underground_structures'
+---@field spatial? BetaMoonSpatialSelector
+---@field tags? string[] Namespaced region and generation tags.
 ---@field key string
 ---@field start BetaMoonWorldFeatureSelector Root local structure template.
 ---@field dimensions? BetaMoonDimensionName[]|BetaMoonDimensionName Defaults to the overworld.
@@ -859,7 +864,8 @@ function WorldStructures:getRegionalRequired(key) return RegionalStructureRefere
 function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, options) return '' end
 
 ---@class BetaMoonWorldHeightProvider
----@field type? 'uniform'|'triangular'|'normal'|'fixed'|'surface'|'world_surface'|'solid_surface'|'ocean_floor'|'fluid_surface'|'underground'|'cave_floor'|'ceiling'
+---@field output? string Authored height-output name for type=authored.
+---@field type? 'uniform'|'triangular'|'normal'|'fixed'|'surface'|'world_surface'|'solid_surface'|'ocean_floor'|'fluid_surface'|'underground'|'cave_floor'|'ceiling'|'authored'
 ---@field min? integer
 ---@field max? integer
 ---@field value? integer Fixed height.
@@ -884,6 +890,7 @@ function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, optio
 ---@field requireSky? boolean Applies to every position selected by scope.
 
 ---@class BetaMoonWorldPlacementConditions
+---@field fluid? string|BetaMoonFluidReference Exact native or custom fluid identity at the placement origin.
 ---@field ground? (BetaMoonBlockReference|integer|string)[]|BetaMoonBlockReference|integer|string
 ---@field requireSky? boolean
 ---@field air? boolean
@@ -894,9 +901,10 @@ function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, optio
 ---@field site? BetaMoonStructureSite|string Optional footprint-aware structure environment profile.
 
 ---@class BetaMoonWorldPlacementDefinition
+---@field spatial? BetaMoonSpatialSelector
 ---@field key string
 ---@field feature BetaMoonWorldFeatureSelector
----@field stage? BetaMoonWorldGenerationStage Currently executes after vanilla population; retained for stable ordering and future precise hooks.
+---@field stage? BetaMoonWorldGenerationStage Owned profiles execute this stage when enabled; native worlds retain post-population ordering.
 ---@field dimensions? BetaMoonDimensionName[]
 ---@field attempts? integer|{min: integer, max: integer}|{perChunk: integer|{min: integer, max: integer}, extraChance: number?, probability: number?, rarity: integer?}
 ---@field position? {height: integer|BetaMoonWorldHeightProvider, horizontal: 'chunk'|'grid'?, gridSpacing: integer?}
@@ -1000,21 +1008,24 @@ function WorldBiomeReference:getKey() return '' end
 ---@field spawns table<BetaMoonBiomeSpawnGroup, BetaMoonBiomeSpawn[]>|nil
 
 ---@class BetaMoonBiomeClimateEntry
+---@field spatial? BetaMoonSpatialSelector
+---@field weight? number
 ---@field biome BetaMoonBiomeSelector
 ---@field temperature number[]|{min: number, max: number}
 ---@field humidity number[]|{min: number, max: number}
 ---@field priority? integer Higher priority wins overlapping climate cells; equal priorities use canonical biome-key order.
 
 ---@class BetaMoonFixedBiomeSourceDefinition
----@field key string
+---@field key? string
 ---@field type 'fixed'
 ---@field biome BetaMoonBiomeSelector
 ---@field active? boolean
 ---@field priority? integer
 
 ---@class BetaMoonVanillaClimateBiomeSourceDefinition
----@field key string
----@field type 'vanilla_climate'
+---@field fallback? BetaMoonBiomeSelector|'vanilla'
+---@field key? string
+---@field type 'vanilla_climate'|'spatial_climate'
 ---@field entries BetaMoonBiomeClimateEntry[] One through 256 entries.
 ---@field active? boolean
 ---@field priority? integer
@@ -1037,6 +1048,473 @@ function WorldBiomeSources:get(key) end
 ---@param key string
 ---@return BetaMoonBiomeSourceReference
 function WorldBiomeSources:getRequired(key) return WorldBiomeSourceReference end
+
+
+---@alias BetaMoonScalarExpression number|string|BetaMoonSpatialFieldReference|BetaMoonScalarNode
+---@class BetaMoonScalarNode
+---@field type 'constant'|'reference'|'x'|'y'|'z'|'noise'|'distance'|'spots'|'random_hash'|'y_gradient'|'biome_value'|'add'|'subtract'|'multiply'|'divide'|'min'|'max'|'abs'|'negate'|'square'|'cube'|'sqrt'|'power'|'floor'|'ceil'|'round'|'clamp'|'map_range'|'smoothstep'|'curve'|'spline'|'terrace'|'lerp'|'select'|'range_choice'|'shift'|'scale_coordinates'|'rotate_2d'|'cache_2d'|'cache_cell'|'cache_once'|'find_top_surface'
+---@field value? number
+---@field field? string|BetaMoonSpatialFieldReference
+---@field input? BetaMoonScalarExpression
+---@field inputs? BetaMoonScalarExpression[] Arithmetic add/multiply/min/max: 2..8 inputs.
+---@field left? BetaMoonScalarExpression
+---@field right? BetaMoonScalarExpression
+---@field exponent? integer Integer power in 0..16.
+---@field min? number
+---@field max? number
+---@field noise? string|BetaMoonSpatialNoiseReference|BetaMoonSpatialNoiseDefinition
+---@field scale? {x: number?, y: number?, z: number?} Noise coordinate frequencies, each at most 1024 in magnitude.
+---@field anchor? string|BetaMoonSpatialAnchorReference Original anchor: minecraft:anchor/original_spawn.
+---@field blocksPerUnit? number
+---@field metric? 'euclidean'|'manhattan'|'chebyshev'
+---@field salt? integer|string
+---@field cellSize? integer
+---@field chance? number
+---@field radius? {min: number, max: number}
+---@field amplitude? number
+---@field excludeRadius? number Exclusion around original spawn.
+---@field property? 'temperature'|'humidity' Native positional climate inputs, each in 0..1.
+---@field fromY? number
+---@field toY? number
+---@field fromValue? number
+---@field toValue? number
+---@field fromMin? number
+---@field fromMax? number
+---@field toMin? number
+---@field toMax? number
+---@field clamp? boolean
+---@field points? {at: number, value: number}[] Ordered curve/spline control points.
+---@field x? BetaMoonScalarExpression
+---@field y? BetaMoonScalarExpression
+---@field z? BetaMoonScalarExpression
+---@field degrees? number
+---@field alpha? BetaMoonScalarExpression
+---@field from? BetaMoonScalarExpression
+---@field to? BetaMoonScalarExpression
+---@field whenTrue? BetaMoonScalarExpression
+---@field whenFalse? BetaMoonScalarExpression
+---@field stepHeight? number
+---@field blend? number
+---@field threshold? number
+---@field minY? integer
+---@field maxY? integer
+
+---@class BetaMoonSpatialNoiseDefinition
+---@field key? string namespace:noise/path.
+---@field algorithm? 'value_noise_v1'|'perlin_v1'|'simplex_2d_v1'|'beta_octaves_v1'
+---@field seedSalt? integer|string
+---@field firstOctave? integer -24..16.
+---@field amplitudes? number[] 1..16 finite amplitudes; absolute sum in (0,1024].
+---@field normalization? 'bounded'|'none'
+
+---@class BetaMoonSpatialFieldDefinition
+---@field key string namespace:field/path.
+---@field node BetaMoonScalarExpression Graphs have at most 256 expanded nodes and depth 32.
+---@field range? {min: number, max: number} Must conservatively contain the compiled range.
+
+---@class BetaMoonSpatialAnchorDefinition
+---@field type? 'fixed'
+---@field key string namespace:anchor/path.
+---@field x integer
+---@field z integer
+---@field dimension? 'overworld'
+
+---@class BetaMoonSpatialSelector
+---@field field string|BetaMoonSpatialFieldReference Must not depend on Y.
+---@field min? number Inclusive lower eligibility bound.
+---@field max? number Inclusive upper eligibility bound.
+---@field weight? {at: number, value: number}[] Increasing input coordinates and weights in 0..4.
+
+---@class BetaMoonFieldSample
+---@field value number
+---@field signature string
+---@class BetaMoonFieldTraceSample
+---@field node string Graph-node diagnostic path.
+---@field x number
+---@field y number
+---@field z number
+---@field value number
+---@class BetaMoonFieldInspection: BetaMoonFieldSample
+---@field trace BetaMoonFieldTraceSample[] At most 512 evaluations, in completion order.
+---@field traceTruncated boolean
+---@field min number
+---@field max number
+---@field sampleWork integer Conservative work estimate for one sample.
+---@field nodes integer
+---@field dependencies integer Bit flags: X=1, Y=2, Z=4, seed=8, original anchor=16, climate=32.
+
+---@class BetaMoonGenerationReference
+---@field key string
+local GenerationReference = {}
+---@return string
+function GenerationReference:getKey() return self.key end
+
+---@class BetaMoonSpatialNoiseReference: BetaMoonGenerationReference
+local SpatialNoiseReference = {}
+---@class BetaMoonSpatialAnchorReference: BetaMoonGenerationReference
+local SpatialAnchorReference = {}
+---@class BetaMoonSpatialFieldReference: BetaMoonGenerationReference
+local SpatialFieldReference = {}
+---@param world BetaMoonActionWorld
+---@param x number
+---@param z number
+---@overload fun(self: BetaMoonSpatialFieldReference, world: BetaMoonActionWorld, x: number, y: number, z: number): BetaMoonFieldSample|nil, string?
+---@return BetaMoonFieldSample|nil, string? reason
+function SpatialFieldReference:sample(world, x, z) end
+---@param world BetaMoonActionWorld
+---@param x number
+---@param z number
+---@overload fun(self: BetaMoonSpatialFieldReference, world: BetaMoonActionWorld, x: number, y: number, z: number): BetaMoonFieldInspection|nil, string?
+---@return BetaMoonFieldInspection|nil, string? reason
+function SpatialFieldReference:inspect(world, x, z) end
+---Exports a bounded CSV slice to BetaMoon's debug directory.
+---@param world BetaMoonActionWorld
+---@param options? {axis: 'xz'|'xy'|'yz'?, startX: number?, startY: number?, startZ: number?, width: integer?, height: integer?, step: number?}
+---@return string|nil path, string? reason
+function SpatialFieldReference:exportSlice(world, options) end
+
+
+---@alias BetaMoonRawBlockState integer|string|BetaMoonBlockReference|{block: integer|string|BetaMoonBlockReference, metadata: integer?, state: table<string, boolean|string>?}
+---@class BetaMoonMaterialRule
+---@field type 'block'|'reference'|'weighted'|'sequence'|'when'
+---@field block? BetaMoonRawBlockState
+---@field metadata? integer
+---@field state? table<string, boolean|string>
+---@field material? string|BetaMoonMaterialRuleReference
+---@field choices? {block: BetaMoonRawBlockState, weight: integer?, metadata: integer?, state: table<string, boolean|string>?}[]
+---@field salt? integer|string
+---@field rules? (BetaMoonMaterialRule|BetaMoonRawBlockState|string)[]
+---@field condition? BetaMoonMaterialCondition
+---@field thenRule? BetaMoonMaterialRule|BetaMoonRawBlockState|string
+---@field elseRule? BetaMoonMaterialRule|BetaMoonRawBlockState|string
+---@class BetaMoonMaterialCondition
+---@field type 'below_y'|'y_range'|'surface_depth'|'derived_surface_depth'|'stone_depth'|'liquid_depth'|'slope'|'exposure'|'biome'|'field'|'all'|'any'|'not'
+---@field y? number
+---@field min? number
+---@field max? number
+---@field selector? string Biome key/name or #namespaced:tag.
+---@field field? BetaMoonScalarExpression
+---@field to? 'air'|'fluid' Exposure immediately above the cell.
+---@field conditions? BetaMoonMaterialCondition[]
+---@field condition? BetaMoonMaterialCondition
+---@class BetaMoonMaterialRuleDefinition
+---@field key string namespace:material/path.
+---@field rule BetaMoonMaterialRule|BetaMoonRawBlockState|string
+
+---@class BetaMoonTerrainHeightLayer
+---@field key string Unique local layer key.
+---@field type 'noise'|'ridge'|'valley'|'terrace'
+---@field scale? number At least 16 blocks.
+---@field amplitude? number Magnitude at most 64.
+---@field salt? integer|string
+---@field stepHeight? integer 1..32.
+---@field blend? number 0..1; terrace interpolation toward the unquantized envelope.
+---@field fieldCurve? BetaMoonScalarExpression X/Z-only multiplier bounded within -4..4.
+---@class BetaMoonTerrainHeightProfileDefinition
+---@field key? string namespace:terrain/path.
+---@field dimension? 'overworld'
+---@field baseHeight number 1..126.
+---@field layers? BetaMoonTerrainHeightLayer[] At most 8 ordered layers.
+---@field heightClamp? {min: integer, max: integer} Within 1..126.
+---@field surfaceSlopeLimit? number Positive diagnostic threshold.
+
+---@class BetaMoonTerrainSourceDefinition
+---@field key? string namespace:terrain_source/path.
+---@field type 'native'|'void'|'flat'|'heightmap'|'density'|'beta_compatible'|'profile_map'|'compose'
+---@field minY? integer 0..127.
+---@field maxY? integer 0..127, at least minY.
+---@field layers? {block: BetaMoonRawBlockState, depth: integer, metadata: integer?, state: table<string, boolean|string>?}[]
+---@field height? BetaMoonScalarExpression X/Z-only envelope; floored once when filling.
+---@field ceiling? BetaMoonScalarExpression Optional inclusive upper envelope for heightmap bands.
+---@field inside? 'between'|'outside' Side of the two envelopes filled with the solid material.
+---@field noise? {continental: BetaMoonScalarExpression?, erosion: BetaMoonScalarExpression?} Beta-compatible X/Z overrides bounded in -1..1.
+---@field density? BetaMoonScalarExpression Positive values are solid; exact zero is empty.
+---@field solidWhen? 'positive'
+---@field cell? {x: integer?, y: integer?, z: integer?} Power-of-two interpolation cells in 1..16; defaults 4,8,4.
+---@field preliminarySurface? BetaMoonScalarExpression X/Z-only intended surface for density materials.
+---@field material? BetaMoonMaterialRule|BetaMoonRawBlockState|string
+---@field solid? BetaMoonMaterialRule|BetaMoonRawBlockState|string
+---@field above? BetaMoonRawBlockState
+---@field air? BetaMoonRawBlockState
+---@field fluid? BetaMoonRawBlockState|{level: BetaMoonScalarExpression, material: BetaMoonRawBlockState}
+---@field seaLevel? BetaMoonScalarExpression X/Z-only level bounded in -1..127.
+---@field floorHeight? integer -1 disables the floor; otherwise inclusive Y in 0..127.
+---@field floorMaterial? BetaMoonRawBlockState
+---@field spawnPlatform? {block: BetaMoonRawBlockState, size: integer?, y: integer?} Void-source platform around saved original spawn; odd size 1..31, Y 0..125.
+---@field preset? 'vanilla_beta' Fixed raw Beta basis; parameter changes create a customized variant.
+---@field baseHeight? number Beta basis default 68.
+---@field heightScale? number Beta basis vertical scaling, in (0,8].
+---@field detailScale? number Beta basis density detail multiplier, in 0..8.
+---@field entries? BetaMoonTerrainProfileEntry[] profile_map only.
+---@field fallback? string|BetaMoonTerrainHeightProfileReference|BetaMoonTerrainHeightProfileDefinition|'vanilla'
+---@field blendWidth? integer 0..256; zero permits sharp profile boundaries.
+---@field children? {source: string|BetaMoonTerrainSourceReference|BetaMoonTerrainSourceDefinition, operation: 'replace'|'union'|'intersection'|'subtract'?, mask: BetaMoonScalarExpression?, min: number?, max: number?}[] compose only.
+---@class BetaMoonTerrainProfileEntry
+---@field profile string|BetaMoonTerrainHeightProfileReference|BetaMoonTerrainHeightProfileDefinition
+---@field biomes? {include: string[]?, exclude: string[]?, includeTags: string[]?, excludeTags: string[]?}
+---@field spatial? BetaMoonSpatialSelector
+---@field weight? number In (0,1024].
+---@class BetaMoonTerrainSample
+---@field height number Fractional authored envelope, or derived surface height where no envelope is provided.
+---@field signature string
+---@field sourceKey? string
+---@field profileKey? string
+---@field slope? number Height-profile central-difference slope.
+---@field slopeLimitExceeded? boolean Whether its diagnostic threshold is exceeded.
+---@field profiles? {key: string, weight: number}[] profile_map blend contributions.
+
+---@class BetaMoonPopulationPolicyDefinition
+---@field key? string namespace:population/path.
+---@field native? 'all'|'none'|BetaMoonNativePopulationCategories
+---@field betamoon? BetaMoonOwnedPopulationStages
+---@class BetaMoonNativePopulationCategories
+---@field lakes? boolean
+---@field dungeons? boolean
+---@field clay? boolean
+---@field ores? boolean
+---@field trees? boolean
+---@field vegetation? boolean
+---@field springs? boolean
+---@field snow? boolean
+---@field animals? boolean Native natural spawning; independent of custom entity rules.
+---@class BetaMoonOwnedPopulationStages
+---@field undergroundStructures? boolean
+---@field undergroundFeatures? boolean
+---@field surfaceStructures? boolean
+---@field surfaceFeatures? boolean
+---@field vegetation? boolean
+---@field entities? boolean Custom natural spawning.
+---@field postProcess? boolean
+
+---@class BetaMoonCarverDefinition
+---@field key? string namespace:carver/path.
+---@field type 'field'|'tunnel'|'room'|'ravine'|'compose'|'native_caves'
+---@field field? BetaMoonScalarExpression
+---@field min? number
+---@field max? number
+---@field children? (string|BetaMoonCarverReference|BetaMoonCarverDefinition)[] compose only.
+---@field operation? 'union'|'intersection'
+---@field probability? number Origin-chunk probability in 0..1.
+---@field count? integer 1..4 starts per successful origin chunk.
+---@field minY? integer
+---@field maxY? integer
+---@field radius? number In (0,16].
+---@field verticalRadius? number In (0,48].
+---@field length? integer 1..96.
+---@field salt? integer|string
+---@field replaceable? BetaMoonRawBlockState[] Defaults to stone, grass and dirt.
+---@field ["protected"]? BetaMoonRawBlockState[] Bedrock is always protected.
+---@field avoidFluids? boolean
+---@field carveBlock? BetaMoonRawBlockState
+---@field belowLevel? integer -1..127.
+---@field belowBlock? BetaMoonRawBlockState
+---@field biomes? {include: string[]?, exclude: string[]?, includeTags: string[]?, excludeTags: string[]?} Carver column filters.
+---@field profiles? (string|BetaMoonTerrainHeightProfileReference)[] Match positive blend contributions from a profile-map source.
+
+---@class BetaMoonGenerationSelection
+---@field include? string[] Canonical placement/feature/structure keys.
+---@field exclude? string[] Exclusions win.
+---@field includeTags? string[]
+---@field excludeTags? string[]
+---@class BetaMoonGeneratorProfileDefinition
+---@field key string namespace:generator/path.
+---@field defaultForNewWorlds? boolean Existing worlds retain their saved choice.
+---@field priority? integer Highest default candidate wins; highest-priority ties reject publication.
+---@field dimensions {overworld: BetaMoonGeneratorDimension}
+---@class BetaMoonGeneratorDimension
+---@field terrain string|BetaMoonTerrainSourceReference|BetaMoonTerrainSourceDefinition
+---@field biomeSource? string|BetaMoonBiomeSourceReference|BetaMoonBiomeSourceDefinition
+---@field surfaces? 'inherit'|'none'
+---@field carvers? (string|BetaMoonCarverReference|BetaMoonCarverDefinition)[]
+---@field population? string|BetaMoonPopulationPolicyReference|BetaMoonPopulationPolicyDefinition
+---@field spawn? {mode: 'surface'?, requireSafeGround: boolean?} Safe spawn is required by default.
+---@field heightOutputs? table<string, string|BetaMoonSpatialFieldReference> Named authored X/Z fields.
+---@field placementHeightmap? 'world_surface'|'solid_surface'|'ocean_floor'|'fluid_surface'
+---@field features? BetaMoonGenerationSelection
+---@field structures? BetaMoonGenerationSelection
+
+---@class BetaMoonTerrainSourceReference: BetaMoonGenerationReference
+local TerrainSourceReference = {}
+---@class BetaMoonTerrainHeightProfileReference: BetaMoonGenerationReference
+local TerrainHeightProfileReference = {}
+---@class BetaMoonMaterialRuleReference: BetaMoonGenerationReference
+local MaterialRuleReference = {}
+---@class BetaMoonPopulationPolicyReference: BetaMoonGenerationReference
+local PopulationPolicyReference = {}
+---@class BetaMoonCarverReference: BetaMoonGenerationReference
+local CarverReference = {}
+---@class BetaMoonGeneratorProfileReference: BetaMoonGenerationReference
+local GeneratorProfileReference = {}
+---@param world BetaMoonActionWorld
+---@param x integer
+---@param z integer
+---@return BetaMoonTerrainSample|nil, string? reason
+function TerrainSourceReference:sample(world, x, z) end
+---@param world BetaMoonActionWorld
+---@param x integer
+---@param z integer
+---@return BetaMoonTerrainSample|nil, string? reason
+function TerrainHeightProfileReference:sample(world, x, z) end
+---@class BetaMoonGeneratorDescription
+---@field key string
+---@field owner string
+---@field signature string
+---@field nativeTerrain boolean
+---@field surfaces boolean
+---@field carvers integer
+---@field stages BetaMoonWorldGenerationStage[]
+---@field stagePolicy table<string, string> Enabled/disabled policy decisions for each logical stage.
+---@field nativeCategories string[] Enabled native population categories.
+---@field contentFilters table<string, BetaMoonGenerationSelection>
+---@field dependencies table<string, string>
+---@class BetaMoonGeneratorChunkPreview: BetaMoonGeneratorDescription
+---@field chunkX integer
+---@field chunkZ integer
+---@field rawHash string Hash of raw block IDs and metadata, before population.
+---@field timings {terrainMs: number, carversMs: number, surfacesMs: number}
+---@field heightmaps table<string, integer[]> Each map is Z-major with 256 values; empty height is -1.
+---@field materials table<string, integer> Counts by block-ID:metadata.
+---@return BetaMoonGeneratorDescription|nil, string? reason
+function GeneratorProfileReference:describe() end
+---@param world BetaMoonActionWorld
+---@param chunkX integer
+---@param chunkZ integer
+---@return BetaMoonGeneratorChunkPreview|nil, string? reason No chunks are loaded or published.
+function GeneratorProfileReference:previewChunk(world, chunkX, chunkZ) end
+---Exports the raw preview's heightmaps and identity to CSV in BetaMoon's debug directory.
+---@param world BetaMoonActionWorld
+---@param chunkX integer
+---@param chunkZ integer
+---@return string|nil path, string? reason
+function GeneratorProfileReference:exportChunk(world, chunkX, chunkZ) end
+
+---@param world BetaMoonActionWorld
+---@param output string
+---@param x integer
+---@param z integer
+---@return number|nil, string? reason
+function GeneratorProfileReference:sampleHeightOutput(world, output, x, z) end
+
+---@class BetaMoonSpatialNoiseRegistry
+local SpatialNoises = {}
+---@param definition BetaMoonSpatialNoiseDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonSpatialNoiseReference
+function SpatialNoises:add(definition) return SpatialNoiseReference end
+---@param key string
+---@return BetaMoonSpatialNoiseReference|nil
+function SpatialNoises:get(key) end
+---@param key string
+---@return BetaMoonSpatialNoiseReference
+function SpatialNoises:getRequired(key) return SpatialNoiseReference end
+
+---@class BetaMoonSpatialFieldRegistry
+local SpatialFields = {}
+---@param definition BetaMoonSpatialFieldDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonSpatialFieldReference
+function SpatialFields:add(definition) return SpatialFieldReference end
+---@param key string
+---@return BetaMoonSpatialFieldReference|nil
+function SpatialFields:get(key) end
+---@param key string
+---@return BetaMoonSpatialFieldReference
+function SpatialFields:getRequired(key) return SpatialFieldReference end
+
+---@class BetaMoonSpatialAnchorRegistry
+local SpatialAnchors = {}
+---@param definition BetaMoonSpatialAnchorDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonSpatialAnchorReference
+function SpatialAnchors:add(definition) return SpatialAnchorReference end
+---@param key string
+---@return BetaMoonSpatialAnchorReference|nil
+function SpatialAnchors:get(key) end
+---@param key string
+---@return BetaMoonSpatialAnchorReference
+function SpatialAnchors:getRequired(key) return SpatialAnchorReference end
+
+---@class BetaMoonTerrainSourceRegistry
+local TerrainSources = {}
+---@param definition BetaMoonTerrainSourceDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonTerrainSourceReference
+function TerrainSources:add(definition) return TerrainSourceReference end
+---@param key string
+---@return BetaMoonTerrainSourceReference|nil
+function TerrainSources:get(key) end
+---@param key string
+---@return BetaMoonTerrainSourceReference
+function TerrainSources:getRequired(key) return TerrainSourceReference end
+
+---@class BetaMoonTerrainHeightProfileRegistry
+local TerrainProfiles = {}
+---@param definition BetaMoonTerrainHeightProfileDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonTerrainHeightProfileReference
+function TerrainProfiles:add(definition) return TerrainHeightProfileReference end
+---@param key string
+---@return BetaMoonTerrainHeightProfileReference|nil
+function TerrainProfiles:get(key) end
+---@param key string
+---@return BetaMoonTerrainHeightProfileReference
+function TerrainProfiles:getRequired(key) return TerrainHeightProfileReference end
+
+---@class BetaMoonMaterialRuleRegistry
+local MaterialRules = {}
+---@param definition BetaMoonMaterialRuleDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonMaterialRuleReference
+function MaterialRules:add(definition) return MaterialRuleReference end
+---@param key string
+---@return BetaMoonMaterialRuleReference|nil
+function MaterialRules:get(key) end
+---@param key string
+---@return BetaMoonMaterialRuleReference
+function MaterialRules:getRequired(key) return MaterialRuleReference end
+
+---@class BetaMoonPopulationPolicyRegistry
+local PopulationPolicies = {}
+---@param definition BetaMoonPopulationPolicyDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonPopulationPolicyReference
+function PopulationPolicies:add(definition) return PopulationPolicyReference end
+---@param key string
+---@return BetaMoonPopulationPolicyReference|nil
+function PopulationPolicies:get(key) end
+---@param key string
+---@return BetaMoonPopulationPolicyReference
+function PopulationPolicies:getRequired(key) return PopulationPolicyReference end
+
+---@class BetaMoonCarverRegistry
+local WorldCarvers = {}
+---@param definition BetaMoonCarverDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonCarverReference
+function WorldCarvers:add(definition) return CarverReference end
+---@param key string
+---@return BetaMoonCarverReference|nil
+function WorldCarvers:get(key) end
+---@param key string
+---@return BetaMoonCarverReference
+function WorldCarvers:getRequired(key) return CarverReference end
+
+---@class BetaMoonGeneratorProfileRegistry
+local GeneratorProfiles = {}
+---@param definition BetaMoonGeneratorProfileDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonGeneratorProfileReference
+function GeneratorProfiles:add(definition) return GeneratorProfileReference end
+---@param key string
+---@return BetaMoonGeneratorProfileReference|nil
+function GeneratorProfiles:get(key) end
+---@param key string
+---@return BetaMoonGeneratorProfileReference
+function GeneratorProfiles:getRequired(key) return GeneratorProfileReference end
+
+---@class BetaMoonOriginalSpawn
+---@field x integer
+---@field y integer
+---@field z integer
+---@field dimension integer
+---@field source 'original_spawn'
+---@param world BetaMoonActionWorld
+---@return BetaMoonOriginalSpawn|nil, string? reason
+function SpatialAnchors:getOriginalSpawn(world) end
+---@param world BetaMoonActionWorld
+---@return BetaMoonGeneratorProfileReference|nil
+function GeneratorProfiles:getSelected(world) end
 
 ---@class BetaMoonOreRegistry
 local OreRegistry = {}
@@ -1093,5 +1571,14 @@ return {
     WorldSurfaces = WorldSurfaces,
     WorldBiomeSources = WorldBiomeSources,
     OreRegistry = OreRegistry,
-    BiomeRegistry = BiomeRegistry
+    BiomeRegistry = BiomeRegistry,
+    SpatialNoises = SpatialNoises,
+    SpatialFields = SpatialFields,
+    SpatialAnchors = SpatialAnchors,
+    TerrainSources = TerrainSources,
+    TerrainProfiles = TerrainProfiles,
+    MaterialRules = MaterialRules,
+    PopulationPolicies = PopulationPolicies,
+    WorldCarvers = WorldCarvers,
+    GeneratorProfiles = GeneratorProfiles
 }

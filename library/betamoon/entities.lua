@@ -186,6 +186,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field max? integer
 
 ---@class BetaMoonEntitySpawnDefinition
+---@field spatial? BetaMoonSpatialSelector
 ---@field category? 'hostile'|'passive' Default passive; follows the corresponding vanilla spawn pass.
 ---@field weight? integer Relative weight among matching custom types, default 10; range 1..10000.
 ---@field group? BetaMoonEntitySpawnRange Group size, default 1..1; bounds 1..16.
