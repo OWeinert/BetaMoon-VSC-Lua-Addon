@@ -2,7 +2,7 @@
 
 LuaLS definitions and a VS Code extension for [**BetaMoon**](https://modrinth.com/mod/betamoon), a mod for Minecraft b1.7.3 providing a Lua scripting framework.
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
-including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation, events, tile entities and container GUIs.
+including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation, multiblocks, particles, input, events, tile entities and container GUIs.
 Packaged `assets/<namespace>/worldgen/structures/*.json` and `assets/<namespace>/loot_tables/*.json` files also receive
 completion and validation from the bundled BetaMoon schemas.
 
@@ -25,14 +25,18 @@ Edit the reference there, then sync; use the public category files for LuaLS com
 | Stacks, positions, and world information | [stacks_positions_and_world_information.lua](library/betamoon/stacks_positions_and_world_information.lua) |
 | Handles | [handles.lua](library/betamoon/handles.lua) |
 | Blocks and items | [blocks_and_items.lua](library/betamoon/blocks_and_items.lua) |
+| Fluids | [fluids.lua](library/betamoon/fluids.lua) |
 | Assets and audio | [assets_and_audio.lua](library/betamoon/assets_and_audio.lua) |
+| Multiblocks | [multiblocks.lua](library/betamoon/multiblocks.lua) |
 | Particles | [particles.lua](library/betamoon/particles.lua) |
+| Entities | [entities.lua](library/betamoon/entities.lua) |
 | Tool and armor materials | [tool_and_armor_materials.lua](library/betamoon/tool_and_armor_materials.lua) |
 | Recipes | [recipes.lua](library/betamoon/recipes.lua) |
 | Overrides | [overrides.lua](library/betamoon/overrides.lua) |
 | World generation | [world_generation.lua](library/betamoon/world_generation.lua) |
 | Tile entities, containers, and container GUIs | [tile_entities_containers_and_container_guis.lua](library/betamoon/tile_entities_containers_and_container_guis.lua) |
 | Events | [events.lua](library/betamoon/events.lua) |
+| Input and controls | [input_and_controls.lua](library/betamoon/input_and_controls.lua) |
 | Chat, modules, and utilities | [chat_modules_and_utilities.lua](library/betamoon/chat_modules_and_utilities.lua) |
 | Public module | [public_module.lua](library/betamoon/public_module.lua) |
 
