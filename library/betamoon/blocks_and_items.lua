@@ -137,7 +137,7 @@ local ItemReference = {} ---@as BetaMoonItemReference
 
 ---@class BetaMoonBlockTickSchedule
 ---@field delay? integer Ticks before the first update. Omit for manual scheduling.
----@field repeatEvery? integer Ticks between later updates. Omit this for a one-time update.
+---@field repeatEvery? integer Ticks between later updates. With delay, automatically restarts on chunk load using the initial delay. One-time/manual schedules are transient across world rejoin.
 
 ---@class BetaMoonBlockDisplayTickDefinition
 ---@field chance? number Chance from 0 to 1 for each attempt. Defaults to 1.
@@ -157,9 +157,15 @@ local DisplayTickWorld = {}
 ---@return BetaMoonBlockAtPosition|nil Nil when the chunk is unloaded.
 function DisplayTickWorld:getBlock(x, y, z) end
 
----@param name BetaMoonParticleName
+---@param name BetaMoonParticleName|BetaMoonParticleTypeReference|string A vanilla name or registered custom type/key.
 ---@param options? BetaMoonParticleOptions Defaults to the callback block center with zero velocity.
 function DisplayTickWorld:spawnParticle(name, options) end
+
+---@param effect BetaMoonParticleEffectReference|string
+---@param options? BetaMoonParticleEffectOptions
+---@return BetaMoonParticleEffectHandle|nil handle
+---@return string|nil reason Unavailable client/world/attachment or exhausted handle budget.
+function DisplayTickWorld:playParticleEffect(effect, options) end
 
 ---@param name string
 ---@param options? BetaMoonSoundOptions Defaults to the callback block center, volume 1, and pitch 1.
@@ -175,6 +181,9 @@ local TickWorld = {}
 ---@field velocityX? number
 ---@field velocityY? number
 ---@field velocityZ? number
+---@field scale? number Custom particles only; multiplier in (0,4].
+---@field color? BetaMoonParticleColor Custom particles only; multiplies the declared RGBA.
+---@field seed? integer Custom particles only; signed 32-bit deterministic seed.
 
 ---@class BetaMoonSoundOptions
 ---@field x? number

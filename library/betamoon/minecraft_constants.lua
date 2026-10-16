@@ -176,7 +176,9 @@
 
 ---@class BetaMoonMinecraftGuiSprites
 ---@field furnace_flame 'minecraft:furnace_flame'
+---@field furnace_flame_background 'minecraft:furnace_flame_background' Unlit furnace flame for layering behind progress.
 ---@field furnace_arrow 'minecraft:furnace_arrow'
+---@field furnace_arrow_background 'minecraft:furnace_arrow_background' Empty furnace arrow for layering behind progress.
 ---@field crafting_arrow 'minecraft:crafting_arrow'
 ---@field slot 'minecraft:slot'
 ---@field output_slot 'minecraft:output_slot'
