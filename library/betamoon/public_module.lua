@@ -106,7 +106,7 @@ local CallbackResults
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
 ---@field recipeMatchers BetaMoonRecipeMatcherRegistry
 ---@field lootTables BetaMoonLootTableRegistry
----@field worldgen {features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
+---@field worldgen {spatial: {noises: BetaMoonSpatialNoiseRegistry, fields: BetaMoonSpatialFieldRegistry, anchors: BetaMoonSpatialAnchorRegistry}, terrain: {sources: BetaMoonTerrainSourceRegistry, profiles: BetaMoonTerrainHeightProfileRegistry}, materialRules: BetaMoonMaterialRuleRegistry, populationPolicies: BetaMoonPopulationPolicyRegistry, carvers: BetaMoonCarverRegistry, generatorProfiles: BetaMoonGeneratorProfileRegistry, features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
 ---@field chat BetaMoonChat

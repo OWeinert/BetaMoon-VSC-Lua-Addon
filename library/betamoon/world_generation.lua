@@ -7,6 +7,7 @@
 -- --------------------------------------------------------------------------
 
 ---@class BetaMoonOreDefinition
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field key? string Stable placement key. Omit only for private compatibility registrations.
 ---@field block BetaMoonBlockReference|integer
 ---@field veinsPerChunk integer
@@ -95,6 +96,7 @@
 ---@field mirror? 'none'|'left_right'|'front_back'|'random' Structure mirror override.
 
 ---@class BetaMoonWorldFeatureReference
+---@field displayName string Presentation label or canonical key.
 local WorldFeatureReference = {}
 ---@return string
 function WorldFeatureReference:getKey() return '' end
@@ -114,6 +116,7 @@ function WorldFeatureReference:place(world, x, y, z, options) return {} end
 function WorldFeatureReference:preview(world, x, y, z, options) return {} end
 
 ---@class BetaMoonWorldPlacementReference
+---@field displayName string Presentation label or canonical key.
 local WorldPlacementReference = {}
 ---@return string
 function WorldPlacementReference:getKey() return '' end
@@ -134,6 +137,7 @@ function WorldPlacementReference:locateCandidate(world, x, z, maxChunks) end
 ---@field loaded boolean Whether the candidate chunk is currently loaded; this does not prove placement succeeded.
 
 ---@class BetaMoonWorldFeatureBase
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field tags? string[] Namespaced generation tags.
 ---@field key string
 ---@field type 'ore_vein'|'block_patch'|'column'|'disk'|'weighted'|'sequence'|'no_op'
@@ -183,6 +187,7 @@ function WorldFeatures:getRequired(key) return WorldFeatureReference end
 ---@field density? number From 0.05 through 1.
 
 ---@class BetaMoonProceduralTreeDefinition
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field key string
 ---@field trunk BetaMoonTreeTrunkDefinition
 ---@field branches? BetaMoonTreeBranchDefinition
@@ -191,6 +196,7 @@ function WorldFeatures:getRequired(key) return WorldFeatureReference end
 ---@field replace? (BetaMoonBlockReference|integer|string)[]
 
 ---@class BetaMoonVanillaTreeDefinition
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field key string
 ---@field generator 'normal'|'big'|'taiga'|'minecraft:normal'|'minecraft:big'|'minecraft:taiga'
 ---@field trunk? BetaMoonBlockReference|integer|string
@@ -205,6 +211,7 @@ function WorldFeatures:getRequired(key) return WorldFeatureReference end
 ---@field weight? integer
 
 ---@class BetaMoonStructureTreeDefinition
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field key string
 ---@field templates BetaMoonStructureTreeTemplate[]
 ---@field rotation? 'none'|'clockwise_90'|'clockwise_180'|'counterclockwise_90'|'random'|'random_horizontal'
@@ -748,6 +755,7 @@ function StructureBuilder:clone() return StructureBuilder end
 ---@field maxConformDisplacement? integer Maximum vertical movement for terrain_conform columns, from 1 through 16.
 
 ---@class BetaMoonStructureDefinition
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field key string
 ---@field path? string Package-relative gameplay-data path under assets/. Defaults to assets/<namespace>/worldgen/structures/<key>.json.
 ---@field template? BetaMoonStructureDocument|BetaMoonStructureBuilder|BetaMoonCompiledStructure Inline structure source; mutually exclusive with path.
@@ -765,6 +773,7 @@ function StructureBuilder:clone() return StructureBuilder end
 ---@field entities? boolean Run `entity` markers after a chunk slice commits.
 
 ---@class BetaMoonRegionalStructureDefinition
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field stage? 'surface_structures'|'underground_structures'
 ---@field spatial? BetaMoonSpatialSelector
 ---@field tags? string[] Namespaced region and generation tags.
@@ -794,6 +803,7 @@ function StructureBuilder:clone() return StructureBuilder end
 ---@field generated boolean Whether the start is already recorded in the current world.
 
 ---@class BetaMoonRegionalStructureReference
+---@field displayName string Presentation label or canonical key.
 local RegionalStructureReference = {}
 ---@return string
 function RegionalStructureReference:getKey() return '' end
@@ -901,6 +911,7 @@ function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, optio
 ---@field site? BetaMoonStructureSite|string Optional footprint-aware structure environment profile.
 
 ---@class BetaMoonWorldPlacementDefinition
+---@field displayName? string Optional generation-settings label; falls back to the canonical key.
 ---@field spatial? BetaMoonSpatialSelector
 ---@field key string
 ---@field feature BetaMoonWorldFeatureSelector
@@ -962,8 +973,8 @@ function WorldSurfaces:getRequired(key) return WorldSurfaceReference end
 
 ---@class BetaMoonBiomeReference
 ---@field key string Stable BetaMoon key, or the display name for a native biome.
----@field name string
----@field displayName string
+---@field displayName string Biome label used in menus and name-based lookups.
+---@field name string Legacy alias of displayName.
 ---@field owner string
 ---@field isVanilla boolean
 ---@field isBetaMoon boolean
@@ -981,7 +992,8 @@ local WorldBiomeReference = {}
 function WorldBiomeReference:getKey() return '' end
 
 ---@class BetaMoonBiomeQuery
----@field name? string
+---@field displayName? string Case-insensitive biome label filter. Takes precedence over name.
+---@field name? string Legacy alias of displayName.
 ---@field owner? string
 ---@field vanilla? boolean
 
@@ -992,8 +1004,9 @@ function WorldBiomeReference:getKey() return '' end
 ---@field placements (BetaMoonWorldPlacementSelector|BetaMoonWorldPlacementDefinition)[] Existing placements become templates and inline placements default to `surface_features`.
 
 ---@class BetaMoonBiomeDefinition
+---@field displayName? string Biome label. Falls back to name, then the canonical key. Required without key or name.
 ---@field key? string Stable biome key. Omit it only for the legacy range facade.
----@field name string
+---@field name? string Legacy alias of displayName; used only when displayName is omitted.
 ---@field basedOn BetaMoonBiomeName|nil
 ---@field color integer|nil
 ---@field foliageColor integer|nil
@@ -1318,8 +1331,7 @@ function SpatialFieldReference:exportSlice(world, options) end
 ---@field excludeTags? string[]
 ---@class BetaMoonGeneratorProfileDefinition
 ---@field key string namespace:generator/path.
----@field defaultForNewWorlds? boolean Existing worlds retain their saved choice.
----@field priority? integer Highest default candidate wins; highest-priority ties reject publication.
+---@field displayName? string Optional label in Create World; defaults to the canonical key.
 ---@field dimensions {overworld: BetaMoonGeneratorDimension}
 ---@class BetaMoonGeneratorDimension
 ---@field terrain string|BetaMoonTerrainSourceReference|BetaMoonTerrainSourceDefinition
@@ -1356,6 +1368,7 @@ function TerrainSourceReference:sample(world, x, z) end
 ---@return BetaMoonTerrainSample|nil, string? reason
 function TerrainHeightProfileReference:sample(world, x, z) end
 ---@class BetaMoonGeneratorDescription
+---@field displayName string Preset label or canonical key.
 ---@field key string
 ---@field owner string
 ---@field signature string
@@ -1512,6 +1525,7 @@ function GeneratorProfiles:getRequired(key) return GeneratorProfileReference end
 ---@param world BetaMoonActionWorld
 ---@return BetaMoonOriginalSpawn|nil, string? reason
 function SpatialAnchors:getOriginalSpawn(world) end
+---Active profile; nil without a profile or during confirmed temporary Minecraft fallback.
 ---@param world BetaMoonActionWorld
 ---@return BetaMoonGeneratorProfileReference|nil
 function GeneratorProfiles:getSelected(world) end
