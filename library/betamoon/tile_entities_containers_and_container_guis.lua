@@ -607,6 +607,17 @@ function ContainerSessionAccess:set(name, value) end
 ---@field width? integer
 ---@field height? integer
 
+---@class BetaMoonGuiSlotElement: BetaMoonGuiElementBase
+---@field type 'slot' Purely visual Minecraft slot frame.
+---@field width? integer Inner width in 1..254, default 16. Adds a fixed one-pixel border on each side.
+---@field height? integer Inner height in 1..254, default 16. Adds a fixed one-pixel border on each side.
+
+---@class BetaMoonGuiPanelElement: BetaMoonGuiElementBase
+---@field type 'panel' Purely visual resizable Minecraft panel. Defaults to the background layer.
+---@field width integer Full outer width in 9..256, including the fixed border.
+---@field height integer Full outer height in 9..256, including the fixed border.
+---@field color? BetaMoonGuiColor RGB tint, default white to retain the original Minecraft colors.
+
 ---@class BetaMoonGuiTextElement: BetaMoonGuiElementBase
 ---@field type 'text'
 ---@field text? string
@@ -706,7 +717,7 @@ function ContainerSessionAccess:set(name, value) end
 ---@field type 'interactive'
 ---@field captureDrag? boolean Default true.
 
----@alias BetaMoonGuiElement BetaMoonGuiImageElement|BetaMoonGuiTextElement|BetaMoonGuiProgressElement|BetaMoonGuiStateImageElement|BetaMoonGuiRectangleElement|BetaMoonGuiTooltipElement|BetaMoonGuiItemElement|BetaMoonGuiGroupElement|BetaMoonGuiButtonElement|BetaMoonGuiIconButtonElement|BetaMoonGuiCheckboxElement|BetaMoonGuiToggleButtonElement|BetaMoonGuiToggleElement|BetaMoonGuiSliderElement|BetaMoonGuiTextBoxElement|BetaMoonGuiChoiceElement|BetaMoonGuiInteractiveElement
+---@alias BetaMoonGuiElement BetaMoonGuiImageElement|BetaMoonGuiSlotElement|BetaMoonGuiPanelElement|BetaMoonGuiTextElement|BetaMoonGuiProgressElement|BetaMoonGuiStateImageElement|BetaMoonGuiRectangleElement|BetaMoonGuiTooltipElement|BetaMoonGuiItemElement|BetaMoonGuiGroupElement|BetaMoonGuiButtonElement|BetaMoonGuiIconButtonElement|BetaMoonGuiCheckboxElement|BetaMoonGuiToggleButtonElement|BetaMoonGuiToggleElement|BetaMoonGuiSliderElement|BetaMoonGuiTextBoxElement|BetaMoonGuiChoiceElement|BetaMoonGuiInteractiveElement
 
 ---@class BetaMoonContainerGuiDefinition
 ---@field name string
