@@ -197,6 +197,10 @@ betamoon = {
 ---@field min number[] Three local coordinates in 0..1.
 ---@field max number[] Three local coordinates in 0..1.
 
+---@class BetaMoonBlockSubtypes
+---@field mask? integer Raw metadata bit mask in 1..15; mutually exclusive with fields. Must not split state fields or include placement-managed bits.
+---@field fields? string[] Names of complete state fields to preserve as inventory subtype identity; mutually exclusive with mask.
+
 ---@class BetaMoonBlockPlacement
 ---@field facing? 'horizontal' Requires a state.facing enum containing the four compass directions.
 ---@field facingFrom? 'player' Places the block with its front facing the placer.
@@ -208,17 +212,19 @@ betamoon = {
 ---@field preset? 'cube'|'cuboid'|'cross'
 ---@field pass? 0|1
 ---@field bounds? BetaMoonLocalBox Authored for the default facing and rotates with horizontal placement state.
+---@field variantBy? 'metadata'|'subtype' Defaults to metadata. Subtype uses only declared subtype bits for textures, tint and model selection.
 ---@field variants? table<integer, BetaMoonBlockRenderVariant> Exact metadata keys in 0..15.
 
 ---@class BetaMoonItemRenderVariant
 ---@field icon? integer Ordinary icon atlas index in 0..255. Applies when no model is selected.
+---@field texture? BetaMoonTextureInput Texture asset or script-relative path for this variant's icon; takes precedence over icon. Applies when no model is selected.
 ---@field color? integer Ordinary item tint in 0x000000..0xFFFFFF. Model tint uses material.tint.
 ---@field appearance? BetaMoonModelAppearance|false Complete replacement; omitted inherits the default, false selects ordinary rendering.
 
 ---@class BetaMoonBlockRenderVariant
 ---@field appearance? BetaMoonModelAppearance|false Complete replacement; omitted inherits the default, false selects ordinary rendering. If any appearance is dynamic, every state renders dynamically; all-static blocks use chunk rendering.
----@field texture? integer Vanilla atlas index in 0..255.
----@field textures? table<string, integer>
+---@field texture? BetaMoonTextureInput|integer Texture asset, script-relative path, or atlas index in 0..255.
+---@field textures? table<BetaMoonBlockFace, BetaMoonTextureInput|integer> Per-face overrides for down/up/north/south/west/east.
 ---@field color? integer RGB color in 0x000000..0xFFFFFF.
 
 ---@class BetaMoonBlockPowerSource
