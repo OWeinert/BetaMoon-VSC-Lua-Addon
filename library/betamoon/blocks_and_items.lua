@@ -79,6 +79,9 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field material BetaMoonBlockMaterial
 ---@field key string
 ---@field displayName string|nil
+---@field displayNames? table<integer, string> Metadata-specific names (0..15), falling back to displayName. With subtypes, keys use only subtype bits.
+---@field subtypes? boolean|BetaMoonBlockSubtypes Opt-in inventory subtype identity. True uses metadata bits not occupied by state; false/omitted disables it.
+---@field preserveDropMetadata? boolean Defaults to false for every block. True preserves declared subtype bits in normal self-drops; explicit drops/getDrops take precedence.
 ---@field hardness number|nil
 ---@field resistance number|nil
 ---@field light integer|nil
@@ -226,6 +229,7 @@ local TickWorld = {}
 ---@field type BetaMoonItemType|nil
 ---@field key string
 ---@field displayName string|nil
+---@field displayNames? table<integer, string> Exact damage/metadata-specific names in 0..32767; missing entries use displayName. Independent of render.variants.
 ---@field material BetaMoonToolMaterialName|BetaMoonArmorMaterialName|BetaMoonToolMaterial|BetaMoonArmorMaterial|nil
 ---@field slot BetaMoonArmorSlot|nil
 ---@field maxStackSize integer|nil
@@ -280,12 +284,14 @@ end
 local BlockRegistry = {}
 
 ---@param idOrKey BetaMoonResourceId
+---@param metadata? integer Block metadata in 0..15. Defaults to the supplied reference's damage, otherwise 0.
 ---@return BetaMoonBlockReference|nil
-function BlockRegistry:get(idOrKey) end
+function BlockRegistry:get(idOrKey, metadata) end
 
 ---@param idOrKey BetaMoonResourceId
+---@param metadata? integer Block metadata in 0..15. Defaults to the supplied reference's damage, otherwise 0.
 ---@return BetaMoonBlockReference
-function BlockRegistry:getRequired(idOrKey)
+function BlockRegistry:getRequired(idOrKey, metadata)
   return BlockReference
 end
 
@@ -313,12 +319,14 @@ end
 local ItemRegistry = {}
 
 ---@param idOrKey BetaMoonResourceId
+---@param metadata? integer Item damage/metadata in 0..32767. Defaults to the supplied reference's damage, otherwise 0.
 ---@return BetaMoonItemReference|nil
-function ItemRegistry:get(idOrKey) end
+function ItemRegistry:get(idOrKey, metadata) end
 
 ---@param idOrKey BetaMoonResourceId
+---@param metadata? integer Item damage/metadata in 0..32767. Defaults to the supplied reference's damage, otherwise 0.
 ---@return BetaMoonItemReference
-function ItemRegistry:getRequired(idOrKey)
+function ItemRegistry:getRequired(idOrKey, metadata)
   return ItemReference
 end
 
