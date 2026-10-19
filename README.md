@@ -2,23 +2,16 @@
 
 LuaLS definitions and a VS Code extension for [**BetaMoon**](https://modrinth.com/mod/betamoon), a mod for Minecraft b1.7.3 providing a Lua scripting framework.
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
-including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation, multiblocks, particles, input, events, tile entities and container GUIs.
+including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation,
+dimensions, teleportation, player/entity movement, multiblocks, particles, input, events, tile entities and reactive container GUIs.
 Packaged `assets/<namespace>/worldgen/structures/*.json` and `assets/<namespace>/loot_tables/*.json` files also receive
 completion and validation from the bundled BetaMoon schemas.
 
 The definitions target BetaMoon 0.10.0.
 
-The files in `library/betamoon/` are generated from the categories in this repository's local
-`internal/api.lua` reference. Each category retains its declarations, annotations and documentation.
-Imports and exports connect shared handles and registries across files. Minecraft never executes these definitions.
-The reference is maintained directly, ignored by Git and excluded from the VSIX; the split files are the public definitions.
-The checkout's `.luarc.json` excludes `internal/` from LuaLS and loads only `library/` as its definition library.
-VS Code opens `internal/api.lua` as plain text because opening an ignored file in Lua mode still sends it to LuaLS.
-Edit the reference there, then sync; use the public category files for LuaLS completion and diagnostics.
-
 ## Definition files
 
-| Source API category | File in `library/betamoon/` |
+| API category | File in `library/betamoon/` |
 | --- | --- |
 | Lifecycle | [lifecycle.lua](library/betamoon/lifecycle.lua) |
 | Minecraft constants | [minecraft_constants.lua](library/betamoon/minecraft_constants.lua) |
@@ -41,8 +34,7 @@ Edit the reference there, then sync; use the public category files for LuaLS com
 | Chat, modules, and utilities | [chat_modules_and_utilities.lua](library/betamoon/chat_modules_and_utilities.lua) |
 | Public module | [public_module.lua](library/betamoon/public_module.lua) |
 
-`public_module.lua` declares the global `betamoon` and connects the category registries. Category boundaries and
-ordering follow the source file, including the supporting types currently declared in its public-module section.
+Browse the category files for API declarations. `public_module.lua` defines the global `betamoon` entry point.
 
 ## Install in VS Code
 
