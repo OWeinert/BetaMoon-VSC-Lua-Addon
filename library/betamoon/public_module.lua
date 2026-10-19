@@ -11,6 +11,7 @@ local Audio = require("betamoon.assets_and_audio").Audio
 local Multiblocks = require("betamoon.multiblocks").Multiblocks
 local Particles = require("betamoon.particles").Particles
 local Entities = require("betamoon.entities").Entities
+local Players = require("betamoon.entities").Players
 local ToolMaterialRegistry = require("betamoon.tool_and_armor_materials").ToolMaterialRegistry
 local ArmorMaterialRegistry = require("betamoon.tool_and_armor_materials").ArmorMaterialRegistry
 local RecipeTypeRegistry = require("betamoon.recipes").RecipeTypeRegistry
@@ -95,6 +96,7 @@ local CallbackResults
 ---@field particles BetaMoonParticleRegistry
 ---@field multiblocks BetaMoonMultiblockRegistry
 ---@field entities BetaMoonEntityRegistry
+---@field players BetaMoonPlayers
 ---@field fuels BetaMoonFuels
 ---@field fluids BetaMoonFluidRegistry
 ---@field soundEvents BetaMoonSoundEventRegistry
@@ -133,6 +135,7 @@ betamoon = {
   particles = Particles,
   multiblocks = Multiblocks,
   entities = Entities,
+  players = Players,
   fuels = Fuels,
   fluids = Fluids,
   soundEvents = SoundEvents,
@@ -409,6 +412,15 @@ function TileView:getNbt() end
 ---@field getCapability fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, yOrCapability: integer|BetaMoonCapabilityReference|string, zOrFace?: integer|BetaMoonBlockFace, capability?: BetaMoonCapabilityReference|string, face?: BetaMoonBlockFace): BetaMoonCapabilityProxy|nil
 
 ---@class BetaMoonActionEntity
+---@field getTransform fun(self: BetaMoonActionEntity): BetaMoonEntityTransform Detached position and orientation.
+---@field setTransform fun(self: BetaMoonActionEntity, request: BetaMoonEntityTransformRequest): boolean, string? Atomic checked relocation/orientation; false with reason on expected refusal.
+---@field moveBy fun(self: BetaMoonActionEntity, dx: number, dy: number, dz: number): boolean, BetaMoonEntityMoveResult|string? Swept native collision in loaded terrain; no extra simulation tick.
+---@field addVelocity fun(self: BetaMoonActionEntity, dx: number, dy: number, dz: number): boolean, string? Add an impulse; each component and resulting velocity must be -16..16.
+---@field getMovementState fun(self: BetaMoonActionEntity): BetaMoonEntityMovementState Detached motion/contact state.
+---@field getBounds fun(self: BetaMoonActionEntity): BetaMoonEntityBounds Detached actual world-space body bounds.
+---@field getSupport fun(self: BetaMoonActionEntity): BetaMoonEntitySupport?, string? Loaded-only support probe; nil with a reason when unavailable.
+---@field isMounted fun(self: BetaMoonActionEntity): boolean
+---@field isSleeping fun(self: BetaMoonActionEntity): boolean
 ---@field isPlayer fun(self: BetaMoonActionEntity): boolean
 ---@field isSneaking fun(self: BetaMoonActionEntity): boolean
 ---@field isAlive fun(self: BetaMoonActionEntity): boolean
