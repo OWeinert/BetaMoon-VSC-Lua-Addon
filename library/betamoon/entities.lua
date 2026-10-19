@@ -390,6 +390,63 @@ function Entities:first(query) end
 ---@return BetaMoonEntityTypeReference|nil
 function Entities:one(query) end
 
+---@class BetaMoonPlayers
+local Players = {}
+
+---Invoke with a fresh local singleplayer facade. Nested read-only scopes remain read-only.
+---@param callback fun(player: BetaMoonActionEntity)
+---@return boolean invoked
+---@return 'no_player'|'player_not_ready'|'unsupported_environment'? reason
+function Players:withLocal(callback) end
+
+---@class BetaMoonEntityVector
+---@field x number
+---@field y number
+---@field z number
+
+---@class BetaMoonEntityTransform
+---@field position BetaMoonEntityVector
+---@field rotation {yaw: number, pitch: number}
+
+---@class BetaMoonEntityTransformRequest
+---@field position? {x?: number, y?: number, z?: number} Omitted components retain current values.
+---@field rotation? {yaw?: number, pitch?: number} Finite degrees; player pitch is -90..90.
+---@field resetVelocity? boolean Default false.
+---@field resetFallDistance? boolean Default false.
+---@field interpolation? 'snap'|'preserve' Default snap. A position or rotation component is required.
+
+---@class BetaMoonEntityCollisionResult
+---@field onGround boolean Native downward-collision flag; distinct from support at rest.
+---@field collidedHorizontally boolean
+---@field collidedVertically boolean
+
+---@class BetaMoonEntityMoveResult: BetaMoonEntityCollisionResult
+---@field requestedDelta BetaMoonEntityVector
+---@field appliedDelta BetaMoonEntityVector Actual displacement after collision.
+
+---@class BetaMoonEntitySupport
+---@field supported boolean Body has collision support immediately beneath its feet.
+---@field probeDistance number Fixed 0.001 blocks.
+
+---@class BetaMoonEntityMovementState: BetaMoonEntityCollisionResult
+---@field position BetaMoonEntityVector
+---@field velocity BetaMoonEntityVector
+---@field fallDistance number
+---@field inWater boolean
+---@field burning boolean
+---@field mounted boolean
+---@field sleeping boolean
+---@field support? BetaMoonEntitySupport
+---@field supportReason? string Reason the loaded-only probe was unavailable.
+
+---@class BetaMoonEntityBounds
+---@field min BetaMoonEntityVector
+---@field max BetaMoonEntityVector
+---@field width number
+---@field height number
+---@field depth number
+
 return {
-    Entities = Entities
+    Entities = Entities,
+    Players = Players
 }
