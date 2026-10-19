@@ -41,6 +41,7 @@ local Fuels = require("betamoon.fuels").Fuels
 local TileEntityRegistry = require("betamoon.tile_entities_containers_and_container_guis").TileEntityRegistry
 local ContainerRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerRegistry
 local ContainerGuiRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerGuiRegistry
+local GuiApi = require("betamoon.tile_entities_containers_and_container_guis").GuiApi
 local Capabilities = require("betamoon.tile_entities_containers_and_container_guis").Capabilities
 local Systems = require("betamoon.tile_entities_containers_and_container_guis").Systems
 local LogicalNetworks = require("betamoon.tile_entities_containers_and_container_guis").LogicalNetworks
@@ -115,6 +116,7 @@ local CallbackResults
 ---@field tileEntities BetaMoonTileEntityRegistry
 ---@field containers BetaMoonContainerRegistry
 ---@field containerGuis BetaMoonContainerGuiRegistry
+---@field gui BetaMoonGuiApi
 ---@field capabilities BetaMoonCapabilityRegistry
 ---@field systems BetaMoonWorldServiceRegistry
 ---@field logicalNetworks BetaMoonLogicalNetworkRegistry
@@ -172,6 +174,7 @@ betamoon = {
   tileEntities = TileEntityRegistry,
   containers = ContainerRegistry,
   containerGuis = ContainerGuiRegistry,
+  gui = GuiApi,
   capabilities = Capabilities,
   systems = Systems,
   logicalNetworks = LogicalNetworks,

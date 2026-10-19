@@ -443,18 +443,18 @@ local TileWorldAccess = {}
 ---@field tileEntity BetaMoonTileEntityHandle
 ---@field slots BetaMoonContainerSlotDefinition[]
 ---@field playerInventory BetaMoonPlayerInventoryDefinition
----@field session? table<string, BetaMoonContainerSessionField> Typed values that last until this container closes.
+---@field state? table<string, BetaMoonContainerStateField> Typed values that last until this container closes.
 ---@field controls? table<string, BetaMoonContainerControlDefinition>
 ---@field onClose? fun(ctx: BetaMoonContainerControlContext)
 
----@class BetaMoonContainerSessionField
+---@class BetaMoonContainerStateField
 ---@field type 'integer'|'number'|'boolean'|'string'
 ---@field default? integer|number|boolean|string
 ---@field maxLength? integer String limit, default 256 and maximum 1024.
 
 ---@class BetaMoonContainerControlBinding
 ---@field data? string Bind to a tile data field.
----@field session? string Bind to a container-session field.
+---@field state? string Bind to a container-state field.
 
 ---@alias BetaMoonCallbackResult 'pass'|'deny'|'handled'
 
@@ -511,14 +511,14 @@ local TileWorldAccess = {}
 ---@field result 'handled'
 ---@field value string|number|boolean
 
----@class BetaMoonContainerSessionAccess
-local ContainerSessionAccess = {}
+---@class BetaMoonContainerStateAccess
+local ContainerStateAccess = {}
 ---@param name string
 ---@return string|number|boolean
-function ContainerSessionAccess:get(name) end
+function ContainerStateAccess:get(name) end
 ---@param name string
 ---@param value string|number|boolean
-function ContainerSessionAccess:set(name, value) end
+function ContainerStateAccess:set(name, value) end
 
 ---@class BetaMoonContainerControlInfo
 ---@field key string
@@ -530,10 +530,10 @@ function ContainerSessionAccess:set(name, value) end
 ---@field phase? 'press'|'drag'|'release'|'scroll'|'focus'|'blur'
 ---@field button? integer
 ---@field wheel? integer
----@field x? integer Element-local coordinate.
----@field y? integer Element-local coordinate.
----@field deltaX? integer Pointer movement since the previous captured event.
----@field deltaY? integer Pointer movement since the previous captured event.
+---@field x? number Element-local coordinate under the current transform.
+---@field y? number Element-local coordinate under the current transform.
+---@field deltaX? number Actual pointer motion in current local units; excludes element animation.
+---@field deltaY? number Actual pointer motion in current local units; excludes element animation.
 ---@field key? integer
 ---@field character? string
 ---@field shift? boolean
@@ -545,7 +545,7 @@ function ContainerSessionAccess:set(name, value) end
 ---@field tile {x: integer, y: integer, z: integer, data: BetaMoonTileDataAccess}
 ---@field data BetaMoonTileDataAccess
 ---@field inventory BetaMoonTileInventoryAccess
----@field session BetaMoonContainerSessionAccess
+---@field state BetaMoonContainerStateAccess
 ---@field control BetaMoonContainerControlInfo
 ---@field input BetaMoonContainerInput
 
@@ -579,10 +579,12 @@ function ContainerSessionAccess:set(name, value) end
 ---@field builtin? BetaMoonGuiPreset
 ---@field style? 'minecraft' Draw a simple generated Minecraft-style panel.
 ---@field drawSlotFrames? boolean Draw frames at the container's slot positions.
+---@field tint? BetaMoonGuiColor Multiplicative RGB artwork tint, default white.
+---@field slotTint? BetaMoonGuiColor Independent automatic slot-frame tint; defaults to background tint.
 
 ---@class BetaMoonGuiCondition
 ---@field field? string
----@field session? string Read a container-session field instead of tile data.
+---@field state? string Read a container-state field instead of tile data.
 ---@field equals? string|number|boolean
 ---@field notEquals? string|number|boolean
 ---@field greaterThan? number
@@ -592,7 +594,211 @@ function ContainerSessionAccess:set(name, value) end
 ---@field all? BetaMoonGuiCondition[]
 ---@field any? BetaMoonGuiCondition[]
 
+---@alias BetaMoonGuiEasingName 'linear'|'ease_in'|'ease_out'|'ease_in_out'|'bounce_in'|'bounce_out'|'bounce_in_out'
+---@class BetaMoonGuiBezier
+---@field bezier [number, number, number, number] Finite coordinates, x1/x2 in 0..1.
+---@alias BetaMoonGuiEasing BetaMoonGuiEasingName|BetaMoonGuiBezier
+
+---@class BetaMoonGuiTransitionOptions
+---@field duration? number Nonnegative seconds; enabled properties default to 0.2.
+---@field delay? number Nonnegative seconds, default 0.
+---@field easing? BetaMoonGuiEasing Default ease_out.
+
+---@class BetaMoonGuiTransitionPolicy
+---@field default? BetaMoonGuiTransitionOptions|false Explicit policy for otherwise unspecified properties.
+---@field x? BetaMoonGuiTransitionOptions|false
+---@field y? BetaMoonGuiTransitionOptions|false
+---@field translateX? BetaMoonGuiTransitionOptions|false
+---@field translateY? BetaMoonGuiTransitionOptions|false
+---@field width? BetaMoonGuiTransitionOptions|false
+---@field height? BetaMoonGuiTransitionOptions|false
+---@field scaleX? BetaMoonGuiTransitionOptions|false
+---@field scaleY? BetaMoonGuiTransitionOptions|false
+---@field originX? BetaMoonGuiTransitionOptions|false
+---@field originY? BetaMoonGuiTransitionOptions|false
+---@field opacity? BetaMoonGuiTransitionOptions|false
+---@field tint? BetaMoonGuiTransitionOptions|false
+---@field color? BetaMoonGuiTransitionOptions|false
+---@field iconTint? BetaMoonGuiTransitionOptions|false
+---@field backgroundTint? BetaMoonGuiTransitionOptions|false
+
+---@class BetaMoonGuiBaseTargets
+---@field x? number
+---@field y? number
+---@field translateX? number
+---@field translateY? number
+---@field scaleX? number
+---@field scaleY? number
+---@field originX? number
+---@field originY? number
+---@field visible? boolean
+
+---@class BetaMoonGuiDrawableTargets: BetaMoonGuiBaseTargets
+---@field opacity? number
+
+---@class BetaMoonGuiArtworkTargets: BetaMoonGuiDrawableTargets
+---@field tint? BetaMoonGuiColor
+
+---@class BetaMoonGuiSizedArtworkTargets: BetaMoonGuiArtworkTargets
+---@field width? number Per-type display dimensions; slots use inner size, panels outer size.
+---@field height? number
+
+---@class BetaMoonGuiPanelTargets: BetaMoonGuiSizedArtworkTargets
+---@field color? BetaMoonGuiColor Legacy alias of tint.
+
+---@class BetaMoonGuiTextTargets: BetaMoonGuiDrawableTargets
+---@field width? number Alignment box, 0 means intrinsic width; no glyph stretching.
+---@field text? string
+---@field color? BetaMoonGuiColor RGB/ARGB text color.
+---@field align? BetaMoonGuiAlignment
+---@field shadow? boolean
+
+---@class BetaMoonGuiRectangleTargets: BetaMoonGuiDrawableTargets
+---@field width? number
+---@field height? number
+---@field color? BetaMoonGuiColor RGB/ARGB fill color.
+
+---@class BetaMoonGuiProgressTargets: BetaMoonGuiSizedArtworkTargets
+---@field backgroundTint? BetaMoonGuiColor
+
+---@class BetaMoonGuiControlTargets: BetaMoonGuiSizedArtworkTargets
+---@field text? string Display label only; unavailable on sliders/text editors.
+
+---@class BetaMoonGuiIconButtonTargets: BetaMoonGuiControlTargets
+---@field iconTint? BetaMoonGuiColor
+
+---@class BetaMoonGuiTooltipTargets: BetaMoonGuiBaseTargets
+---@field width? number
+---@field height? number
+
+---@class BetaMoonGuiGroupTargets: BetaMoonGuiSizedArtworkTargets
+---@field clip? boolean Requires explicitly bounded group.
+
+---@alias BetaMoonGuiTargets BetaMoonGuiBaseTargets|BetaMoonGuiPanelTargets|BetaMoonGuiTextTargets|BetaMoonGuiRectangleTargets|BetaMoonGuiProgressTargets|BetaMoonGuiControlTargets|BetaMoonGuiIconButtonTargets|BetaMoonGuiTooltipTargets|BetaMoonGuiGroupTargets
+---@alias BetaMoonGuiBinding fun(view: BetaMoonGuiBindingView): BetaMoonGuiTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@alias BetaMoonGuiInteraction 'hovered'|'pressed'|'focused'|'disabled'|'selected'|'invalid'
+
+---@class BetaMoonGuiReadAccess
+local GuiReadAccess = {}
+---@param key string
+---@return string|number|boolean
+function GuiReadAccess:get(key) end
+
+---@class BetaMoonGuiDataReadAccess
+local GuiDataReadAccess = {}
+---@param key string
+---@return BetaMoonSharedDataValue
+function GuiDataReadAccess:get(key) end
+---@return table<string, BetaMoonSharedDataValue>
+function GuiDataReadAccess:snapshot() return {} end
+
+---@class BetaMoonGuiBindingView
+---@field state BetaMoonGuiReadAccess Read-only typed temporary state; tracked reads.
+---@field data BetaMoonGuiReadAccess Read-only synchronized integer/boolean data; tracked reads.
+local GuiBindingView = {}
+---@param name BetaMoonGuiInteraction
+---@param elementId? string Omit to observe this element.
+---@return boolean
+function GuiBindingView:interaction(name, elementId) end
+
+---@alias BetaMoonGuiRequestStatus 'pending'|'running'|'completed'|'interrupted'|'canceled'
+---@class BetaMoonGuiAnimationRequest
+---@field id integer Screen-local request identity.
+local GuiAnimationRequest = {}
+---@return BetaMoonGuiRequestStatus
+function GuiAnimationRequest:status() end
+function GuiAnimationRequest:cancel() end
+function GuiAnimationRequest:finish() end
+
+---@class BetaMoonGuiElementHandle
+local GuiElementHandle = {}
+---@param properties BetaMoonGuiTargets
+function GuiElementHandle:set(properties) end
+---@param properties BetaMoonGuiTargets
+---@param transition? BetaMoonGuiTransitionPolicy|false
+---@return BetaMoonGuiAnimationRequest
+function GuiElementHandle:animate(properties, transition) end
+---@param properties BetaMoonGuiTargets
+---@param transition? BetaMoonGuiTransitionPolicy|false Omitted/false is immediate.
+---@return BetaMoonGuiAnimationRequest|nil An animated override returns a request.
+function GuiElementHandle:override(properties, transition) end
+---@param properties? string[] Omit to release all overrides to current derived targets.
+function GuiElementHandle:clearOverride(properties) end
+---@param properties? string[]
+function GuiElementHandle:cancel(properties) end
+---@param properties? string[]
+function GuiElementHandle:finish(properties) end
+function GuiElementHandle:refresh() end
+---@param property string
+---@return string|number|boolean|nil Displayed value, including staged immediate sets.
+function GuiElementHandle:get(property) end
+---@param property string
+---@return string|number|boolean|nil Last committed requested target.
+function GuiElementHandle:target(property) end
+
+---@class BetaMoonGuiRuntime
+local GuiRuntime = {}
+---@param id string
+---@return BetaMoonGuiElementHandle
+function GuiRuntime:element(id) end
+
+---@alias BetaMoonContainerGuiEventType 'open'|'change'|'interaction'|'control'|'animation'|'animation_property'|'reload'|'close'
+---@class BetaMoonContainerGuiEvent
+---@field type BetaMoonContainerGuiEventType
+---@field input? BetaMoonContainerInput Input snapshot for control events.
+---@field source? 'state'|'data'
+---@field key? string
+---@field value? string|number|boolean
+---@field previous? string|number|boolean
+---@field proposed? string|number|boolean
+---@field elementId? string
+---@field name? BetaMoonGuiInteraction
+---@field control? string
+---@field phase? 'activate'|'change'|'commit'|'complete'|'cancel'
+---@field accepted? boolean
+---@field requestId? integer
+---@field properties? string[]
+---@field property? string Only for animation_property.
+---@field status? BetaMoonGuiRequestStatus
+---@field reason? string
+
+---@class BetaMoonContainerGuiEventContext
+---@field state BetaMoonContainerStateAccess Typed temporary state; read-only during close.
+---@field data BetaMoonGuiDataReadAccess Read-only tile data.
+---@field tile {x: integer, y: integer, z: integer, data: BetaMoonGuiDataReadAccess}
+---@field player {name: string}|table
+---@field inventory BetaMoonGuiInventoryReadAccess
+---@field gui BetaMoonGuiRuntime Presentation writes require an active GUI event; close is read-only.
+
+---@class BetaMoonGuiInventoryReadAccess
+local GuiInventoryReadAccess = {}
+---@param slot string
+---@return BetaMoonTileInventoryStack|nil
+function GuiInventoryReadAccess:get(slot) end
+
+---@class BetaMoonGuiApi
+local GuiApi = {}
+---@param from number
+---@param to number
+---@param t number Finite; extrapolation is permitted.
+---@return number
+function GuiApi:lerp(from, to, t) end
+---@param easing BetaMoonGuiEasing
+---@param t number Normalized progress in 0..1.
+---@return number
+function GuiApi:ease(easing, t) end
+
 ---@class BetaMoonGuiElementBase
+---@field id? string Unique, case-sensitive ID for runtime element handles.
+---@field bind? BetaMoonGuiBinding Pure source-to-presentation function; reruns on observed source changes.
+---@field transition? BetaMoonGuiTransitionPolicy|false
+---@field translateX? number Default 0 logical pixels.
+---@field translateY? number Default 0 logical pixels.
+---@field scaleX? number Nonnegative, default 1.
+---@field scaleY? number Nonnegative, default 1.
+---@field originX? number Normalized 0..1, default 0.5 on leaves and 0 on groups.
+---@field originY? number Normalized 0..1, default 0.5 on leaves and 0 on groups.
+---@field visible? boolean Default true; combined with visibleWhen and parent visibility.
 ---@field x? integer
 ---@field y? integer
 ---@field anchor? BetaMoonGuiAnchor
@@ -601,6 +807,9 @@ function ContainerSessionAccess:set(name, value) end
 ---@field tooltip? string|string[]
 
 ---@class BetaMoonGuiImageElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiSizedArtworkTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field tint? BetaMoonGuiColor
+---@field opacity? number 0..1, default 1.
 ---@field type 'image'
 ---@field image? BetaMoonTextureInput Complete PNG relative to the scripts directory.
 ---@field builtin? BetaMoonGuiBuiltinSprite
@@ -608,17 +817,25 @@ function ContainerSessionAccess:set(name, value) end
 ---@field height? integer
 
 ---@class BetaMoonGuiSlotElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiSizedArtworkTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field tint? BetaMoonGuiColor
+---@field opacity? number 0..1, default 1.
 ---@field type 'slot' Purely visual Minecraft slot frame.
 ---@field width? integer Inner width in 1..254, default 16. Adds a fixed one-pixel border on each side.
 ---@field height? integer Inner height in 1..254, default 16. Adds a fixed one-pixel border on each side.
 
 ---@class BetaMoonGuiPanelElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiPanelTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field tint? BetaMoonGuiColor Overrides the legacy color alias.
+---@field opacity? number 0..1, default 1.
 ---@field type 'panel' Purely visual resizable Minecraft panel. Defaults to the background layer.
 ---@field width integer Full outer width in 9..256, including the fixed border.
 ---@field height integer Full outer height in 9..256, including the fixed border.
 ---@field color? BetaMoonGuiColor RGB tint, default white to retain the original Minecraft colors.
 
 ---@class BetaMoonGuiTextElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiTextTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field opacity? number 0..1, default 1.
 ---@field type 'text'
 ---@field text? string
 ---@field value? string Synced tile data field used instead of static text.
@@ -629,6 +846,12 @@ function ContainerSessionAccess:set(name, value) end
 ---@field shadow? boolean
 
 ---@class BetaMoonGuiProgressElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiProgressTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field width? integer Display width, default fill-source width.
+---@field height? integer Display height, default fill-source height.
+---@field tint? BetaMoonGuiColor
+---@field backgroundTint? BetaMoonGuiColor Requires a configured background; defaults to tint.
+---@field opacity? number 0..1, default 1.
 ---@field type 'progress'
 ---@field value string
 ---@field maximum integer|string
@@ -641,6 +864,11 @@ function ContainerSessionAccess:set(name, value) end
 ---@field hideWhenEmpty? boolean
 
 ---@class BetaMoonGuiStateImageElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiSizedArtworkTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field width? integer Display width; omitted follows current source.
+---@field height? integer Display height; omitted follows current source.
+---@field tint? BetaMoonGuiColor
+---@field opacity? number 0..1, default 1.
 ---@field type 'state_image'
 ---@field value string
 ---@field states? table<string, BetaMoonTextureInput>
@@ -649,34 +877,48 @@ function ContainerSessionAccess:set(name, value) end
 ---@field default? BetaMoonTextureInput
 
 ---@class BetaMoonGuiRectangleElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiRectangleTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field opacity? number 0..1, default 1.
 ---@field type 'rectangle'
 ---@field width integer
 ---@field height integer
 ---@field color BetaMoonGuiColor
 
 ---@class BetaMoonGuiTooltipElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiTooltipTargets, BetaMoonGuiTransitionPolicy|false|nil
 ---@field type 'tooltip'
 ---@field width integer
 ---@field height integer
 ---@field text string|string[]
 
 ---@class BetaMoonGuiItemElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiBaseTargets, BetaMoonGuiTransitionPolicy|false|nil
 ---@field type 'item'
 ---@field slot? string Name of a tile inventory slot to preview.
 ---@field item? integer|BetaMoonResourceReference|BetaMoonStackInput Fixed item to preview; count defaults to 1 and damage to 0.
 ---@field showCount? boolean
 
 ---@class BetaMoonGuiGroupElement: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiGroupTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field width? integer Explicit paired bounds; does not resize children.
+---@field height? integer Explicit paired bounds.
+---@field clip? boolean Requires explicit bounds, default false.
+---@field tint? BetaMoonGuiColor Multiplies descendant artwork; excludes text/item colors.
+---@field opacity? number 0..1; non-unit fades require every drawn descendant to support opacity.
 ---@field type 'group'
 ---@field elements BetaMoonGuiElement[]
 
 ---@class BetaMoonGuiNineSlice
+---@field tint? BetaMoonGuiColor Per-source RGB multiplier.
 ---@field texture BetaMoonTextureInput
 ---@field border? integer Equal corner-border size on every side.
 
 ---@alias BetaMoonGuiControlVisual BetaMoonTextureInput|BetaMoonGuiNineSlice
 
 ---@class BetaMoonGuiControlElementBase: BetaMoonGuiElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiControlTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field tint? BetaMoonGuiColor Artwork only; leaves label/editor readability colors unchanged.
+---@field opacity? number 0..1, default 1.
 ---@field control string
 ---@field width? integer
 ---@field height? integer Default 20.
@@ -689,6 +931,8 @@ function ContainerSessionAccess:set(name, value) end
 ---@field type 'button'
 
 ---@class BetaMoonGuiIconButtonElement: BetaMoonGuiControlElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiIconButtonTargets, BetaMoonGuiTransitionPolicy|false|nil
+---@field iconTint? BetaMoonGuiColor Independent icon tint, replacing the local element tint.
 ---@field type 'icon_button'
 ---@field icon? BetaMoonTextureInput Custom icon texture.
 ---@field iconBuiltin? 'close'|'confirm'|'plus'|'minus' Built-in icon. Use either this or `icon`.
@@ -703,11 +947,13 @@ function ContainerSessionAccess:set(name, value) end
 ---@field type 'toggle' Compatibility alias for `toggle_button`.
 
 ---@class BetaMoonGuiSliderElement: BetaMoonGuiControlElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiSizedArtworkTargets, BetaMoonGuiTransitionPolicy|false|nil
 ---@field type 'slider'
 ---@field orientation? 'horizontal'|'vertical'
 ---@field captureDrag? boolean Default true.
 
 ---@class BetaMoonGuiTextBoxElement: BetaMoonGuiControlElementBase
+---@field bind? fun(view: BetaMoonGuiBindingView): BetaMoonGuiSizedArtworkTargets, BetaMoonGuiTransitionPolicy|false|nil
 ---@field type 'text_box'
 
 ---@class BetaMoonGuiChoiceElement: BetaMoonGuiControlElementBase
@@ -725,6 +971,8 @@ function ContainerSessionAccess:set(name, value) end
 ---@field layout? BetaMoonGuiLayout
 ---@field background? BetaMoonGuiBackground
 ---@field elements? BetaMoonGuiElement[]
+---@field events? BetaMoonContainerGuiEventType[] Omitted selects ordinary families; animation_property is explicit opt-in.
+---@field onEvent? fun(ctx: BetaMoonContainerGuiEventContext, event: BetaMoonContainerGuiEvent)
 
 ---@class BetaMoonTileEntityRegistry
 local TileEntityRegistry = {}
@@ -793,6 +1041,7 @@ return {
     TileEntityRegistry = TileEntityRegistry,
     ContainerRegistry = ContainerRegistry,
     ContainerGuiRegistry = ContainerGuiRegistry,
+    GuiApi = GuiApi,
     Capabilities = Capabilities,
     Systems = Systems,
     LogicalNetworks = LogicalNetworks
