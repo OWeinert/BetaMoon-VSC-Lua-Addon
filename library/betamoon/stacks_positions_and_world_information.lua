@@ -39,7 +39,8 @@
 ---@field worldTime integer
 ---@field lastTimePlayed integer
 ---@field sizeOnDisk integer
----@field dimension integer
+---@field dimension integer Save-local provider ID; use dimensionKey for persistent identity.
+---@field dimensionKey string Canonical dimension key.
 ---@field saveVersion integer
 ---@field raining boolean
 ---@field rainTime integer

@@ -73,6 +73,7 @@ local ItemReference = {} ---@as BetaMoonItemReference
 ---@field where (fun(resource: BetaMoonItemReference): boolean)|nil
 
 ---@class BetaMoonBlockDefinition
+---@field teleportHazard? boolean Marks unsafe arrival blocks; default false.
 ---@field appearance? BetaMoonModelAppearance|false Default model presentation; render.variants entries may replace it or disable it with false. Visuals do not alter gameplay properties.
 ---@field id integer
 ---@field material BetaMoonBlockMaterial
