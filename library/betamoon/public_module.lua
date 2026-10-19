@@ -52,6 +52,7 @@ local Events = require("betamoon.events").Events
 local Input = require("betamoon.input_and_controls").Input
 local Config = require("betamoon.chat_modules_and_utilities").Config
 local Chat = require("betamoon.chat_modules_and_utilities").Chat
+local Log = require("betamoon.chat_modules_and_utilities").Log
 local Modules = require("betamoon.chat_modules_and_utilities").Modules
 local Positions = require("betamoon.chat_modules_and_utilities").Positions
 
@@ -117,6 +118,7 @@ local CallbackResults
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
 ---@field chat BetaMoonChat
+---@field log BetaMoonLog Callable as betamoon.log(level, message); methods use the same thresholds and script identity.
 ---@field modules BetaMoonModules
 ---@field positions BetaMoonPositions
 ---@field tileEntities BetaMoonTileEntityRegistry
@@ -129,6 +131,7 @@ local CallbackResults
 ---@field stack fun(item: BetaMoonResourceReference|integer, count?: integer, damage?: integer): BetaMoonStack
 ---@type BetaMoonModule
 betamoon = {
+  log = Log,
   dimensions = Dimensions,
   teleport = Teleport,
   mc = MinecraftConstants,

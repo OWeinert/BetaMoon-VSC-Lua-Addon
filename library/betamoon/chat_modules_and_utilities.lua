@@ -6,6 +6,28 @@
 -- CATEGORY: CHAT, MODULES, AND UTILITIES
 -- --------------------------------------------------------------------------
 
+---@alias BetaMoonLogLevel 'trace'|'debug'|'info'|'warn'|'error'
+
+---Write runtime messages without creating Script Issues or throwing an error.
+---@class BetaMoonLog
+---@operator call(level: BetaMoonLogLevel, message: string)
+local Log = {}
+
+---@param message string
+function Log:trace(message) end
+
+---@param message string
+function Log:debug(message) end
+
+---@param message string
+function Log:info(message) end
+
+---@param message string
+function Log:warn(message) end
+
+---@param message string
+function Log:error(message) end
+
 ---@class BetaMoonConfig: table<string, any>
 ---@field save fun(): boolean Write the current values to the config file. Fails if the file changed since it was loaded.
 ---@field reload fun(): boolean Reload the file into this same table, discarding unsaved changes.
@@ -69,6 +91,7 @@ end
 return {
     Config = Config,
     Chat = Chat,
+    Log = Log,
     Modules = Modules,
     Positions = Positions
 }
