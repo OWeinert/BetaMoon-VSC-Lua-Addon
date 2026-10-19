@@ -13,7 +13,7 @@
 ---@field veinsPerChunk integer
 ---@field veinSize integer
 ---@field height {min: integer, max: integer}
----@field dimension BetaMoonDimensionName|nil `hell` and `all` remain accepted aliases; prefer the constants in `betamoon.mc.world.dimensions`.
+---@field dimension? BetaMoonDimensionSelection Omitted preserves native defaults; both/all are native-only aliases.
 ---@field replace BetaMoonBlockReference|integer|nil
 ---@field biomes BetaMoonBiomeName[]|nil
 ---@field salt? integer Additional stable seed salt.
@@ -28,7 +28,7 @@
 ---@field veinsPerChunk integer
 ---@field veinSize integer
 ---@field height {min: integer, max: integer}
----@field dimension BetaMoonDimensionName
+---@field dimension BetaMoonDimensionSelection
 ---@field replace integer|nil
 ---@field biomes string[]
 ---@field override fun(self: BetaMoonOreReference, definition: table): BetaMoonOverrideHandle
@@ -38,7 +38,7 @@
 ---@field owner? string
 ---@field enabled? boolean
 ---@field block? BetaMoonBlockReference|integer
----@field dimension? BetaMoonDimensionName
+---@field dimension? BetaMoonDimensionSelection
 
 ---@alias BetaMoonWorldFeatureSelector string|BetaMoonWorldFeatureReference
 ---@alias BetaMoonWorldPlacementSelector string|BetaMoonWorldPlacementReference
@@ -779,7 +779,7 @@ function StructureBuilder:clone() return StructureBuilder end
 ---@field tags? string[] Namespaced region and generation tags.
 ---@field key string
 ---@field start BetaMoonWorldFeatureSelector Root local structure template.
----@field dimensions? BetaMoonDimensionName[]|BetaMoonDimensionName Defaults to the overworld.
+---@field dimensions? BetaMoonDimensionSelection Defaults to the native Overworld.
 ---@field spacing? integer Region spacing in chunks, from 2 through 512; defaults to 32.
 ---@field separation? integer Minimum region-edge separation, from 0 through spacing - 1; defaults to 8.
 ---@field salt? integer Stable seed salt.
@@ -916,7 +916,7 @@ function WorldStructures:export(world, minX, minY, minZ, maxX, maxY, maxZ, optio
 ---@field key string
 ---@field feature BetaMoonWorldFeatureSelector
 ---@field stage? BetaMoonWorldGenerationStage Owned profiles execute this stage when enabled; native worlds retain post-population ordering.
----@field dimensions? BetaMoonDimensionName[]
+---@field dimensions? BetaMoonDimensionSelection
 ---@field attempts? integer|{min: integer, max: integer}|{perChunk: integer|{min: integer, max: integer}, extraChance: number?, probability: number?, rarity: integer?}
 ---@field position? {height: integer|BetaMoonWorldHeightProvider, horizontal: 'chunk'|'grid'?, gridSpacing: integer?}
 ---@field conditions? BetaMoonWorldPlacementConditions
@@ -1121,6 +1121,7 @@ function WorldBiomeSources:getRequired(key) return WorldBiomeSourceReference end
 ---@field normalization? 'bounded'|'none'
 
 ---@class BetaMoonSpatialFieldDefinition
+---@field dimension? BetaMoonDimensionTarget Direct sampling elsewhere fails; spatial selectors have zero weight there.
 ---@field key string namespace:field/path.
 ---@field node BetaMoonScalarExpression Graphs have at most 256 expanded nodes and depth 32.
 ---@field range? {min: number, max: number} Must conservatively contain the compiled range.
@@ -1130,7 +1131,7 @@ function WorldBiomeSources:getRequired(key) return WorldBiomeSourceReference end
 ---@field key string namespace:anchor/path.
 ---@field x integer
 ---@field z integer
----@field dimension? 'overworld'
+---@field dimension? BetaMoonDimensionTarget Default minecraft:overworld.
 
 ---@class BetaMoonSpatialSelector
 ---@field field string|BetaMoonSpatialFieldReference Must not depend on Y.
@@ -1334,6 +1335,7 @@ function SpatialFieldReference:exportSlice(world, options) end
 ---@field displayName? string Optional label in Create World; defaults to the canonical key.
 ---@field dimensions {overworld: BetaMoonGeneratorDimension}
 ---@class BetaMoonGeneratorDimension
+---@field nativeBase? 'overworld'|'nether'|'sky' Default overworld. Hell/Sky native population supports all or none; climate remains the native family climate.
 ---@field terrain string|BetaMoonTerrainSourceReference|BetaMoonTerrainSourceDefinition
 ---@field biomeSource? string|BetaMoonBiomeSourceReference|BetaMoonBiomeSourceDefinition
 ---@field surfaces? 'inherit'|'none'
@@ -1517,6 +1519,7 @@ function GeneratorProfiles:get(key) end
 function GeneratorProfiles:getRequired(key) return GeneratorProfileReference end
 
 ---@class BetaMoonOriginalSpawn
+---@field dimensionKey string Canonical sampled-world dimension.
 ---@field x integer
 ---@field y integer
 ---@field z integer
@@ -1549,7 +1552,8 @@ function GeneratorProfiles:getSelected(world) end
 ---@field weatherSound? string|BetaMoonSoundEventReference|BetaMoonAtmosphereSound
 ---@class BetaMoonAtmosphereScope
 ---@field type 'dimension'|'biome'|'region_tag'|'sphere'|'box'
----@field id? integer Dimension scopes.
+---@field id? integer Native dimension scopes only (0/-1); cannot combine with key.
+---@field key? BetaMoonDimensionTarget Canonical dimension scope; cannot combine with id.
 ---@field keys? string[] Biome scopes.
 ---@field tags? string[] Biome scopes.
 ---@field tag? string Registered regional-structure tag.

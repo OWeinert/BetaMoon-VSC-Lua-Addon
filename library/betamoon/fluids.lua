@@ -77,6 +77,7 @@
 ---@field pathfinding? 'blocked'|'passable'|'water'|'lava' Custom fluids default to blocked and all flags false.
 
 ---@class BetaMoonFluidDefinition
+---@field safeTeleportArrival? boolean Default false. Explicitly permits safe-mode arrival in this fluid.
 ---@field ecology? BetaMoonFluidEcologyPolicy
 ---@field key string Canonical fluid key.
 ---@field material BetaMoonFluidMaterial Uses vanilla water/lava only as a temporary native carrier; this is not fluid identity.
@@ -124,6 +125,7 @@ local FluidDefinitionToken = {}
 function FluidDefinitionToken:bind(binding) end
 
 ---@class BetaMoonFluidReference
+---@field safeTeleportArrival boolean
 ---@field key string Canonical fluid key.
 ---@field owner string
 ---@field isVanilla boolean

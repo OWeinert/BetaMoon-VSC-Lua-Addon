@@ -37,6 +37,8 @@ local PopulationPolicies = require("betamoon.world_generation").PopulationPolici
 local WorldCarvers = require("betamoon.world_generation").WorldCarvers
 local GeneratorProfiles = require("betamoon.world_generation").GeneratorProfiles
 local Atmospheres = require("betamoon.world_generation").Atmospheres
+local Dimensions = require("betamoon.dimensions_and_teleportation").Dimensions
+local Teleport = require("betamoon.dimensions_and_teleportation").Teleport
 local Fuels = require("betamoon.fuels").Fuels
 local TileEntityRegistry = require("betamoon.tile_entities_containers_and_container_guis").TileEntityRegistry
 local ContainerRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerRegistry
@@ -84,6 +86,8 @@ local TreeModes
 local CallbackResults
 
 ---@class BetaMoonModule
+---@field dimensions BetaMoonDimensionRegistry
+---@field teleport BetaMoonTeleport
 ---@field mc BetaMoonMinecraftConstants Read-only named Minecraft values. The values themselves are ordinary strings.
 ---@field callbackResults BetaMoonCallbackResults Read-only interaction callback result constants.
 ---@field blocks BetaMoonBlockRegistry
@@ -121,6 +125,8 @@ local CallbackResults
 ---@field stack fun(item: BetaMoonResourceReference|integer, count?: integer, damage?: integer): BetaMoonStack
 ---@type BetaMoonModule
 betamoon = {
+  dimensions = Dimensions,
+  teleport = Teleport,
   mc = MinecraftConstants,
   callbackResults = CallbackResults,
   blocks = BlockRegistry,
@@ -375,7 +381,9 @@ function TileView:getNbt() end
 ---@field isDaytime fun(self: BetaMoonActionWorld): boolean Current sky daylight state.
 ---@field getDifficulty fun(self: BetaMoonActionWorld): integer Native difficulty, 0..3.
 ---@field getSpawnPoint fun(self: BetaMoonActionWorld): BetaMoonPositionI World spawn coordinates.
----@field getDimension fun(self: BetaMoonActionWorld): integer Native dimension ID.
+---@field getDimension fun(self: BetaMoonActionWorld): integer Save-local provider ID.
+---@field getDimensionKey fun(self: BetaMoonActionWorld): string Canonical dimension identity.
+---@field getDimensionReference fun(self: BetaMoonActionWorld): BetaMoonDimensionReference Retainable effective reference pinned to the active world settings.
 ---@field getWeather fun(self: BetaMoonActionWorld): {raining: boolean, thundering: boolean, rainStrength: number, thunderStrength: number}
 ---@field isLoaded fun(self: BetaMoonActionWorld, x: integer, z: integer): boolean Checks the chunk without loading it.
 ---@field getBiome fun(self: BetaMoonActionWorld, x: integer, z: integer): string Biome display name.

@@ -34,6 +34,7 @@ Edit the reference there, then sync; use the public category files for LuaLS com
 | Recipes | [recipes.lua](library/betamoon/recipes.lua) |
 | Overrides | [overrides.lua](library/betamoon/overrides.lua) |
 | World generation | [world_generation.lua](library/betamoon/world_generation.lua) |
+| Dimensions and teleportation | [dimensions_and_teleportation.lua](library/betamoon/dimensions_and_teleportation.lua) |
 | Tile entities, containers, and container GUIs | [tile_entities_containers_and_container_guis.lua](library/betamoon/tile_entities_containers_and_container_guis.lua) |
 | Events | [events.lua](library/betamoon/events.lua) |
 | Input and controls | [input_and_controls.lua](library/betamoon/input_and_controls.lua) |

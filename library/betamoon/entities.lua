@@ -193,7 +193,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field cap? integer Maximum loaded instances of this type in the world, default 32; range 1..1024.
 ---@field light? BetaMoonEntitySpawnRange Accepted combined light range, default 0..15.
 ---@field height? BetaMoonEntitySpawnRange Accepted Y range, default 1..126.
----@field dimensions? integer[] Up to 64 allowed dimension IDs in -128..127; omit for any dimension.
+---@field dimensions? BetaMoonDimensionSelection Up to 64 canonical keys/references; native 0/-1 aliases accepted. Omitted selects native Overworld and Nether only.
 ---@field biomes? string[] Up to 64 allowed biome names, case-insensitive; omit for any biome.
 ---@field substrates? (BetaMoonBlockReference|integer)[] Up to 64 allowed solid blocks directly below the spawn position; omit for any solid block.
 ---@field despawn? 'native'|'persistent' Overrides living.despawn for naturally and explicitly spawned instances.
