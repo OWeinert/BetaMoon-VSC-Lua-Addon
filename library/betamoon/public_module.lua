@@ -11,6 +11,7 @@ local Audio = require("betamoon.assets_and_audio").Audio
 local Multiblocks = require("betamoon.multiblocks").Multiblocks
 local Particles = require("betamoon.particles").Particles
 local Entities = require("betamoon.entities").Entities
+local Players = require("betamoon.entities").Players
 local ToolMaterialRegistry = require("betamoon.tool_and_armor_materials").ToolMaterialRegistry
 local ArmorMaterialRegistry = require("betamoon.tool_and_armor_materials").ArmorMaterialRegistry
 local RecipeTypeRegistry = require("betamoon.recipes").RecipeTypeRegistry
@@ -27,10 +28,23 @@ local WorldSurfaces = require("betamoon.world_generation").WorldSurfaces
 local WorldBiomeSources = require("betamoon.world_generation").WorldBiomeSources
 local OreRegistry = require("betamoon.world_generation").OreRegistry
 local BiomeRegistry = require("betamoon.world_generation").BiomeRegistry
+local SpatialNoises = require("betamoon.world_generation").SpatialNoises
+local SpatialFields = require("betamoon.world_generation").SpatialFields
+local SpatialAnchors = require("betamoon.world_generation").SpatialAnchors
+local TerrainSources = require("betamoon.world_generation").TerrainSources
+local TerrainProfiles = require("betamoon.world_generation").TerrainProfiles
+local MaterialRules = require("betamoon.world_generation").MaterialRules
+local PopulationPolicies = require("betamoon.world_generation").PopulationPolicies
+local WorldCarvers = require("betamoon.world_generation").WorldCarvers
+local GeneratorProfiles = require("betamoon.world_generation").GeneratorProfiles
+local Atmospheres = require("betamoon.world_generation").Atmospheres
+local Dimensions = require("betamoon.dimensions_and_teleportation").Dimensions
+local Teleport = require("betamoon.dimensions_and_teleportation").Teleport
 local Fuels = require("betamoon.fuels").Fuels
 local TileEntityRegistry = require("betamoon.tile_entities_containers_and_container_guis").TileEntityRegistry
 local ContainerRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerRegistry
 local ContainerGuiRegistry = require("betamoon.tile_entities_containers_and_container_guis").ContainerGuiRegistry
+local GuiApi = require("betamoon.tile_entities_containers_and_container_guis").GuiApi
 local Capabilities = require("betamoon.tile_entities_containers_and_container_guis").Capabilities
 local Systems = require("betamoon.tile_entities_containers_and_container_guis").Systems
 local LogicalNetworks = require("betamoon.tile_entities_containers_and_container_guis").LogicalNetworks
@@ -38,6 +52,7 @@ local Events = require("betamoon.events").Events
 local Input = require("betamoon.input_and_controls").Input
 local Config = require("betamoon.chat_modules_and_utilities").Config
 local Chat = require("betamoon.chat_modules_and_utilities").Chat
+local Log = require("betamoon.chat_modules_and_utilities").Log
 local Modules = require("betamoon.chat_modules_and_utilities").Modules
 local Positions = require("betamoon.chat_modules_and_utilities").Positions
 
@@ -74,6 +89,8 @@ local TreeModes
 local CallbackResults
 
 ---@class BetaMoonModule
+---@field dimensions BetaMoonDimensionRegistry
+---@field teleport BetaMoonTeleport
 ---@field mc BetaMoonMinecraftConstants Read-only named Minecraft values. The values themselves are ordinary strings.
 ---@field callbackResults BetaMoonCallbackResults Read-only interaction callback result constants.
 ---@field blocks BetaMoonBlockRegistry
@@ -84,6 +101,7 @@ local CallbackResults
 ---@field particles BetaMoonParticleRegistry
 ---@field multiblocks BetaMoonMultiblockRegistry
 ---@field entities BetaMoonEntityRegistry
+---@field players BetaMoonPlayers
 ---@field fuels BetaMoonFuels
 ---@field fluids BetaMoonFluidRegistry
 ---@field soundEvents BetaMoonSoundEventRegistry
@@ -96,21 +114,26 @@ local CallbackResults
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
 ---@field recipeMatchers BetaMoonRecipeMatcherRegistry
 ---@field lootTables BetaMoonLootTableRegistry
----@field worldgen {features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
+---@field worldgen {spatial: {noises: BetaMoonSpatialNoiseRegistry, fields: BetaMoonSpatialFieldRegistry, anchors: BetaMoonSpatialAnchorRegistry}, terrain: {sources: BetaMoonTerrainSourceRegistry, profiles: BetaMoonTerrainHeightProfileRegistry}, materialRules: BetaMoonMaterialRuleRegistry, populationPolicies: BetaMoonPopulationPolicyRegistry, carvers: BetaMoonCarverRegistry, generatorProfiles: BetaMoonGeneratorProfileRegistry, features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
 ---@field chat BetaMoonChat
+---@field log BetaMoonLog Callable as betamoon.log(level, message); methods use the same thresholds and script identity.
 ---@field modules BetaMoonModules
 ---@field positions BetaMoonPositions
 ---@field tileEntities BetaMoonTileEntityRegistry
 ---@field containers BetaMoonContainerRegistry
 ---@field containerGuis BetaMoonContainerGuiRegistry
+---@field gui BetaMoonGuiApi
 ---@field capabilities BetaMoonCapabilityRegistry
 ---@field systems BetaMoonWorldServiceRegistry
 ---@field logicalNetworks BetaMoonLogicalNetworkRegistry
 ---@field stack fun(item: BetaMoonResourceReference|integer, count?: integer, damage?: integer): BetaMoonStack
 ---@type BetaMoonModule
 betamoon = {
+  log = Log,
+  dimensions = Dimensions,
+  teleport = Teleport,
   mc = MinecraftConstants,
   callbackResults = CallbackResults,
   blocks = BlockRegistry,
@@ -121,6 +144,7 @@ betamoon = {
   particles = Particles,
   multiblocks = Multiblocks,
   entities = Entities,
+  players = Players,
   fuels = Fuels,
   fluids = Fluids,
   soundEvents = SoundEvents,
@@ -136,7 +160,14 @@ betamoon = {
   recipeBindings = RecipeBindingRegistry,
   recipeMatchers = RecipeMatcherRegistry,
   lootTables = LootTables,
+  client = {visuals = {atmospheres = Atmospheres}},
   worldgen = {
+    spatial = {noises = SpatialNoises, fields = SpatialFields, anchors = SpatialAnchors},
+    terrain = {sources = TerrainSources, profiles = TerrainProfiles},
+    materialRules = MaterialRules,
+    carvers = WorldCarvers,
+    populationPolicies = PopulationPolicies,
+    generatorProfiles = GeneratorProfiles,
     features = WorldFeatures,
     placements = WorldPlacements,
     trees = WorldTrees,
@@ -155,6 +186,7 @@ betamoon = {
   tileEntities = TileEntityRegistry,
   containers = ContainerRegistry,
   containerGuis = ContainerGuiRegistry,
+  gui = GuiApi,
   capabilities = Capabilities,
   systems = Systems,
   logicalNetworks = LogicalNetworks,
@@ -180,6 +212,10 @@ betamoon = {
 ---@field min number[] Three local coordinates in 0..1.
 ---@field max number[] Three local coordinates in 0..1.
 
+---@class BetaMoonBlockSubtypes
+---@field mask? integer Raw metadata bit mask in 1..15; mutually exclusive with fields. Must not split state fields or include placement-managed bits.
+---@field fields? string[] Names of complete state fields to preserve as inventory subtype identity; mutually exclusive with mask.
+
 ---@class BetaMoonBlockPlacement
 ---@field facing? 'horizontal' Requires a state.facing enum containing the four compass directions.
 ---@field facingFrom? 'player' Places the block with its front facing the placer.
@@ -191,17 +227,19 @@ betamoon = {
 ---@field preset? 'cube'|'cuboid'|'cross'
 ---@field pass? 0|1
 ---@field bounds? BetaMoonLocalBox Authored for the default facing and rotates with horizontal placement state.
+---@field variantBy? 'metadata'|'subtype' Defaults to metadata. Subtype uses only declared subtype bits for textures, tint and model selection.
 ---@field variants? table<integer, BetaMoonBlockRenderVariant> Exact metadata keys in 0..15.
 
 ---@class BetaMoonItemRenderVariant
 ---@field icon? integer Ordinary icon atlas index in 0..255. Applies when no model is selected.
+---@field texture? BetaMoonTextureInput Texture asset or script-relative path for this variant's icon; takes precedence over icon. Applies when no model is selected.
 ---@field color? integer Ordinary item tint in 0x000000..0xFFFFFF. Model tint uses material.tint.
 ---@field appearance? BetaMoonModelAppearance|false Complete replacement; omitted inherits the default, false selects ordinary rendering.
 
 ---@class BetaMoonBlockRenderVariant
 ---@field appearance? BetaMoonModelAppearance|false Complete replacement; omitted inherits the default, false selects ordinary rendering. If any appearance is dynamic, every state renders dynamically; all-static blocks use chunk rendering.
----@field texture? integer Vanilla atlas index in 0..255.
----@field textures? table<string, integer>
+---@field texture? BetaMoonTextureInput|integer Texture asset, script-relative path, or atlas index in 0..255.
+---@field textures? table<BetaMoonBlockFace, BetaMoonTextureInput|integer> Per-face overrides for down/up/north/south/west/east.
 ---@field color? integer RGB color in 0x000000..0xFFFFFF.
 
 ---@class BetaMoonBlockPowerSource
@@ -358,7 +396,9 @@ function TileView:getNbt() end
 ---@field isDaytime fun(self: BetaMoonActionWorld): boolean Current sky daylight state.
 ---@field getDifficulty fun(self: BetaMoonActionWorld): integer Native difficulty, 0..3.
 ---@field getSpawnPoint fun(self: BetaMoonActionWorld): BetaMoonPositionI World spawn coordinates.
----@field getDimension fun(self: BetaMoonActionWorld): integer Native dimension ID.
+---@field getDimension fun(self: BetaMoonActionWorld): integer Save-local provider ID.
+---@field getDimensionKey fun(self: BetaMoonActionWorld): string Canonical dimension identity.
+---@field getDimensionReference fun(self: BetaMoonActionWorld): BetaMoonDimensionReference Retainable effective reference pinned to the active world settings.
 ---@field getWeather fun(self: BetaMoonActionWorld): {raining: boolean, thundering: boolean, rainStrength: number, thunderStrength: number}
 ---@field isLoaded fun(self: BetaMoonActionWorld, x: integer, z: integer): boolean Checks the chunk without loading it.
 ---@field getBiome fun(self: BetaMoonActionWorld, x: integer, z: integer): string Biome display name.
@@ -389,6 +429,15 @@ function TileView:getNbt() end
 ---@field getCapability fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, yOrCapability: integer|BetaMoonCapabilityReference|string, zOrFace?: integer|BetaMoonBlockFace, capability?: BetaMoonCapabilityReference|string, face?: BetaMoonBlockFace): BetaMoonCapabilityProxy|nil
 
 ---@class BetaMoonActionEntity
+---@field getTransform fun(self: BetaMoonActionEntity): BetaMoonEntityTransform Detached position and orientation.
+---@field setTransform fun(self: BetaMoonActionEntity, request: BetaMoonEntityTransformRequest): boolean, string? Atomic checked relocation/orientation; false with reason on expected refusal.
+---@field moveBy fun(self: BetaMoonActionEntity, dx: number, dy: number, dz: number): boolean, BetaMoonEntityMoveResult|string? Swept native collision in loaded terrain; no extra simulation tick.
+---@field addVelocity fun(self: BetaMoonActionEntity, dx: number, dy: number, dz: number): boolean, string? Add an impulse; each component and resulting velocity must be -16..16.
+---@field getMovementState fun(self: BetaMoonActionEntity): BetaMoonEntityMovementState Detached motion/contact state.
+---@field getBounds fun(self: BetaMoonActionEntity): BetaMoonEntityBounds Detached actual world-space body bounds.
+---@field getSupport fun(self: BetaMoonActionEntity): BetaMoonEntitySupport?, string? Loaded-only support probe; nil with a reason when unavailable.
+---@field isMounted fun(self: BetaMoonActionEntity): boolean
+---@field isSleeping fun(self: BetaMoonActionEntity): boolean
 ---@field isPlayer fun(self: BetaMoonActionEntity): boolean
 ---@field isSneaking fun(self: BetaMoonActionEntity): boolean
 ---@field isAlive fun(self: BetaMoonActionEntity): boolean

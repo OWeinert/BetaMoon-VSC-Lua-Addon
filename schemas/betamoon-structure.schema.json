@@ -482,6 +482,57 @@
       "additionalProperties": false,
       "required": ["key", "entries"],
       "properties": {
+        "when": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "spatial"
+          ],
+          "properties": {
+            "spatial": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "min": {
+                  "type": "number"
+                },
+                "max": {
+                  "type": "number"
+                },
+                "weight": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 64,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "at",
+                      "value"
+                    ],
+                    "properties": {
+                      "at": {
+                        "type": "number"
+                      },
+                      "value": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 4
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "key": { "$ref": "#/definitions/identifier" },
         "rolls": {
           "oneOf": [

@@ -186,13 +186,14 @@ function EntityTypeReference:override(definition) return {} end
 ---@field max? integer
 
 ---@class BetaMoonEntitySpawnDefinition
+---@field spatial? BetaMoonSpatialSelector
 ---@field category? 'hostile'|'passive' Default passive; follows the corresponding vanilla spawn pass.
 ---@field weight? integer Relative weight among matching custom types, default 10; range 1..10000.
 ---@field group? BetaMoonEntitySpawnRange Group size, default 1..1; bounds 1..16.
 ---@field cap? integer Maximum loaded instances of this type in the world, default 32; range 1..1024.
 ---@field light? BetaMoonEntitySpawnRange Accepted combined light range, default 0..15.
 ---@field height? BetaMoonEntitySpawnRange Accepted Y range, default 1..126.
----@field dimensions? integer[] Up to 64 allowed dimension IDs in -128..127; omit for any dimension.
+---@field dimensions? BetaMoonDimensionSelection Up to 64 canonical keys/references; native 0/-1 aliases accepted. Omitted selects native Overworld and Nether only.
 ---@field biomes? string[] Up to 64 allowed biome names, case-insensitive; omit for any biome.
 ---@field substrates? (BetaMoonBlockReference|integer)[] Up to 64 allowed solid blocks directly below the spawn position; omit for any solid block.
 ---@field despawn? 'native'|'persistent' Overrides living.despawn for naturally and explicitly spawned instances.
@@ -389,6 +390,63 @@ function Entities:first(query) end
 ---@return BetaMoonEntityTypeReference|nil
 function Entities:one(query) end
 
+---@class BetaMoonPlayers
+local Players = {}
+
+---Invoke with a fresh local singleplayer facade. Nested read-only scopes remain read-only.
+---@param callback fun(player: BetaMoonActionEntity)
+---@return boolean invoked
+---@return 'no_player'|'player_not_ready'|'unsupported_environment'? reason
+function Players:withLocal(callback) end
+
+---@class BetaMoonEntityVector
+---@field x number
+---@field y number
+---@field z number
+
+---@class BetaMoonEntityTransform
+---@field position BetaMoonEntityVector
+---@field rotation {yaw: number, pitch: number}
+
+---@class BetaMoonEntityTransformRequest
+---@field position? {x?: number, y?: number, z?: number} Omitted components retain current values.
+---@field rotation? {yaw?: number, pitch?: number} Finite degrees; player pitch is -90..90.
+---@field resetVelocity? boolean Default false.
+---@field resetFallDistance? boolean Default false.
+---@field interpolation? 'snap'|'preserve' Default snap. A position or rotation component is required.
+
+---@class BetaMoonEntityCollisionResult
+---@field onGround boolean Native downward-collision flag; distinct from support at rest.
+---@field collidedHorizontally boolean
+---@field collidedVertically boolean
+
+---@class BetaMoonEntityMoveResult: BetaMoonEntityCollisionResult
+---@field requestedDelta BetaMoonEntityVector
+---@field appliedDelta BetaMoonEntityVector Actual displacement after collision.
+
+---@class BetaMoonEntitySupport
+---@field supported boolean Body has collision support immediately beneath its feet.
+---@field probeDistance number Fixed 0.001 blocks.
+
+---@class BetaMoonEntityMovementState: BetaMoonEntityCollisionResult
+---@field position BetaMoonEntityVector
+---@field velocity BetaMoonEntityVector
+---@field fallDistance number
+---@field inWater boolean
+---@field burning boolean
+---@field mounted boolean
+---@field sleeping boolean
+---@field support? BetaMoonEntitySupport
+---@field supportReason? string Reason the loaded-only probe was unavailable.
+
+---@class BetaMoonEntityBounds
+---@field min BetaMoonEntityVector
+---@field max BetaMoonEntityVector
+---@field width number
+---@field height number
+---@field depth number
+
 return {
-    Entities = Entities
+    Entities = Entities,
+    Players = Players
 }

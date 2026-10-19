@@ -6,7 +6,7 @@
 -- CATEGORY: LIFECYCLE
 -- --------------------------------------------------------------------------
 
----@alias BetaMoonEventName 'world_join'|'world_leave'|'player_join'|'player_leave'|'gui_opened'|'gui_closed'|'gui_tick'|'game_tick'|'world_tick'|'screen_changed'|'key_input'|'mouse_input'|'block_broken'|'block_placed'|'item_used'|'dimension_changed'
+---@alias BetaMoonEventName 'world_join'|'world_leave'|'player_join'|'player_leave'|'gui_opened'|'gui_closed'|'gui_tick'|'game_tick'|'world_tick'|'screen_changed'|'key_input'|'mouse_input'|'block_broken'|'block_placed'|'item_used'|'dimension_changed'|'teleport_completed'|'teleport_failed'
 ---@alias BetaMoonItemType 'item'|'food'|'pickaxe'|'axe'|'shovel'|'hoe'|'sword'|'armor'
 ---@alias BetaMoonRecipeType 'shaped'|'shapeless'|'smelting'|string
 ---@alias BetaMoonRecipeTypeSelector BetaMoonRecipeType|BetaMoonRecipeTypeReference

@@ -59,6 +59,8 @@
 ---@field deactivated boolean Logical state became inactive this cycle.
 
 ---@class BetaMoonInputActionEvent: BetaMoonInputActionState
+---@field world? BetaMoonActionWorld Read-only gameplay access; teleport requests may be queued.
+---@field player? BetaMoonActionEntity Fresh callback-only local player, nil in menus.
 ---@field map string Canonical input-map key.
 ---@field action string Local action name.
 ---@field phase 'pressed'|'released'
@@ -185,6 +187,7 @@ function Hotkey:close() end
 ---@field action? {kind: 'attack'|'use'|'heldBreaking'|'open'|'drop'|'hotbar'|'hotbarWheel', result: 'pass'|'deny'} A pass applies only to the named action kind on the next input cycle.
 
 ---@class BetaMoonControllerEvent
+---@field world BetaMoonActionWorld Read-only access; queued teleportation is permitted.
 ---@field stage BetaMoonControllerStage
 ---@field tick integer
 ---@field player BetaMoonActionEntity Callback-scoped local player handle.
