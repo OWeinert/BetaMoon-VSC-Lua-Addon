@@ -305,6 +305,7 @@ function SoundEvents:one(query) end
 ---@field volume? number Native volume above 0 and at most 4; defaults to 1.
 ---@field pitch? number Native pitch above 0.01 and at most 4; defaults to 1.
 
+---A stable read-only custom step sound identity. Repeated lookups and compatible reloads return the same reference.
 ---@class BetaMoonStepSoundReference
 ---@field key string
 ---@field owner string

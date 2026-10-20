@@ -7,7 +7,7 @@ dimensions, teleportation, player/entity movement, multiblocks, particles, input
 Packaged `assets/<namespace>/worldgen/structures/*.json` and `assets/<namespace>/loot_tables/*.json` files also receive
 completion and validation from the bundled BetaMoon schemas.
 
-The definitions target BetaMoon 0.10.0.
+The definitions target BetaMoon 0.11.0.
 
 ## Definition files
 

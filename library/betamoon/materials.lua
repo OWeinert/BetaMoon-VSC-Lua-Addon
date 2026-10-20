@@ -17,6 +17,7 @@
 ---@field translucent? boolean Solid materials only; defaults to false.
 ---@field mobility? 'normal'|'noPush'|'immovable' Defaults to noPush for logic/liquid, normal otherwise. Liquid cannot use normal.
 
+---A stable read-only native material identity. Repeated lookups and compatible reloads return the same reference.
 ---@class BetaMoonBlockMaterialReference
 ---@field key string Canonical custom key or vanilla material name.
 ---@field owner? string Present for custom materials.
