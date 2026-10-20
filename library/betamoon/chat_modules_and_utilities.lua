@@ -32,13 +32,18 @@ function Log:error(message) end
 ---@field save fun(): boolean Write the current values to the config file. Fails if the file changed since it was loaded.
 ---@field reload fun(): boolean Reload the file into this same table, discarding unsaved changes.
 
+---@class BetaMoonConfigChoiceOption
+---@field value string|number Saved value; must match the field's default type.
+---@field label? string Nonempty caption shown by choice and cycle controls.
+
 ---@class BetaMoonConfigFieldOptions
 ---@field label? string Friendly label in the Scripts screen.
----@field description? string Short explanation shown below the field.
+---@field description? string Short explanation shown in the field's hover tooltip.
 ---@field min? number Inclusive numeric lower bound for GUI edits.
 ---@field max? number Inclusive numeric upper bound for GUI edits.
 ---@field step? number Positive numeric increment for GUI edits.
----@field choices? string[] Allowed strings, including the default; the editor cycles through them.
+---@field input? 'text'|'slider'|'choice'|'cycle' GUI input method. Strings and numbers default to text; booleans default to a True/False cycle button. Slider is numeric; choice is a dropdown; cycle advances on each click.
+---@field choices? (string|number|BetaMoonConfigChoiceOption)[] Allowed values for a string or number, including the default. Required by choice and cycle inputs. Each option may have a separate display label.
 ---@field readOnly? boolean Show this field without allowing GUI edits. Lua may still change it.
 ---@field readOnlyReason? string Explanation shown for a read-only field.
 ---@field fields? table<string, BetaMoonConfigFieldOptions> Options for declared nested object fields.
