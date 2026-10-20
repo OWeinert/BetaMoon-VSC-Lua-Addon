@@ -36,20 +36,27 @@ function Log:error(message) end
 ---@field value string|number Saved value; must match the field's default type.
 ---@field label? string Nonempty caption shown by choice and cycle controls.
 
+---@class BetaMoonConfigKeyOptions
+---@field input? 'text' Dictionary keys use text fields.
+
 ---@class BetaMoonConfigFieldOptions
 ---@field label? string Friendly label in the Scripts screen.
 ---@field description? string Short explanation shown in the field's hover tooltip.
 ---@field min? number Inclusive numeric lower bound for GUI edits.
 ---@field max? number Inclusive numeric upper bound for GUI edits.
 ---@field step? number Positive numeric increment for GUI edits.
----@field input? 'text'|'slider'|'choice'|'cycle' GUI input method. Strings and numbers default to text; booleans default to a True/False cycle button. Slider is numeric; choice is a dropdown; cycle advances on each click.
+---@field input? 'text'|'slider'|'choice'|'cycle'|'collection' GUI input method. Strings and numbers default to text; booleans default to a True/False cycle button. For a list or dictionary, text uses one comma-separated field; collection adds/removes entries.
 ---@field choices? (string|number|BetaMoonConfigChoiceOption)[] Allowed values for a string or number, including the default. Required by choice and cycle inputs. Each option may have a separate display label.
+---@field expanded? boolean Start a nested section, list, or dictionary open in Configure; defaults to false. Unavailable for scalar fields and compact text collections.
 ---@field readOnly? boolean Show this field without allowing GUI edits. Lua may still change it.
 ---@field readOnlyReason? string Explanation shown for a read-only field.
 ---@field fields? table<string, BetaMoonConfigFieldOptions> Options for declared nested object fields.
----@field element? BetaMoonConfigFieldOptions Editor shape for array items. An empty default array requires element.default before adding items.
----@field default? boolean|number|string|table Default for newly added array elements; only used inside element options.
----@field maxItems? integer Maximum GUI array length, from the initial length through 64; defaults to 64.
+---@field element? BetaMoonConfigFieldOptions Editor shape for array items. A text list requires scalar entries and an element.default. An empty default array also requires element.default before adding items.
+---@field kind? 'list'|'dictionary' Required for text or collection input on a table; must match the default table shape.
+---@field key? BetaMoonConfigKeyOptions Dictionary key control; use `{ input = 'text' }`.
+---@field value? BetaMoonConfigFieldOptions Dictionary value control. Requires a string, number, or boolean `default` for newly added entries or compact text parsing.
+---@field default? boolean|number|string|table Default for newly added list elements or dictionary values; only used inside element/value options.
+---@field maxItems? integer Maximum GUI list or dictionary length, from the initial length through 64; defaults to 64.
 
 ---@class BetaMoonConfigOptions
 ---@field label? string Friendly config-section name.
