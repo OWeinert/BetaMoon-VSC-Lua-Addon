@@ -36,7 +36,7 @@
 ---@field blocks? BetaMoonFluidDisplacement Behavior for eligible non-fluid blocks; tile entities and other fluids are always protected.
 
 ---@class BetaMoonFluidEntityPolicy
----@field movement? 'none'|'water'|'lava' Native-compatible movement profile; independent of the carrier material.
+---@field movement? 'none'|'water'|'lava' Native-compatible movement profile; lava also controls dropped-item buoyancy and fizz, independent of the carrier material.
 ---@field currentScale? number Current acceleration multiplier in 0..8.
 ---@field drowning? boolean Consume air while a living entity's eye is immersed.
 ---@field countsAsWet? boolean Count body contact as wet.
