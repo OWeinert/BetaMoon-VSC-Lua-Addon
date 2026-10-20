@@ -107,7 +107,7 @@ local CallbackResults
 ---@field soundEvents BetaMoonSoundEventRegistry
 ---@field audio BetaMoonAudio
 ---@field input BetaMoonInput
----@field config fun(key: string, defaults: table<string, boolean|number|string|table>): BetaMoonConfig
+---@field config fun(key: string, defaults: table<string, boolean|number|string|table>, options?: BetaMoonConfigOptions): BetaMoonConfig
 ---@field materials {tools: BetaMoonToolMaterialRegistry, armor: BetaMoonArmorMaterialRegistry}
 ---@field recipes BetaMoonRecipeRegistry
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
