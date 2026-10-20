@@ -299,6 +299,31 @@ function SoundEvents:first(query) end
 ---@return BetaMoonSoundEventReference|nil
 function SoundEvents:one(query) end
 
+---@class BetaMoonStepSoundDefinition
+---@field key string Namespaced step-sound key.
+---@field event BetaMoonSoundEventReference|string Registered sound event for native step, placement, hit, and break calls.
+---@field volume? number Native volume above 0 and at most 4; defaults to 1.
+---@field pitch? number Native pitch above 0.01 and at most 4; defaults to 1.
+
+---@class BetaMoonStepSoundReference
+---@field key string
+---@field owner string
+
+---@class BetaMoonStepSoundRegistry
+local StepSounds = {}
+
+---@param definition BetaMoonStepSoundDefinition
+---@return BetaMoonStepSoundReference
+function StepSounds:add(definition) return {} end
+
+---@param key string Registered key or vanilla step-sound name.
+---@return BetaMoonStepSoundReference|BetaMoonVanillaStepSound|nil
+function StepSounds:get(key) return nil end
+
+---@param key string Registered key or vanilla step-sound name.
+---@return BetaMoonStepSoundReference|BetaMoonVanillaStepSound
+function StepSounds:getRequired(key) return {} end
+
 ---@class BetaMoonAudioPlayOptions
 ---@field position? BetaMoonPositionF World coordinates; requires a mono clip. Omit for nonpositional playback.
 ---@field volume? number Replaces the event gain, 0..1; defaults to event value or 1.
@@ -316,5 +341,6 @@ function Audio:play(sound, options) end
 return {
     Assets = Assets,
     SoundEvents = SoundEvents,
+    StepSounds = StepSounds,
     Audio = Audio
 }

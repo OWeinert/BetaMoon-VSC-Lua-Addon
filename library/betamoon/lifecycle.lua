@@ -12,8 +12,10 @@
 ---@alias BetaMoonRecipeTypeSelector BetaMoonRecipeType|BetaMoonRecipeTypeReference
 ---@alias BetaMoonRecipeStack integer|BetaMoonResourceReference|BetaMoonStack|BetaMoonStackInput
 ---@alias BetaMoonResourceId integer|string|BetaMoonResourceReference
----@alias BetaMoonBlockMaterial 'air'|'grass'|'ground'|'wood'|'rock'|'stone'|'iron'|'water'|'lava'|'leaves'|'plants'|'sponge'|'cloth'|'fire'|'sand'|'circuits'|'glass'|'tnt'|'ice'|'snow'|'builtsnow'|'built_snow'|'cactus'|'clay'|'pumpkin'|'portal'|'cake'
----@alias BetaMoonStepSound 'stone'|'wood'|'gravel'|'grass'|'metal'|'glass'|'cloth'|'sand'
+---@alias BetaMoonVanillaBlockMaterial 'air'|'grass'|'ground'|'wood'|'rock'|'stone'|'iron'|'water'|'lava'|'leaves'|'plants'|'sponge'|'cloth'|'fire'|'sand'|'circuits'|'glass'|'tnt'|'ice'|'snow'|'builtsnow'|'built_snow'|'cactus'|'clay'|'pumpkin'|'portal'|'cake'
+---@alias BetaMoonBlockMaterial BetaMoonVanillaBlockMaterial|BetaMoonBlockMaterialReference|string
+---@alias BetaMoonVanillaStepSound 'stone'|'wood'|'gravel'|'grass'|'metal'|'glass'|'cloth'|'sand'
+---@alias BetaMoonStepSound BetaMoonVanillaStepSound|BetaMoonStepSoundReference|string
 ---@alias BetaMoonToolMaterialName 'wood'|'stone'|'iron'|'diamond'|'emerald'|'gold'
 ---@alias BetaMoonArmorMaterialName 'leather'|'cloth'|'chain'|'chainmail'|'iron'|'diamond'|'emerald'|'gold'|'golden'
 ---@alias BetaMoonArmorSlot 'head'|'helmet'|'chest'|'chestplate'|'legs'|'leggings'|'feet'|'boots'

@@ -6,7 +6,7 @@
 -- CATEGORY: FLUIDS
 -- --------------------------------------------------------------------------
 
----@alias BetaMoonFluidMaterial 'water'|'lava' Temporary native carrier until custom materials are available.
+---@alias BetaMoonFluidMaterial 'water'|'lava'|BetaMoonBlockMaterialReference|string Custom material must use kind = 'liquid'.
 ---@alias BetaMoonFluidPreset 'neutral'|'water'|'lava'
 ---@alias BetaMoonFluidSourceCreation 'never'|'two_adjacent'
 ---@alias BetaMoonFluidDisplacement 'drop'|'destroy'|'block'
@@ -80,7 +80,7 @@
 ---@field safeTeleportArrival? boolean Default false. Explicitly permits safe-mode arrival in this fluid.
 ---@field ecology? BetaMoonFluidEcologyPolicy
 ---@field key string Canonical fluid key.
----@field material BetaMoonFluidMaterial Uses vanilla water/lava only as a temporary native carrier; this is not fluid identity.
+---@field material BetaMoonFluidMaterial Native carrier; fluid identity and behavior remain separate.
 ---@field preset? BetaMoonFluidPreset Defaults to neutral.
 ---@field appearance BetaMoonFluidAppearance
 ---@field flow? BetaMoonFluidFlow
@@ -130,7 +130,7 @@ function FluidDefinitionToken:bind(binding) end
 ---@field owner string
 ---@field isVanilla boolean
 ---@field exists boolean
----@field material BetaMoonFluidMaterial Temporary native carrier, not fluid identity.
+---@field material BetaMoonFluidMaterial Native carrier, not fluid identity.
 ---@field preset BetaMoonFluidPreset
 ---@field flowingBlock BetaMoonBlockReference
 ---@field stillBlock BetaMoonBlockReference

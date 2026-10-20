@@ -27,6 +27,7 @@ function ResourceReference:override(definition)
 end
 
 ---@class BetaMoonBlockReference: BetaMoonResourceReference
+---@field material BetaMoonBlockMaterial|nil
 ---@field fluid? BetaMoonFluidReference Present for flowing/still fluid blocks.
 ---@field fluidRole? 'flowing'|'still'
 ---@field texture integer

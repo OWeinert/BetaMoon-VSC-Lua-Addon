@@ -7,13 +7,15 @@ local ItemRegistry = require("betamoon.blocks_and_items").ItemRegistry
 local Fluids = require("betamoon.fluids").Fluids
 local Assets = require("betamoon.assets_and_audio").Assets
 local SoundEvents = require("betamoon.assets_and_audio").SoundEvents
+local StepSounds = require("betamoon.assets_and_audio").StepSounds
 local Audio = require("betamoon.assets_and_audio").Audio
 local Multiblocks = require("betamoon.multiblocks").Multiblocks
 local Particles = require("betamoon.particles").Particles
 local Entities = require("betamoon.entities").Entities
 local Players = require("betamoon.entities").Players
-local ToolMaterialRegistry = require("betamoon.tool_and_armor_materials").ToolMaterialRegistry
-local ArmorMaterialRegistry = require("betamoon.tool_and_armor_materials").ArmorMaterialRegistry
+local BlockMaterialRegistry = require("betamoon.materials").BlockMaterialRegistry
+local ToolMaterialRegistry = require("betamoon.materials").ToolMaterialRegistry
+local ArmorMaterialRegistry = require("betamoon.materials").ArmorMaterialRegistry
 local RecipeTypeRegistry = require("betamoon.recipes").RecipeTypeRegistry
 local RecipeRegistry = require("betamoon.recipes").RecipeRegistry
 local RecipeBindingRegistry = require("betamoon.recipes").RecipeBindingRegistry
@@ -105,10 +107,11 @@ local CallbackResults
 ---@field fuels BetaMoonFuels
 ---@field fluids BetaMoonFluidRegistry
 ---@field soundEvents BetaMoonSoundEventRegistry
+---@field stepSounds BetaMoonStepSoundRegistry
 ---@field audio BetaMoonAudio
 ---@field input BetaMoonInput
 ---@field config fun(key: string, defaults: table<string, boolean|number|string|table>): BetaMoonConfig
----@field materials {tools: BetaMoonToolMaterialRegistry, armor: BetaMoonArmorMaterialRegistry}
+---@field materials {blocks: BetaMoonBlockMaterialRegistry, tools: BetaMoonToolMaterialRegistry, armor: BetaMoonArmorMaterialRegistry}
 ---@field recipes BetaMoonRecipeRegistry
 ---@field recipeTypes BetaMoonRecipeTypeRegistry
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
@@ -148,10 +151,12 @@ betamoon = {
   fuels = Fuels,
   fluids = Fluids,
   soundEvents = SoundEvents,
+  stepSounds = StepSounds,
   audio = Audio,
   input = Input,
   config = Config,
   materials = {
+    blocks = BlockMaterialRegistry,
     tools = ToolMaterialRegistry,
     armor = ArmorMaterialRegistry
   },
@@ -340,7 +345,7 @@ function NbtView:getList(key) end
 ---@field powered boolean
 ---@field light integer
 ---@field hasTile boolean
----@field material {liquid: boolean, solid: boolean, burning: boolean, translucent: boolean, mobility: integer}
+---@field material {key: string?, liquid: boolean, solid: boolean, burning: boolean, translucent: boolean, harvestable: boolean, groundCover: boolean, blocksGrass: boolean, mobility: integer, mapColor: integer}
 
 ---@class BetaMoonTileView
 ---@field position BetaMoonPositionI

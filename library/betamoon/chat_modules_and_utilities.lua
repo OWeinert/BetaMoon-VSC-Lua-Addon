@@ -10,7 +10,7 @@
 
 ---Write runtime messages without creating Script Issues or throwing an error.
 ---@class BetaMoonLog
----@operator call(level: BetaMoonLogLevel, message: string)
+---@operator call: fun(level: BetaMoonLogLevel, message: string)
 local Log = {}
 
 ---@param message string
