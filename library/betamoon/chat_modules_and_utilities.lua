@@ -10,7 +10,7 @@
 
 ---Write runtime messages without creating Script Issues or throwing an error.
 ---@class BetaMoonLog
----@operator call(level: BetaMoonLogLevel, message: string)
+---@operator call: fun(level: BetaMoonLogLevel, message: string)
 local Log = {}
 
 ---@param message string
@@ -32,12 +32,33 @@ function Log:error(message) end
 ---@field save fun(): boolean Write the current values to the config file. Fails if the file changed since it was loaded.
 ---@field reload fun(): boolean Reload the file into this same table, discarding unsaved changes.
 
+---@class BetaMoonConfigFieldOptions
+---@field label? string Friendly label in the Scripts screen.
+---@field description? string Short explanation shown below the field.
+---@field min? number Inclusive numeric lower bound for GUI edits.
+---@field max? number Inclusive numeric upper bound for GUI edits.
+---@field step? number Positive numeric increment for GUI edits.
+---@field choices? string[] Allowed strings, including the default; the editor cycles through them.
+---@field readOnly? boolean Show this field without allowing GUI edits. Lua may still change it.
+---@field readOnlyReason? string Explanation shown for a read-only field.
+---@field fields? table<string, BetaMoonConfigFieldOptions> Options for declared nested object fields.
+---@field element? BetaMoonConfigFieldOptions Editor shape for array items. An empty default array requires element.default before adding items.
+---@field default? boolean|number|string|table Default for newly added array elements; only used inside element options.
+---@field maxItems? integer Maximum GUI array length, from the initial length through 64; defaults to 64.
+
+---@class BetaMoonConfigOptions
+---@field label? string Friendly config-section name.
+---@field description? string Short config-section description.
+---@field fields? table<string, BetaMoonConfigFieldOptions> Presentation and edit rules for declared fields.
+---@field onChange? fun(values: table<string, any>, previous: table<string, any>, changedPaths: string[]) Called once after a changed save or reload at the next safe update. Previous values are detached; handlers should be repeatable.
+
 ---Open a JSON config in the instance's betamoon/config folder, creating it from defaults if missing.
 ---A simple key such as "mymod" uses mymod.json; "mymod:gameplay" uses mymod/gameplay.json.
 ---@param key string
 ---@param defaults table<string, boolean|number|string|table>
+---@param options? BetaMoonConfigOptions Optional Scripts-screen metadata and live-change handler.
 ---@return BetaMoonConfig
-local Config = function(key, defaults)
+local Config = function(key, defaults, options)
   return {}
 end
 
