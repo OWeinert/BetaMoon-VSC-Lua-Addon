@@ -107,9 +107,9 @@ end
 ---@class BetaMoonPositions
 local Positions = {}
 
----@param x integer
----@param y integer
----@param z integer
+---@param x integer Exact integer; fractions are rejected.
+---@param y integer Exact integer; fractions are rejected.
+---@param z integer Exact integer; fractions are rejected.
 ---@return BetaMoonPositionI
 function Positions:integer(x, y, z)
   return { x = x, y = y, z = z }
