@@ -63,12 +63,14 @@ function Log:error(message) end
 ---@field description? string Short config-section description.
 ---@field fields? table<string, BetaMoonConfigFieldOptions> Presentation and edit rules for declared fields.
 ---@field onChange? fun(values: table<string, any>, previous: table<string, any>, changedPaths: string[]) Called once after a changed save or reload at the next safe update. Previous values are detached; handlers should be repeatable.
+---@field schemaVersion? integer Positive schema version stored as $schemaVersion. Existing unversioned files are version 0.
+---@field migrate? fun(old: table<string, any>, fromVersion: integer): table<string, any> Return the complete new values for an older file. The old snapshot and nested tables are read-only. Required when opening an older file.
 
 ---Open a JSON config in the instance's betamoon/config folder, creating it from defaults if missing.
 ---A simple key such as "mymod" uses mymod.json; "mymod:gameplay" uses mymod/gameplay.json.
 ---@param key string
 ---@param defaults table<string, boolean|number|string|table>
----@param options? BetaMoonConfigOptions Optional Scripts-screen metadata and live-change handler.
+---@param options? BetaMoonConfigOptions Optional Scripts-screen metadata, live-change handler, and schema migration.
 ---@return BetaMoonConfig
 local Config = function(key, defaults, options)
   return {}
