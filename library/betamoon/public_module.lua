@@ -35,6 +35,7 @@ local SpatialFields = require("betamoon.world_generation").SpatialFields
 local SpatialAnchors = require("betamoon.world_generation").SpatialAnchors
 local TerrainSources = require("betamoon.world_generation").TerrainSources
 local TerrainProfiles = require("betamoon.world_generation").TerrainProfiles
+local TerrainOverrides = require("betamoon.world_generation").TerrainOverrides
 local MaterialRules = require("betamoon.world_generation").MaterialRules
 local PopulationPolicies = require("betamoon.world_generation").PopulationPolicies
 local WorldCarvers = require("betamoon.world_generation").WorldCarvers
@@ -117,7 +118,7 @@ local CallbackResults
 ---@field recipeBindings BetaMoonRecipeBindingRegistry
 ---@field recipeMatchers BetaMoonRecipeMatcherRegistry
 ---@field lootTables BetaMoonLootTableRegistry
----@field worldgen {spatial: {noises: BetaMoonSpatialNoiseRegistry, fields: BetaMoonSpatialFieldRegistry, anchors: BetaMoonSpatialAnchorRegistry}, terrain: {sources: BetaMoonTerrainSourceRegistry, profiles: BetaMoonTerrainHeightProfileRegistry}, materialRules: BetaMoonMaterialRuleRegistry, populationPolicies: BetaMoonPopulationPolicyRegistry, carvers: BetaMoonCarverRegistry, generatorProfiles: BetaMoonGeneratorProfileRegistry, features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
+---@field worldgen {spatial: {noises: BetaMoonSpatialNoiseRegistry, fields: BetaMoonSpatialFieldRegistry, anchors: BetaMoonSpatialAnchorRegistry}, terrain: {sources: BetaMoonTerrainSourceRegistry, profiles: BetaMoonTerrainHeightProfileRegistry, overrides: BetaMoonTerrainOverrideRegistry}, materialRules: BetaMoonMaterialRuleRegistry, populationPolicies: BetaMoonPopulationPolicyRegistry, carvers: BetaMoonCarverRegistry, generatorProfiles: BetaMoonGeneratorProfileRegistry, features: BetaMoonWorldFeatureRegistry, placements: BetaMoonWorldPlacementRegistry, trees: BetaMoonTreeRegistry, structures: BetaMoonStructureRegistry, ores: BetaMoonOreRegistry, surfaces: BetaMoonSurfaceRegistry, biomes: BetaMoonBiomeRegistry, biomeSources: BetaMoonBiomeSourceRegistry, treeModes: BetaMoonTreeModes}
 ---@field events BetaMoonEvents
 ---@field overrides BetaMoonOverrideRegistry
 ---@field chat BetaMoonChat
@@ -168,7 +169,7 @@ betamoon = {
   client = {visuals = {atmospheres = Atmospheres}},
   worldgen = {
     spatial = {noises = SpatialNoises, fields = SpatialFields, anchors = SpatialAnchors},
-    terrain = {sources = TerrainSources, profiles = TerrainProfiles},
+    terrain = {sources = TerrainSources, profiles = TerrainProfiles, overrides = TerrainOverrides},
     materialRules = MaterialRules,
     carvers = WorldCarvers,
     populationPolicies = PopulationPolicies,

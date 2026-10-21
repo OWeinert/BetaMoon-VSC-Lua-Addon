@@ -1331,6 +1331,53 @@ function SpatialFieldReference:exportSlice(world, options) end
 ---@field biomes? {include: string[]?, exclude: string[]?, includeTags: string[]?, excludeTags: string[]?} Carver column filters.
 ---@field profiles? (string|BetaMoonTerrainHeightProfileReference)[] Match positive blend contributions from a profile-map source.
 
+---@class BetaMoonTerrainOverrideDefinition
+---@field key string namespace:terrain_override/path.
+---@field displayName? string Generation Settings label; defaults to the canonical key.
+---@field bases string[] One or more compatible presets: "minecraft" or namespace:generator/path.
+---@field biomes? {include: string[]?, exclude: string[]?, includeTags: string[]?, excludeTags: string[]?} Native display names or canonical biome keys; exclusions win.
+---@field region? {minX: integer?, maxX: integer?, minZ: integer?, maxZ: integer?, selector: BetaMoonSpatialSelector?} Inclusive X/Z bounds and optional seed-based selector.
+---@field blend? {width: integer?, side: 'inside'|'both'?} Width 0..256; default inside with no fade.
+---@field priority? integer -1000..1000; lower values run first.
+---@field before? string[] Canonical override keys that must run after this package.
+---@field after? string[] Canonical override keys that must run before this package.
+---@field terrain? {mode: 'inherit'|'replace'?, source: string|BetaMoonTerrainSourceReference?} Replacement requires an owned terrain source.
+---@field materials? {mode: 'inherit'|'add'|'replace'?, rule: BetaMoonMaterialRule|BetaMoonRawBlockState|string?} Add targets stone; replace targets all non-air except bedrock. Applied before carving and surfaces.
+---@field carvers? {mode: 'inherit'|'add'|'replace'|'none'?, entries: (string|BetaMoonCarverReference)[]?}
+---@field surfaces? {mode: 'inherit'|'replace'|'none'?, surface: string|BetaMoonSurfaceReference?} Replacement uses a registered surface rule set after carving.
+---@field population? {disableNative: string[]?, disablePlacements: string[]?} Suppress native categories or owned placement/structure keys at the feature origin; world-level switches remain authoritative.
+---@class BetaMoonTerrainOverrideDiagnostic
+---@field key string
+---@field displayName string
+---@field enabled boolean
+---@field reason 'not_in_save'|'disabled_by_player'|'disabled_by_parent'|'outside_target'|'active'
+---@field influence number 0..1 at the sampled X/Z position.
+---@field selected boolean Whether the deterministic transition cell receives this package.
+---@field order integer One-based effective order; zero when disabled.
+---@field channels string[]
+---@field signature string
+---@class BetaMoonTerrainOverridePoint
+---@field preset string
+---@field biome string Canonical saved-world biome at this X/Z position.
+---@field x integer
+---@field z integer
+---@field packages BetaMoonTerrainOverrideDiagnostic[]
+---@class BetaMoonTerrainOverrideChunkEntry
+---@field key string
+---@field enabled boolean
+---@field order integer
+---@field minInfluence number
+---@field maxInfluence number
+---@field influencedColumns integer
+---@field selectedColumns integer
+---@field channels string[]
+---@field signature string
+---@class BetaMoonTerrainOverrideChunk
+---@field preset string
+---@field chunkX integer
+---@field chunkZ integer
+---@field packages BetaMoonTerrainOverrideChunkEntry[]
+
 ---@class BetaMoonGenerationSelection
 ---@field include? string[] Canonical placement/feature/structure keys.
 ---@field exclude? string[] Exclusions win.
@@ -1363,6 +1410,8 @@ local MaterialRuleReference = {}
 local PopulationPolicyReference = {}
 ---@class BetaMoonCarverReference: BetaMoonGenerationReference
 local CarverReference = {}
+---@class BetaMoonTerrainOverrideReference: BetaMoonGenerationReference
+local TerrainOverrideReference = {}
 ---@class BetaMoonGeneratorProfileReference: BetaMoonGenerationReference
 local GeneratorProfileReference = {}
 ---@param world BetaMoonActionWorld
@@ -1480,6 +1529,30 @@ function TerrainProfiles:get(key) end
 ---@param key string
 ---@return BetaMoonTerrainHeightProfileReference
 function TerrainProfiles:getRequired(key) return TerrainHeightProfileReference end
+
+---@class BetaMoonTerrainOverrideRegistry
+local TerrainOverrides = {}
+---@param definition BetaMoonTerrainOverrideDefinition|{key: string?, path: string} Packaged JSON uses the same declaration schema.
+---@return BetaMoonTerrainOverrideReference
+function TerrainOverrides:add(definition) return TerrainOverrideReference end
+---@param key string
+---@return BetaMoonTerrainOverrideReference|nil
+function TerrainOverrides:get(key) end
+---@param key string
+---@return BetaMoonTerrainOverrideReference
+function TerrainOverrides:getRequired(key) return TerrainOverrideReference end
+---@param world BetaMoonActionWorld
+---@param x integer
+---@param z integer
+---@return BetaMoonTerrainOverridePoint
+---@overload fun(self: BetaMoonTerrainOverrideRegistry, world: BetaMoonActionWorld, position: BetaMoonXZPosition): BetaMoonTerrainOverridePoint
+function TerrainOverrides:inspect(world, x, z) end
+---@param world BetaMoonActionWorld
+---@param chunkX integer
+---@param chunkZ integer
+---@return BetaMoonTerrainOverrideChunk
+---@overload fun(self: BetaMoonTerrainOverrideRegistry, world: BetaMoonActionWorld, position: BetaMoonChunkPosition): BetaMoonTerrainOverrideChunk
+function TerrainOverrides:inspectChunk(world, chunkX, chunkZ) end
 
 ---@class BetaMoonMaterialRuleRegistry
 local MaterialRules = {}
@@ -1676,6 +1749,7 @@ return {
     SpatialAnchors = SpatialAnchors,
     TerrainSources = TerrainSources,
     TerrainProfiles = TerrainProfiles,
+    TerrainOverrides = TerrainOverrides,
     MaterialRules = MaterialRules,
     PopulationPolicies = PopulationPolicies,
     WorldCarvers = WorldCarvers,
