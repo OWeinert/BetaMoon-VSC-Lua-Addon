@@ -86,6 +86,7 @@ function ParticleEffectHandle:stop() end
 ---@param x number
 ---@param y number
 ---@param z number
+---@overload fun(self: BetaMoonParticleEffectHandle, position: BetaMoonVectorPosition)
 function ParticleEffectHandle:setPosition(x, y, z) end
 
 ---@class BetaMoonParticleAccess
@@ -117,6 +118,7 @@ function ParticleAccess:setColor(color) end
 ---@param x number -16..16 blocks/tick.
 ---@param y number -16..16 blocks/tick.
 ---@param z number -16..16 blocks/tick.
+---@overload fun(self: BetaMoonParticleAccess, velocity: BetaMoonVectorPosition)
 function ParticleAccess:setVelocity(x, y, z) end
 ---@param gravity number -1..1 blocks/tick squared; positive downward.
 function ParticleAccess:setGravity(gravity) end

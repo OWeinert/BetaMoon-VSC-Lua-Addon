@@ -106,6 +106,7 @@ function WorldFeatureReference:getKey() return '' end
 ---@param z integer
 ---@param options? BetaMoonWorldFeaturePlaceOptions
 ---@return BetaMoonWorldFeatureResult
+---@overload fun(self: BetaMoonWorldFeatureReference, world: BetaMoonActionWorld, position: BetaMoonCellPosition, options?: BetaMoonWorldFeaturePlaceOptions): BetaMoonWorldFeatureResult
 function WorldFeatureReference:place(world, x, y, z, options) return {} end
 ---@param world BetaMoonActionWorld
 ---@param x integer
@@ -113,6 +114,7 @@ function WorldFeatureReference:place(world, x, y, z, options) return {} end
 ---@param z integer
 ---@param options? BetaMoonWorldFeaturePlaceOptions
 ---@return BetaMoonWorldFeatureResult
+---@overload fun(self: BetaMoonWorldFeatureReference, world: BetaMoonActionWorld, position: BetaMoonCellPosition, options?: BetaMoonWorldFeaturePlaceOptions): BetaMoonWorldFeatureResult
 function WorldFeatureReference:preview(world, x, y, z, options) return {} end
 
 ---@class BetaMoonWorldPlacementReference
@@ -127,6 +129,7 @@ function WorldPlacementReference:getFeature() return WorldFeatureReference end
 ---@param z integer
 ---@param maxChunks? integer Search radius in chunks, from 0 to 128. Defaults to 32.
 ---@return BetaMoonWorldPlacementCandidate|nil
+---@overload fun(self: BetaMoonWorldPlacementReference, world: BetaMoonActionWorld, position: BetaMoonXZPosition, maxChunks?: integer): BetaMoonWorldPlacementCandidate|nil
 function WorldPlacementReference:locateCandidate(world, x, z, maxChunks) end
 
 ---@class BetaMoonWorldPlacementCandidate
@@ -812,6 +815,7 @@ function RegionalStructureReference:getKey() return '' end
 ---@param z integer
 ---@param maxRegions? integer Search radius from 0 through 128; defaults to 32.
 ---@return BetaMoonRegionalStructureLocation|nil
+---@overload fun(self: BetaMoonRegionalStructureReference, world: BetaMoonActionWorld, position: BetaMoonXZPosition, maxRegions?: integer): BetaMoonRegionalStructureLocation|nil
 function RegionalStructureReference:locate(world, x, z, maxRegions) end
 
 ---@class BetaMoonStructureExportOptions
@@ -1174,12 +1178,14 @@ local SpatialFieldReference = {}
 ---@param z number
 ---@overload fun(self: BetaMoonSpatialFieldReference, world: BetaMoonActionWorld, x: number, y: number, z: number): BetaMoonFieldSample|nil, string?
 ---@return BetaMoonFieldSample|nil, string? reason
+---@overload fun(self: BetaMoonSpatialFieldReference, world: BetaMoonActionWorld, position: BetaMoonXZVector): BetaMoonFieldSample|nil, string?
 function SpatialFieldReference:sample(world, x, z) end
 ---@param world BetaMoonActionWorld
 ---@param x number
 ---@param z number
 ---@overload fun(self: BetaMoonSpatialFieldReference, world: BetaMoonActionWorld, x: number, y: number, z: number): BetaMoonFieldInspection|nil, string?
 ---@return BetaMoonFieldInspection|nil, string? reason
+---@overload fun(self: BetaMoonSpatialFieldReference, world: BetaMoonActionWorld, position: BetaMoonXZVector): BetaMoonFieldInspection|nil, string?
 function SpatialFieldReference:inspect(world, x, z) end
 ---Exports a bounded CSV slice to BetaMoon's debug directory.
 ---@param world BetaMoonActionWorld
@@ -1363,11 +1369,13 @@ local GeneratorProfileReference = {}
 ---@param x integer
 ---@param z integer
 ---@return BetaMoonTerrainSample|nil, string? reason
+---@overload fun(self: BetaMoonTerrainSourceReference, world: BetaMoonActionWorld, position: BetaMoonXZPosition): BetaMoonTerrainSample|nil, string?
 function TerrainSourceReference:sample(world, x, z) end
 ---@param world BetaMoonActionWorld
 ---@param x integer
 ---@param z integer
 ---@return BetaMoonTerrainSample|nil, string? reason
+---@overload fun(self: BetaMoonTerrainHeightProfileReference, world: BetaMoonActionWorld, position: BetaMoonXZPosition): BetaMoonTerrainSample|nil, string?
 function TerrainHeightProfileReference:sample(world, x, z) end
 ---@class BetaMoonGeneratorDescription
 ---@field displayName string Preset label or canonical key.
@@ -1395,12 +1403,14 @@ function GeneratorProfileReference:describe() end
 ---@param chunkX integer
 ---@param chunkZ integer
 ---@return BetaMoonGeneratorChunkPreview|nil, string? reason No chunks are loaded or published.
+---@overload fun(self: BetaMoonGeneratorProfileReference, world: BetaMoonActionWorld, position: BetaMoonChunkPosition): BetaMoonGeneratorChunkPreview|nil, string?
 function GeneratorProfileReference:previewChunk(world, chunkX, chunkZ) end
 ---Exports the raw preview's heightmaps and identity to CSV in BetaMoon's debug directory.
 ---@param world BetaMoonActionWorld
 ---@param chunkX integer
 ---@param chunkZ integer
 ---@return string|nil path, string? reason
+---@overload fun(self: BetaMoonGeneratorProfileReference, world: BetaMoonActionWorld, position: BetaMoonChunkPosition): string|nil, string?
 function GeneratorProfileReference:exportChunk(world, chunkX, chunkZ) end
 
 ---@param world BetaMoonActionWorld
@@ -1408,6 +1418,7 @@ function GeneratorProfileReference:exportChunk(world, chunkX, chunkZ) end
 ---@param x integer
 ---@param z integer
 ---@return number|nil, string? reason
+---@overload fun(self: BetaMoonGeneratorProfileReference, world: BetaMoonActionWorld, output: string, position: BetaMoonXZPosition): number|nil, string?
 function GeneratorProfileReference:sampleHeightOutput(world, output, x, z) end
 
 ---@class BetaMoonSpatialNoiseRegistry
@@ -1601,6 +1612,7 @@ function Atmospheres:bind(definition) end
 ---@param y number
 ---@param z number
 ---@return {profiles: {key: string, weight: number, priority: integer}[], channels: table<string, {key: string, weight: number, priority: integer}[]>}
+---@overload fun(self: BetaMoonAtmosphereRegistry, world: BetaMoonActionWorld, position: BetaMoonVectorPosition): {profiles: {key: string, weight: number, priority: integer}[], channels: table<string, {key: string, weight: number, priority: integer}[]>}
 function Atmospheres:getActive(world, x, y, z) return {profiles={}} end
 
 ---@class BetaMoonOreRegistry

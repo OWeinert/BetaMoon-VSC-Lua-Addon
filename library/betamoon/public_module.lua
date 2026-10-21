@@ -393,9 +393,9 @@ function TileView:getNbt() end
 
 ---@class BetaMoonActionWorld
 ---@field findMultiblocks fun(self: BetaMoonActionWorld, definition: BetaMoonMultiblockReference, options: BetaMoonMultiblockFindOptions): BetaMoonMultiblockFindResult Pure bounded placement search; no instance allocation.
----@field getMultiblocksAt fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, options?: {definition: BetaMoonMultiblockReference?}): BetaMoonMultiblockInstance[] Known memberships including required air and owned outputs; no discovery side effects.
----@field checkMultiblock fun(self: BetaMoonActionWorld, definition: BetaMoonMultiblockReference, x: integer, y: integer, z: integer, options?: BetaMoonMultiblockCheckOptions): BetaMoonMultiblockReport Pure loaded-only diagnostic.
----@field getMultiblock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): BetaMoonMultiblockInstance|nil Scoped authoritative controller instance.
+---@field getMultiblocksAt fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, yOrOptions?: integer|{definition: BetaMoonMultiblockReference?}, z?: integer, options?: {definition: BetaMoonMultiblockReference?}): BetaMoonMultiblockInstance[] Known memberships including required air and owned outputs; no discovery side effects.
+---@field checkMultiblock fun(self: BetaMoonActionWorld, definition: BetaMoonMultiblockReference, positionOrX: BetaMoonCellPosition|integer, yOrOptions?: integer|BetaMoonMultiblockCheckOptions, z?: integer, options?: BetaMoonMultiblockCheckOptions): BetaMoonMultiblockReport Pure loaded-only diagnostic.
+---@field getMultiblock fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): BetaMoonMultiblockInstance|nil Scoped authoritative controller instance.
 ---@field getTime fun(self: BetaMoonActionWorld): integer World ticks.
 ---@field getDayTime fun(self: BetaMoonActionWorld): integer Time of day, 0..23999.
 ---@field isDaytime fun(self: BetaMoonActionWorld): boolean Current sky daylight state.
@@ -405,39 +405,39 @@ function TileView:getNbt() end
 ---@field getDimensionKey fun(self: BetaMoonActionWorld): string Canonical dimension identity.
 ---@field getDimensionReference fun(self: BetaMoonActionWorld): BetaMoonDimensionReference Retainable effective reference pinned to the active world settings.
 ---@field getWeather fun(self: BetaMoonActionWorld): {raining: boolean, thundering: boolean, rainStrength: number, thunderStrength: number}
----@field isLoaded fun(self: BetaMoonActionWorld, x: integer, z: integer): boolean Checks the chunk without loading it.
----@field getBiome fun(self: BetaMoonActionWorld, x: integer, z: integer): string Biome display name.
----@field getHeight fun(self: BetaMoonActionWorld, x: integer, z: integer): integer|nil Top height or nil when the chunk is unloaded.
----@field getLight fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): {combined: integer, sky: integer, block: integer, brightness: number}|nil Nil when unloaded.
----@field isSolid fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean False when unloaded.
----@field canSeeSky fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean False when unloaded.
----@field isRainingAt fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Local exposed rain, false when unloaded.
----@field isLiquid fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): boolean Block material is a liquid; false when unloaded.
----@field isPowered fun(self: BetaMoonActionWorld, x?: integer, y?: integer, z?: integer): boolean Coordinates default to the callback origin. Explicit unloaded coordinates return false.
+---@field isLoaded fun(self: BetaMoonActionWorld, positionOrX: BetaMoonXZPosition|integer, z?: integer): boolean Checks the chunk without loading it.
+---@field getBiome fun(self: BetaMoonActionWorld, positionOrX: BetaMoonXZPosition|integer, z?: integer): string Biome display name.
+---@field getHeight fun(self: BetaMoonActionWorld, positionOrX: BetaMoonXZPosition|integer, z?: integer): integer|nil Top height or nil when the chunk is unloaded.
+---@field getLight fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): {combined: integer, sky: integer, block: integer, brightness: number}|nil Nil when unloaded.
+---@field isSolid fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): boolean False when unloaded.
+---@field canSeeSky fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): boolean False when unloaded.
+---@field isRainingAt fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): boolean Local exposed rain, false when unloaded.
+---@field isLiquid fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): boolean Block material is a liquid; false when unloaded.
+---@field isPowered fun(self: BetaMoonActionWorld, positionOrX?: BetaMoonCellPosition|integer, y?: integer, z?: integer): boolean Coordinates default to the callback origin. Explicit unloaded coordinates return false.
 ---@field getClosestPlayer fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity|nil Radius at most 64 around the callback origin.
 ---@field getNearbyEntities fun(self: BetaMoonActionWorld, radius: number): BetaMoonActionEntity[] Up to 256 within a true radius of at most 32 around the callback block center.
----@field getBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer): BetaMoonBlockAtPosition|nil Detached block snapshot for Y 0-127; nil when the chunk is unloaded.
----@field setBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, block: BetaMoonBlockReference|integer, damage?: integer): boolean
----@field notifyNeighbors fun(self: BetaMoonActionWorld, x?: integer, y?: integer, z?: integer): boolean Coordinates default to the callback origin. Explicit unloaded coordinates return false.
+---@field getBlock fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): BetaMoonBlockAtPosition|nil Detached block snapshot for Y 0-127; nil when the chunk is unloaded.
+---@field setBlock fun(self: BetaMoonActionWorld, x: integer, y: integer, z: integer, block: BetaMoonBlockReference|integer, damage?: integer): boolean|fun(self: BetaMoonActionWorld, position: BetaMoonCellPosition, block: BetaMoonBlockReference|integer, damage?: integer): boolean
+---@field notifyNeighbors fun(self: BetaMoonActionWorld, positionOrX?: BetaMoonCellPosition|integer, y?: integer, z?: integer): boolean Coordinates default to the callback origin. Explicit unloaded coordinates return false.
 ---@field playSound fun(self: BetaMoonActionWorld, name: string, volume?: number, pitch?: number)|fun(self: BetaMoonActionWorld, name: string, options?: BetaMoonSoundOptions)
 ---@field spawnParticle fun(self: BetaMoonActionWorld, name: BetaMoonParticleName|BetaMoonParticleTypeReference|string, options?: BetaMoonParticleOptions)
 ---@field playParticleEffect fun(self: BetaMoonActionWorld, effect: BetaMoonParticleEffectReference|string, options?: BetaMoonParticleEffectOptions): BetaMoonParticleEffectHandle?, string?
 ---@field spawnEntity fun(self: BetaMoonActionWorld, type: BetaMoonEntityTypeReference|string, options: BetaMoonEntitySpawnOptions): BetaMoonActionEntity|nil, string? Returns nil and a reason when placement fails or onSpawn removes the entity.
 ---@field createExplosion fun(self: BetaMoonActionWorld, options: BetaMoonExplosionOptions): BetaMoonExplosionResult Creates an authoritative configurable explosion. Unavailable in queries and client-only display callbacks.
 ---@field getInfo fun(self: BetaMoonActionWorld): BetaMoonWorldDataInfo
----@field getBlockView fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, y?: integer, z?: integer): BetaMoonBlockView|nil
----@field getTile fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, y?: integer, z?: integer): BetaMoonTileView|nil
----@field getBiomeData fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, z?: integer): BetaMoonBiomeView
----@field getChunk fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, z?: integer): BetaMoonChunkView|nil
+---@field getBlockView fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): BetaMoonBlockView|nil
+---@field getTile fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, y?: integer, z?: integer): BetaMoonTileView|nil
+---@field getBiomeData fun(self: BetaMoonActionWorld, positionOrX: BetaMoonXZPosition|integer, z?: integer): BetaMoonBiomeView
+---@field getChunk fun(self: BetaMoonActionWorld, positionOrX: BetaMoonXZPosition|integer, z?: integer): BetaMoonChunkView|nil Block X/Z coordinates, not chunk indices.
 ---@field getPlayers fun(self: BetaMoonActionWorld, options?: BetaMoonPlayerQuery): BetaMoonActionEntity[] Loaded players sorted nearest-first.
 ---@field getSystemData fun(self: BetaMoonActionWorld, system: BetaMoonWorldServiceReference|string): table<string, BetaMoonSharedDataValue>|nil
----@field getCapability fun(self: BetaMoonActionWorld, positionOrX: BetaMoonPositionI|integer, yOrCapability: integer|BetaMoonCapabilityReference|string, zOrFace?: integer|BetaMoonBlockFace, capability?: BetaMoonCapabilityReference|string, face?: BetaMoonBlockFace): BetaMoonCapabilityProxy|nil
+---@field getCapability fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, yOrCapability: integer|BetaMoonCapabilityReference|string, zOrFace?: integer|BetaMoonBlockFace, capability?: BetaMoonCapabilityReference|string, face?: BetaMoonBlockFace): BetaMoonCapabilityProxy|nil
 
 ---@class BetaMoonActionEntity
 ---@field getTransform fun(self: BetaMoonActionEntity): BetaMoonEntityTransform Detached position and orientation.
 ---@field setTransform fun(self: BetaMoonActionEntity, request: BetaMoonEntityTransformRequest): boolean, string? Atomic checked relocation/orientation; false with reason on expected refusal.
----@field moveBy fun(self: BetaMoonActionEntity, dx: number, dy: number, dz: number): boolean, BetaMoonEntityMoveResult|string? Swept native collision in loaded terrain; no extra simulation tick.
----@field addVelocity fun(self: BetaMoonActionEntity, dx: number, dy: number, dz: number): boolean, string? Add an impulse; each component and resulting velocity must be -16..16.
+---@field moveBy fun(self: BetaMoonActionEntity, positionOrDx: BetaMoonVectorPosition|number, dy?: number, dz?: number): boolean, BetaMoonEntityMoveResult|string? Swept native collision in loaded terrain; no extra simulation tick.
+---@field addVelocity fun(self: BetaMoonActionEntity, positionOrDx: BetaMoonVectorPosition|number, dy?: number, dz?: number): boolean, string? Add an impulse; each component and resulting velocity must be -16..16.
 ---@field getMovementState fun(self: BetaMoonActionEntity): BetaMoonEntityMovementState Detached motion/contact state.
 ---@field getBounds fun(self: BetaMoonActionEntity): BetaMoonEntityBounds Detached actual world-space body bounds.
 ---@field getSupport fun(self: BetaMoonActionEntity): BetaMoonEntitySupport?, string? Loaded-only support probe; nil with a reason when unavailable.
@@ -459,33 +459,33 @@ function TileView:getNbt() end
 ---@field canSee fun(self: BetaMoonActionEntity, target: BetaMoonActionEntity): boolean Living line-of-sight test.
 ---@field getDistanceTo fun(self: BetaMoonActionEntity, target: BetaMoonActionEntity): number|nil
 ---@field getVelocity fun(self: BetaMoonActionEntity): BetaMoonPositionF Returns a detached motion snapshot.
----@field setVelocity fun(self: BetaMoonActionEntity, x: number, y: number, z: number) Each component must be within -16..16 blocks per tick.
+---@field setVelocity fun(self: BetaMoonActionEntity, positionOrX: BetaMoonVectorPosition|number, y?: number, z?: number) Each component must be within -16..16 blocks per tick.
 ---@field setMovement fun(self: BetaMoonActionEntity, forward: number, strafe: number, jump: boolean): boolean Manual living AI or composed manual-movement input; false when neither controls movement.
 ---@field setFacing fun(self: BetaMoonActionEntity, yaw: number, pitch: number)
----@field facePosition fun(self: BetaMoonActionEntity, x: number, y: number, z: number, maxYaw?: number, maxPitch?: number): boolean Turn toward world coordinates, optionally at limited degrees per call.
+---@field facePosition fun(self: BetaMoonActionEntity, positionOrX: BetaMoonVectorPosition|number, yOrMaxYaw?: number, zOrMaxPitch?: number, maxYaw?: number, maxPitch?: number): boolean Turn toward world coordinates, optionally at limited degrees per call.
 ---@field faceToward fun(self: BetaMoonActionEntity, target: BetaMoonActionEntity, maxYaw?: number, maxPitch?: number): boolean Turn a living entity toward a target by at most the supplied degrees (default 30).
----@field setPartOffset fun(self: BetaMoonActionEntity, name: string, x: number, y: number, z: number): boolean Moves a named damage shape; returns false when absent.
----@field setInteractionOffset fun(self: BetaMoonActionEntity, name: string, x: number, y: number, z: number): boolean Moves a named interaction shape; returns false when absent.
----@field setSensorOffset? fun(self: BetaMoonActionEntity, name: string, x: number, y: number, z: number): boolean Moves a named sensor on a BetaMoon entity; returns false when absent.
+---@field setPartOffset fun(self: BetaMoonActionEntity, name: string, positionOrX: BetaMoonVectorPosition|number, y?: number, z?: number): boolean Moves a named damage shape; returns false when absent.
+---@field setInteractionOffset fun(self: BetaMoonActionEntity, name: string, positionOrX: BetaMoonVectorPosition|number, y?: number, z?: number): boolean Moves a named interaction shape; returns false when absent.
+---@field setSensorOffset? fun(self: BetaMoonActionEntity, name: string, positionOrX: BetaMoonVectorPosition|number, y?: number, z?: number): boolean Moves a named sensor on a BetaMoon entity; returns false when absent.
 ---@field playAnimation? fun(self: BetaMoonActionEntity, clip: string, options?: {speed: number?, startTime: number?, restart: boolean?}): boolean Selects a clip from the appearance animation asset. Same clip/speed keeps its clock unless restart is true.
 ---@field stopAnimation? fun(self: BetaMoonActionEntity): boolean Clears the per-instance selection and returns whether one was active.
 ---@field getAnimation? fun(self: BetaMoonActionEntity): {clip: string, speed: number, time: number}|nil Detached transient animation state.
 ---@field setVisible? fun(self: BetaMoonActionEntity, visible: boolean) Overrides this BetaMoon instance's visibility.
----@field setVisualOffset? fun(self: BetaMoonActionEntity, x: number, y: number, z: number) Local render offset in blocks; components -16..16.
+---@field setVisualOffset? fun(self: BetaMoonActionEntity, positionOrX: BetaMoonVectorPosition|number, y?: number, z?: number) Local render offset in blocks; components -16..16.
 ---@field setVisualRotation? fun(self: BetaMoonActionEntity, yaw: number, pitch: number, roll: number) Additional visual rotation in degrees.
----@field setVisualScale? fun(self: BetaMoonActionEntity, x: number, y: number, z: number) Visual-only scale; components 0..64.
+---@field setVisualScale? fun(self: BetaMoonActionEntity, positionOrX: BetaMoonVectorPosition|number, y?: number, z?: number) Visual-only scale; components 0..64.
 ---@field resetVisuals? fun(self: BetaMoonActionEntity) Restores declaration visibility and the identity visual transform.
 ---@field playSound fun(self: BetaMoonActionEntity, event: BetaMoonSoundEventReference|string, options?: {volume: number?, pitch: number?, range: number?}): boolean Emits a positional one-shot at the current entity position.
----@field navigateTo fun(self: BetaMoonActionEntity, x: integer, y: integer, z: integer, range?: number): boolean Native ground path request.
+---@field navigateTo fun(self: BetaMoonActionEntity, positionOrX: BetaMoonCellPosition|integer, yOrRange?: integer|number, z?: integer, range?: number): boolean Native ground path request.
 ---@field getNavigationStatus fun(self: BetaMoonActionEntity): 'idle'|'moving'|'reached'|'blocked'|'unavailable'|'cancelled'|nil Current composed ground navigation status, or nil outside composed AI.
 ---@field getNavigationWaypoint fun(self: BetaMoonActionEntity): BetaMoonPositionF|nil Detached current waypoint of a composed ground route.
 ---@field cancelNavigation fun(self: BetaMoonActionEntity): boolean Cancels a composed ground route; false outside composed AI.
----@field getPathTo fun(self: BetaMoonActionEntity, x: integer, y: integer, z: integer, range?: number): BetaMoonPositionF[]|nil Detached native path waypoints for Lua route following; nil if unavailable.
+---@field getPathTo fun(self: BetaMoonActionEntity, positionOrX: BetaMoonCellPosition|integer, yOrRange?: integer|number, z?: integer, range?: number): BetaMoonPositionF[]|nil Detached native path waypoints for Lua route following; nil if unavailable.
 ---@field setTarget fun(self: BetaMoonActionEntity, target?: BetaMoonActionEntity): boolean Sets or clears the native creature target.
 ---@field getTarget fun(self: BetaMoonActionEntity): BetaMoonActionEntity|nil
 ---@field remove fun(self: BetaMoonActionEntity) Removes the entity without death callbacks or death drops.
 ---@field getPosition fun(self: BetaMoonActionEntity): BetaMoonPositionF Returns a detached position snapshot.
----@field setPosition fun(self: BetaMoonActionEntity, x: number, y: number, z: number): boolean Moves to a loaded position; false outside bounds or for part proxies.
+---@field setPosition fun(self: BetaMoonActionEntity, positionOrX: BetaMoonVectorPosition|number, y?: number, z?: number): boolean Moves to a loaded position; false outside bounds or for part proxies.
 ---@field getRotation fun(self: BetaMoonActionEntity): {yaw: number, pitch: number} Detached facing snapshot.
 ---@field getNearbyEntities fun(self: BetaMoonActionEntity, radius: number): BetaMoonActionEntity[] Up to 256 within a true radius of at most 32 around the exact entity position; excludes self.
 ---@field getPassenger fun(self: BetaMoonActionEntity): BetaMoonActionEntity|nil Current native single-seat passenger.
@@ -598,7 +598,7 @@ function TileView:getNbt() end
 ---@field action fun(ctx: BetaMoonBlockActionContext)
 
 ---@class BetaMoonItemActionContext
----@field activateMultiblock fun(self: BetaMoonItemActionContext, definition: BetaMoonMultiblockReference, x: integer, y: integer, z: integer, options?: BetaMoonMultiblockActivateOptions): BetaMoonMultiblockActivationResult Revalidates managed placement and current held-item eligibility/cost; use clicked/face for ray-traced onUse.
+---@field activateMultiblock fun(self: BetaMoonItemActionContext, definition: BetaMoonMultiblockReference, positionOrX: BetaMoonCellPosition|integer, yOrOptions?: integer|BetaMoonMultiblockActivateOptions, z?: integer, options?: BetaMoonMultiblockActivateOptions): BetaMoonMultiblockActivationResult Revalidates managed placement and current held-item eligibility/cost; use clicked/face for ray-traced onUse.
 ---@field world BetaMoonActionWorld
 ---@field stack BetaMoonActionStack
 ---@field target BetaMoonActionTarget
