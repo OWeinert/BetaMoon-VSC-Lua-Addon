@@ -39,18 +39,21 @@ function Log:error(message) end
 ---@class BetaMoonConfigKeyOptions
 ---@field input? 'text' Dictionary keys use text fields.
 
+---@alias BetaMoonConfigLayoutEntry string|{heading: string}|{divider: boolean}
+
 ---@class BetaMoonConfigFieldOptions
 ---@field label? string Friendly label in the Scripts screen.
 ---@field description? string Short explanation shown in the field's hover tooltip.
 ---@field min? number Inclusive numeric lower bound for GUI edits.
 ---@field max? number Inclusive numeric upper bound for GUI edits.
 ---@field step? number Positive numeric increment for GUI edits.
----@field input? 'text'|'slider'|'choice'|'cycle'|'collection' GUI input method. Strings and numbers default to text; booleans default to a True/False cycle button. For a list or dictionary, text uses one comma-separated field; collection adds/removes entries.
----@field choices? (string|number|BetaMoonConfigChoiceOption)[] Allowed values for a string or number, including the default. Required by choice and cycle inputs. Each option may have a separate display label.
+---@field input? 'text'|'slider'|'choice'|'cycle'|'collection'|'multiSelect' GUI input method. Strings and numbers default to text; booleans default to a True/False cycle button. MultiSelect edits a fixed-choice list.
+---@field choices? (string|number|BetaMoonConfigChoiceOption)[] Allowed values for choice/cycle inputs, including their scalar default; for multiSelect, a nonempty unique set whose string or number values include every default list entry. Each option may have a separate display label.
 ---@field expanded? boolean Start a nested section, list, or dictionary open in Configure; defaults to false. Unavailable for scalar fields and compact text collections.
 ---@field readOnly? boolean Show this field without allowing GUI edits. Lua may still change it.
 ---@field readOnlyReason? string Explanation shown for a read-only field.
 ---@field fields? table<string, BetaMoonConfigFieldOptions> Options for declared nested object fields.
+---@field layout? BetaMoonConfigLayoutEntry[] Field order and optional headings/dividers for a fixed nested object. Omitted fields follow in default order; does not affect saved values.
 ---@field element? BetaMoonConfigFieldOptions Editor shape for array items. A text list requires scalar entries and an element.default. An empty default array also requires element.default before adding items.
 ---@field kind? 'list'|'dictionary' Required for text or collection input on a table; must match the default table shape.
 ---@field key? BetaMoonConfigKeyOptions Dictionary key control; use `{ input = 'text' }`.
@@ -62,6 +65,7 @@ function Log:error(message) end
 ---@field label? string Friendly config-section name.
 ---@field description? string Short config-section description.
 ---@field fields? table<string, BetaMoonConfigFieldOptions> Presentation and edit rules for declared fields.
+---@field layout? BetaMoonConfigLayoutEntry[] Optional top-level field order, headings and dividers. Omitted fields follow in default order; does not affect saved values.
 ---@field onChange? fun(values: table<string, any>, previous: table<string, any>, changedPaths: string[]) Called once after a changed save or reload at the next safe update. Previous values are detached; handlers should be repeatable.
 ---@field schemaVersion? integer Positive schema version stored as $schemaVersion. Existing unversioned files are version 0.
 ---@field migrate? fun(old: table<string, any>, fromVersion: integer): table<string, any> Return the complete new values for an older file. The old snapshot and nested tables are read-only. Required when opening an older file.
