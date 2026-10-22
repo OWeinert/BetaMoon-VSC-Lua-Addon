@@ -22,7 +22,7 @@
 
 ---@class BetaMoonParticleDefinition
 ---@field key string Namespaced particle key; declare during modInit/modReload.
----@field texture BetaMoonTextureInput|BetaMoonParticleAtlas
+---@field texture BetaMoonTextureInput|BetaMoonParticleAtlas Script PNG texture or particle atlas descriptor; native Minecraft asset keys are unsupported here.
 ---@field frameStart? 'first'|'random'
 ---@field lifetimeTicks? BetaMoonParticleRange Integer 1..600; default 20.
 ---@field size? number|{start: number, finish: number} World units; start (0,4], finish [0,4]; default 0.2.
