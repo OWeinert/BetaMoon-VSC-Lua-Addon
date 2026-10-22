@@ -435,6 +435,9 @@ function TileView:getNbt() end
 ---@field getCapability fun(self: BetaMoonActionWorld, positionOrX: BetaMoonCellPosition|integer, yOrCapability: integer|BetaMoonCapabilityReference|string, zOrFace?: integer|BetaMoonBlockFace, capability?: BetaMoonCapabilityReference|string, face?: BetaMoonBlockFace): BetaMoonCapabilityProxy|nil
 
 ---@class BetaMoonActionEntity
+---@field modify fun(self: BetaMoonActionEntity, definition: BetaMoonEntityModifierDefinition): BetaMoonEntityModifier Attach to this singleplayer entity/world generation; requires a supported living movement path.
+---@field supportsModification fun(self: BetaMoonActionEntity, path: BetaMoonEntityModificationPath): boolean Known unsupported paths return false; unknown paths raise an error.
+---@field getModifications fun(self: BetaMoonActionEntity, options?: {sources?: boolean}): BetaMoonEntityModifications Detached contributed rules and optional source diagnostics.
 ---@field getTransform fun(self: BetaMoonActionEntity): BetaMoonEntityTransform Detached position and orientation.
 ---@field setTransform fun(self: BetaMoonActionEntity, request: BetaMoonEntityTransformRequest): boolean, string? Atomic checked relocation/orientation; false with reason on expected refusal.
 ---@field moveBy fun(self: BetaMoonActionEntity, positionOrDx: BetaMoonVectorPosition|number, dy?: number, dz?: number): boolean, BetaMoonEntityMoveResult|string? Swept native collision in loaded terrain; no extra simulation tick.

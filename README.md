@@ -4,6 +4,7 @@ LuaLS definitions and a VS Code extension for [**BetaMoon**](https://modrinth.co
 Provides completion, hover documentation, signatures and type checking for the global `betamoon` API,
 including blocks, items, texture/sound/model/animation assets, procedural poses, sound events, recipes, world generation,
 dimensions, teleportation, player/entity movement, multiblocks, particles, input, events, tile entities and reactive container GUIs.
+Entity movement includes owned rule sources, native/manual per-step commands, additive forces and local-player input observations.
 Packaged `assets/<namespace>/worldgen/structures/*.json` and `assets/<namespace>/loot_tables/*.json` files also receive
 completion and validation from the bundled BetaMoon schemas.
 
