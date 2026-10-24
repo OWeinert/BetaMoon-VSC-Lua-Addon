@@ -393,11 +393,182 @@ function Entities:one(query) end
 ---@class BetaMoonPlayers
 local Players = {}
 
+---Register an owned, transient source that awaits/rebinds the local singleplayer player.
+---@param definition BetaMoonEntityModifierDefinition
+---@return BetaMoonEntityModifier
+function Players:modifyLocal(definition) return {} end
+
 ---Invoke with a fresh local singleplayer facade. Nested read-only scopes remain read-only.
 ---@param callback fun(player: BetaMoonActionEntity)
 ---@return boolean invoked
 ---@return 'no_player'|'player_not_ready'|'unsupported_environment'? reason
 function Players:withLocal(callback) end
+
+---@alias BetaMoonEntityModificationPath 'physics.gravityMultiplier'|'physics.airDrag.horizontal'|'physics.airDrag.vertical'|'physics.fluidDrag.horizontal'|'physics.fluidDrag.vertical'|'physics.trackFallDistance'|'movement.accelerationMultiplier'|'movement.jumpMultiplier'|'movement.jumpEnabled'|'movement.swimLiftEnabled'|'movement.sneakSlowdown'|'movement.sneakEdgeGuard'|'movement.sneakBodyAdjustment'|'damage.fallMultiplier'|'onAttach'|'onDetach'|'onMotion'|'onForces'|'onAfterMotion'
+
+---@class BetaMoonEntityDragRules
+---@field horizontal? number Finite retention in 0..1; priority override.
+---@field vertical? number Finite retention in 0..1; priority override.
+
+---@class BetaMoonEntityPhysicsRules
+---@field gravityMultiplier? number Finite 0..8; factors multiply with final cap 8.
+---@field airDrag? BetaMoonEntityDragRules Airborne land branch only; grounded block friction remains native.
+---@field fluidDrag? BetaMoonEntityDragRules Native water/lava branch retention.
+---@field trackFallDistance? boolean Priority override; false clears accumulated descent before collision.
+
+---@class BetaMoonEntityMovementRules
+---@field accelerationMultiplier? number Finite 0..8; factors multiply with final cap 8.
+---@field jumpMultiplier? number Finite 0..8; factors multiply with final cap 8.
+---@field jumpEnabled? boolean Any false vetoes native ground jumps; true cannot invent a jump.
+---@field swimLiftEnabled? boolean Any false vetoes native jump-held fluid lift.
+---@field sneakSlowdown? number Finite 0..1; priority horizontal input factor, native default 0.3.
+---@field sneakEdgeGuard? boolean Priority override of native sneaking edge protection.
+---@field sneakBodyAdjustment? boolean Priority override; local player path only.
+
+---@class BetaMoonEntityDamageRules
+---@field fallMultiplier? number Finite 0..8; product capped at 8, applied once to computed fall damage, rounded up.
+
+---@class BetaMoonEntityRules
+---@field physics? BetaMoonEntityPhysicsRules
+---@field movement? BetaMoonEntityMovementRules
+---@field damage? BetaMoonEntityDamageRules
+
+---@class BetaMoonEntityModifierPatch: BetaMoonEntityRules
+---@field key? string Existing key only; keys cannot change.
+---@field priority? integer -10000..10000, default 0. Ties use lexical script owner/key.
+---@field enabled? boolean Default true. Disable preserves binding state and faults.
+---@field onAttach? fun(ctx: BetaMoonEntityModifierAttachContext)
+---@field onDetach? fun(ctx: BetaMoonEntityModifierDetachContext, event: {reason: string})
+---@field onMotion? fun(ctx: BetaMoonEntityModifierContext): BetaMoonEntityMotionCommand|nil First valid command wins; nil yields.
+---@field onForces? fun(ctx: BetaMoonEntityModifierContext): BetaMoonEntityForceCommand|nil Independent additive contribution.
+---@field onAfterMotion? fun(ctx: BetaMoonEntityModifierContext, result: BetaMoonEntityMotionResult)
+
+---@class BetaMoonEntityModifierDefinition: BetaMoonEntityModifierPatch
+---@field key string Canonical namespace:modifier/path key; owner/key/target must be unique.
+
+---@class BetaMoonEntityModifier
+local EntityModifier = {}
+
+---Validate the complete patch atomically. Omitted fields retain their contributions; callbacks require functions.
+---@param patch BetaMoonEntityModifierPatch
+function EntityModifier:update(patch) end
+---Remove this source's rule leaf or callback. Zero/false remain explicit values.
+---@param path BetaMoonEntityModificationPath
+function EntityModifier:clear(path) end
+---@param enabled boolean
+function EntityModifier:setEnabled(enabled) end
+---@return boolean
+function EntityModifier:isEnabled() end
+---@return boolean
+function EntityModifier:isValid() end
+---@return BetaMoonEntityModifierStatus
+function EntityModifier:getStatus() return {} end
+---Recover callback faults; a failed binding receives fresh transient state. Replacing a failed callback also recovers it.
+function EntityModifier:retry() end
+---Idempotently release this source. Mutations require its declaring script and a mutable game-thread callback.
+function EntityModifier:close() end
+
+---@class BetaMoonEntityModifierStatus
+---@field state 'awaiting_player'|'attached'|'unsupported_environment'|'failed'|'closed'
+---@field enabled boolean Requested enablement.
+---@field applied boolean Currently eligible contribution; independent of motion arbitration.
+---@field suspended boolean Temporarily mounted, sleeping or dead.
+---@field reason? string Suspension reason.
+---@field error? string Callback or binding diagnostic.
+---@field observerFailed boolean Observer failure leaves rules/producers/forces active.
+---@field key string
+---@field owner string
+---@field generation? integer Opaque binding generation; compare for equality only.
+
+---@class BetaMoonEntityModifierSourceInfo: BetaMoonEntityModifierStatus
+---@field priority integer
+---@field rules BetaMoonEntityRules This source's persistent contributions, including disabled/failed sources.
+
+---@class BetaMoonEntityModifications
+---@field supported boolean Whether this target currently supports movement modifiers.
+---@field rules BetaMoonEntityRules Resolved contributed leaves; absent leaves use the current native baseline.
+---@field capped BetaMoonEntityModificationPath[] Multiplier leaves capped at 8.
+---@field sources? BetaMoonEntityModifierSourceInfo[] Present when requested with {sources=true}.
+
+---@class BetaMoonEntityNativeMotionIntent
+---@field forward number Current processed native/controller/AI intent.
+---@field strafe number
+---@field jump boolean
+---@field sneak boolean
+
+---@alias BetaMoonEntityInputActionName 'forward'|'back'|'left'|'right'|'jump'|'sneak'
+
+---@class BetaMoonEntityInputAction
+---@field held boolean Routed physical held state.
+---@field pressed boolean At least one routed press since the preceding movement snapshot.
+---@field released boolean At least one release since the preceding movement snapshot.
+
+---@class BetaMoonEntityMotionInput
+---@field available boolean False for unfocused or screen-suspended gameplay; axes/actions are then neutral.
+---@field forward number Logical horizontal axis before sneak reduction, -1..1.
+---@field strafe number Logical horizontal axis before sneak reduction, -1..1.
+---@field jump boolean Logical held jump intent; controllers may synthesize it.
+---@field sneak boolean Logical held sneak intent.
+---@field actions table<BetaMoonEntityInputActionName, BetaMoonEntityInputAction>
+---@field transitions {action: BetaMoonEntityInputActionName, phase: 'pressed'|'released', sequence: integer}[] Ordered routed physical edges; synthetic intent creates no physical edges.
+
+---@class BetaMoonEntityMotionState: BetaMoonEntityCollisionResult
+---@field position BetaMoonEntityVector
+---@field velocity BetaMoonEntityVector
+---@field rotation {yaw: number, pitch: number}
+---@field fallDistance number
+---@field inWater boolean
+---@field inLava boolean
+---@field mounted boolean
+---@field sleeping boolean
+
+---@class BetaMoonEntityModifierBindingContext
+---@field tick integer Monotonic simulated movement tick for this target binding.
+---@field dt number Fixed 0.05 seconds; no catch-up while paused.
+---@field generation integer Opaque target binding generation.
+---@field state table Fresh transient table per source/binding; shared across that source's callbacks.
+
+---@class BetaMoonEntityModifierContext: BetaMoonEntityModifierBindingContext
+---@field entity BetaMoonActionEntity Read-only and scoped to this invocation.
+---@field world BetaMoonActionWorld Read-only and scoped to this invocation.
+---@field movement BetaMoonEntityMotionState Detached state; force callbacks share the prospective post-jump/pre-heading velocity.
+---@field nativeIntent BetaMoonEntityNativeMotionIntent
+---@field input? BetaMoonEntityMotionInput Local player only; nil for mobs.
+---@field ownsMotion boolean Whether this source won arbitration; false during onMotion selection.
+
+---@class BetaMoonEntityModifierAttachContext: BetaMoonEntityModifierBindingContext
+---@field entity BetaMoonActionEntity Read-only and scoped to this invocation.
+---@field world BetaMoonActionWorld Read-only and scoped to this invocation.
+---@field movement BetaMoonEntityMotionState Initial detached binding state.
+---@field nativeIntent table Empty until movement preparation resolves intent.
+---@field ownsMotion boolean False.
+
+---@class BetaMoonEntityModifierDetachContext: BetaMoonEntityModifierBindingContext
+---@field movement? BetaMoonEntityMotionState Last detached snapshot; no live entity/world facade.
+---@field nativeIntent table Empty.
+---@field ownsMotion boolean False.
+
+---@class BetaMoonEntityMotionCommand
+---@field mode 'native'|'manual' Manual skips native acceleration, jump/lift, gravity, drag, friction and ladder adjustments; native collision remains active.
+---@field velocity? BetaMoonEntityVector Complete finite vector, each component -16..16 blocks/tick; otherwise retain incoming motion.
+---@field rotation? {yaw?: number, pitch?: number} Finite degrees; player pitch -90..90. Conflicting player look ownership yields look_owned.
+---@field fallDistance? number Finite 0..65535; no implicit fall immunity.
+---@field rules? BetaMoonEntityRules Replace this source's contributed leaves for one movement step.
+
+---@class BetaMoonEntityForceCommand
+---@field velocityDelta BetaMoonEntityVector Complete finite vector, each component -16..16 blocks/tick.
+
+---@class BetaMoonEntityMotionResult: BetaMoonEntityMotionState
+---@field sourceKey? string Winning motion source, absent when all yield.
+---@field sourceOwner? string
+---@field mode 'native'|'manual'
+---@field requestedDelta BetaMoonEntityVector Requested collision displacement.
+---@field appliedDelta BetaMoonEntityVector Actual post-collision displacement.
+---@field velocityDelta BetaMoonEntityVector Applied aggregate force.
+---@field forceStatus 'none'|'applied'|'limit_exceeded' Oversized aggregate/result discards the entire force batch without faulting sources.
+---@field blockedReason? string Includes look_owned, unloaded_chunk, work_limit and out_of_bounds.
+---@field support? BetaMoonEntitySupport Independent loaded-only foot probe.
+---@field supportReason? string
 
 ---@class BetaMoonEntityVector
 ---@field x number
