@@ -8,7 +8,7 @@ Entity movement includes owned rule sources, native/manual per-step commands, ad
 Packaged `assets/<namespace>/worldgen/structures/*.json` and `assets/<namespace>/loot_tables/*.json` files also receive
 completion and validation from the bundled BetaMoon schemas.
 
-The definitions target BetaMoon 0.11.0.
+The definitions target BetaMoon 1.0.0.
 
 ## Definition files
 
