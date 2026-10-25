@@ -24,7 +24,7 @@ The definitions target BetaMoon 1.0.0.
 | Multiblocks | [multiblocks.lua](library/betamoon/multiblocks.lua) |
 | Particles | [particles.lua](library/betamoon/particles.lua) |
 | Entities | [entities.lua](library/betamoon/entities.lua) |
-| Tool and armor materials | [tool_and_armor_materials.lua](library/betamoon/tool_and_armor_materials.lua) |
+| Block, tool, and armor materials | [materials.lua](library/betamoon/materials.lua) |
 | Recipes | [recipes.lua](library/betamoon/recipes.lua) |
 | Overrides | [overrides.lua](library/betamoon/overrides.lua) |
 | World generation | [world_generation.lua](library/betamoon/world_generation.lua) |
