@@ -92,12 +92,14 @@ function DimensionReference:getState(world) end
 ---@param chunkX integer
 ---@param chunkZ integer
 ---@return BetaMoonGeneratorChunkPreview|nil, string? reason Includes native_preview_unavailable and anchor_unavailable; does not initialize storage.
+---@overload fun(self: BetaMoonDimensionReference, world: BetaMoonActionWorld, position: BetaMoonChunkPosition): BetaMoonGeneratorChunkPreview|nil, string?
 function DimensionReference:previewChunk(world, chunkX, chunkZ) end
 ---@param world BetaMoonActionWorld
 ---@param name string Authored profile height-output name.
 ---@param x integer
 ---@param z integer
 ---@return number|nil, string? reason
+---@overload fun(self: BetaMoonDimensionReference, world: BetaMoonActionWorld, name: string, position: BetaMoonXZPosition): number|nil, string?
 function DimensionReference:sampleHeightOutput(world, name, x, z) end
 ---@class BetaMoonDimensionRegistry
 local Dimensions = {}
@@ -211,6 +213,7 @@ function Teleport:clearReturnPoints(player, channel) end
 ---@param y number
 ---@param z number
 ---@return BetaMoonTeleportLocation|nil, string? reason Pure X/Z mapping using sourceScale/targetScale; does not load worlds.
+---@overload fun(self: BetaMoonTeleport, source: BetaMoonDimensionTarget, target: BetaMoonDimensionTarget, position: BetaMoonVectorPosition): BetaMoonTeleportLocation|nil, string?
 function Teleport:mapCoordinates(source, target, x, y, z) end
 ---@param world BetaMoonActionWorld
 ---@param x number
@@ -218,6 +221,7 @@ function Teleport:mapCoordinates(source, target, x, y, z) end
 ---@param z number
 ---@param options? BetaMoonTeleportInspectionOptions
 ---@return BetaMoonTeleportLocation|nil, string? reason Read-only bounded inspection, never loads/populates chunks or creates a platform.
+---@overload fun(self: BetaMoonTeleport, world: BetaMoonActionWorld, position: BetaMoonVectorPosition, options?: BetaMoonTeleportInspectionOptions): BetaMoonTeleportLocation|nil, string?
 function Teleport:inspectArrival(world, x, y, z, options) end
 
 return {

@@ -6,7 +6,7 @@
 -- CATEGORY: FLUIDS
 -- --------------------------------------------------------------------------
 
----@alias BetaMoonFluidMaterial 'water'|'lava' Temporary native carrier until custom materials are available.
+---@alias BetaMoonFluidMaterial 'water'|'lava'|BetaMoonBlockMaterialReference|string Custom material must use kind = 'liquid'.
 ---@alias BetaMoonFluidPreset 'neutral'|'water'|'lava'
 ---@alias BetaMoonFluidSourceCreation 'never'|'two_adjacent'
 ---@alias BetaMoonFluidDisplacement 'drop'|'destroy'|'block'
@@ -36,7 +36,7 @@
 ---@field blocks? BetaMoonFluidDisplacement Behavior for eligible non-fluid blocks; tile entities and other fluids are always protected.
 
 ---@class BetaMoonFluidEntityPolicy
----@field movement? 'none'|'water'|'lava' Native-compatible movement profile; independent of the carrier material.
+---@field movement? 'none'|'water'|'lava' Native-compatible movement profile; lava also controls dropped-item buoyancy and fizz, independent of the carrier material.
 ---@field currentScale? number Current acceleration multiplier in 0..8.
 ---@field drowning? boolean Consume air while a living entity's eye is immersed.
 ---@field countsAsWet? boolean Count body contact as wet.
@@ -80,7 +80,7 @@
 ---@field safeTeleportArrival? boolean Default false. Explicitly permits safe-mode arrival in this fluid.
 ---@field ecology? BetaMoonFluidEcologyPolicy
 ---@field key string Canonical fluid key.
----@field material BetaMoonFluidMaterial Uses vanilla water/lava only as a temporary native carrier; this is not fluid identity.
+---@field material BetaMoonFluidMaterial Native carrier; fluid identity and behavior remain separate.
 ---@field preset? BetaMoonFluidPreset Defaults to neutral.
 ---@field appearance BetaMoonFluidAppearance
 ---@field flow? BetaMoonFluidFlow
@@ -130,7 +130,7 @@ function FluidDefinitionToken:bind(binding) end
 ---@field owner string
 ---@field isVanilla boolean
 ---@field exists boolean
----@field material BetaMoonFluidMaterial Temporary native carrier, not fluid identity.
+---@field material BetaMoonFluidMaterial Native carrier, not fluid identity.
 ---@field preset BetaMoonFluidPreset
 ---@field flowingBlock BetaMoonBlockReference
 ---@field stillBlock BetaMoonBlockReference

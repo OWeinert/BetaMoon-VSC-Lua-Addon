@@ -29,6 +29,12 @@
 ---@field y number
 ---@field z number
 
+---@alias BetaMoonCellPosition BetaMoonPositionI|BetaMoonPositionF|{x: integer, y: integer, z: integer} Coordinates must be exact integers within the operation's bounds.
+---@alias BetaMoonVectorPosition BetaMoonPositionI|BetaMoonPositionF|{x: number, y: number, z: number} Finite three-axis vector or world position.
+---@alias BetaMoonXZPosition BetaMoonCellPosition|{x: integer, z: integer} Block X/Z position; Y is ignored when present.
+---@alias BetaMoonChunkPosition BetaMoonCellPosition|{x: integer, z: integer} Chunk X/Z indices; Y is ignored when present.
+---@alias BetaMoonXZVector BetaMoonVectorPosition|{x: number, z: number} Continuous X/Z position; Y is ignored when present.
+
 ---@class BetaMoonWorldInfo
 ---@field name string
 ---@field seed integer

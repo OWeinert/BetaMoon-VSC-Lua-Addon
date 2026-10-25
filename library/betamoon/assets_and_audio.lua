@@ -11,9 +11,21 @@
 ---@field path? string File relative to betamoon/scripts for a single-file mod or assets/ for a manifest package. Omit to use namespace/category/key-path with .png, .json, or .animation.json; sounds detect exactly one .ogg or .wav default. An explicit path also sets the pack entry beneath bm_assets/.
 
 ---@class BetaMoonAssetSource
----@field kind 'pack'|'script'|'builtin' Actual source of the currently usable content.
+---@field kind 'pack'|'script'|'builtin'|'minecraft' Selected asset provider; minecraft uses the active vanilla texture pack.
 ---@field name string Texture pack name, loose-script root, package assets root, or built-in provider name.
 ---@field path string Selected entry, logical default path, or packaged built-in path.
+---@field origin? 'jar'|'unknown' Native texture origin: jar for Default; unknown when the selected pack may fall back internally.
+---@field width? integer Native source image width in pixels.
+---@field height? integer Native source image height in pixels.
+---@field region? BetaMoonNativeTextureRegion Selected native atlas cell; absent for a whole image.
+
+---@class BetaMoonNativeTextureRegion
+---@field atlas 'terrain'|'items'
+---@field index integer Zero-based cell index, 0..255.
+---@field column integer Zero-based column, 0..15.
+---@field row integer Zero-based row, 0..15.
+---@field columns integer 16 columns; cell pixel width is source width divided by 16.
+---@field rows integer 16 rows; cell pixel height is source height divided by 16.
 
 ---@class BetaMoonAssetReference
 local AssetReference = {}
@@ -24,10 +36,10 @@ function AssetReference:getKey() return "" end
 ---@return 'textures'|'sounds'|'models'|'animations' kind
 function AssetReference:getKind() return "textures" end
 
----@return string path Logical fallback path relative to the mod's asset root, or packaged path for a built-in model.
+---@return string path Logical fallback path, packaged built-in path, or native Minecraft resource path such as terrain.png.
 function AssetReference:getPath() return "" end
 
----@return string path Logical default prefixed with bm_assets/, or the catalog path for a built-in model.
+---@return string path Texture-pack ZIP entry. BetaMoon assets use bm_assets/; native Minecraft images use paths such as terrain.png at the ZIP root.
 function AssetReference:getOverridePath() return "" end
 
 ---@return BetaMoonAssetSource source
@@ -43,9 +55,10 @@ function AssetReference:getSource() return {kind="script", name="", path=""} end
 
 ---@class BetaMoonTextureDescriptor
 ---@field asset BetaMoonTextureAsset|string Registered texture, namespaced key, or relative PNG path.
----@field animation? BetaMoonTextureAnimation|false Playback override; false selects the strip's first frame.
+---@field animation? BetaMoonTextureAnimation|false Playback override for script PNGs; false selects the strip's first frame. Native Minecraft references use native playback and reject this field.
 
 ---@class BetaMoonTextureAssetDefinition: BetaMoonAssetDefinition
+---@field key string Exact namespace:path key in the script's namespace; minecraft is reserved for native texture references.
 ---@field animation? BetaMoonTextureAnimation Vertical strip playback shared by uses of this asset.
 
 ---@alias BetaMoonTextureInput BetaMoonTextureAsset|string|BetaMoonTextureDescriptor Texture reference, key, path, or animated descriptor.
@@ -59,6 +72,7 @@ local TextureAssetRegistry = {}
 ---@return BetaMoonTextureAsset
 function TextureAssetRegistry:add(definition) return {} end
 
+---Native keys need no registration: minecraft:image/<native PNG path without .png>, minecraft:atlas/terrain/0..255, minecraft:atlas/items/0..255; minecraft:block/sand aliases terrain cell 18.
 ---@param key string Exact namespaced key.
 ---@return BetaMoonTextureAsset|nil
 function TextureAssetRegistry:get(key) return nil end
@@ -111,7 +125,7 @@ local ModelAssetRegistry = {}
 ---@return BetaMoonModelAsset
 function ModelAssetRegistry:add(definition) return {} end
 
----Includes built-in Beta 1.7.3 block models under minecraft:block/...; these need no registration.
+---Includes built-in Beta 1.7.3 block models under minecraft:block/..., including full_block; no registration needed.
 ---@param key string
 ---@return BetaMoonModelAsset|nil
 function ModelAssetRegistry:get(key) return nil end
@@ -210,7 +224,7 @@ function ModelPose:applyAnimation(animation, clip, seconds, weight, parts) end
 ---@field cull? boolean Hide back faces, default false.
 ---@field tint? integer RGB 0x000000..0xFFFFFF, default white.
 ---@field opacity? number 0..1, default 1.
----@field uv? {u: number?, v: number?, scaleU: number?, scaleV: number?} Normalized UV offset/scaling; defaults 0,0,1,1. Values within +/-10000.
+---@field uv? {u: number?, v: number?, scaleU: number?, scaleV: number?} Normalized UV offset/scaling; defaults 0,0,1,1. Native atlas-cell materials require transformed UVs within 0..1 in that cell; whole images use full-image UVs. Values within +/-10000.
 
 ---@class BetaMoonModelPoseState
 ---@field ageTicks number Interpolated age/time. Held: holder age; ground: dropped item age; block/GUI: world time (GUI without world: 0).
@@ -299,6 +313,32 @@ function SoundEvents:first(query) end
 ---@return BetaMoonSoundEventReference|nil
 function SoundEvents:one(query) end
 
+---@class BetaMoonStepSoundDefinition
+---@field key string Namespaced step-sound key.
+---@field event BetaMoonSoundEventReference|string Registered sound event for native step, placement, hit, and break calls.
+---@field volume? number Native volume above 0 and at most 4; defaults to 1.
+---@field pitch? number Native pitch above 0.01 and at most 4; defaults to 1.
+
+---A stable read-only custom step sound identity. Repeated lookups and compatible reloads return the same reference.
+---@class BetaMoonStepSoundReference
+---@field key string
+---@field owner string
+
+---@class BetaMoonStepSoundRegistry
+local StepSounds = {}
+
+---@param definition BetaMoonStepSoundDefinition
+---@return BetaMoonStepSoundReference
+function StepSounds:add(definition) return {} end
+
+---@param key string Registered key or vanilla step-sound name.
+---@return BetaMoonStepSoundReference|BetaMoonVanillaStepSound|nil
+function StepSounds:get(key) return nil end
+
+---@param key string Registered key or vanilla step-sound name.
+---@return BetaMoonStepSoundReference|BetaMoonVanillaStepSound
+function StepSounds:getRequired(key) return {} end
+
 ---@class BetaMoonAudioPlayOptions
 ---@field position? BetaMoonPositionF World coordinates; requires a mono clip. Omit for nonpositional playback.
 ---@field volume? number Replaces the event gain, 0..1; defaults to event value or 1.
@@ -316,5 +356,6 @@ function Audio:play(sound, options) end
 return {
     Assets = Assets,
     SoundEvents = SoundEvents,
+    StepSounds = StepSounds,
     Audio = Audio
 }
