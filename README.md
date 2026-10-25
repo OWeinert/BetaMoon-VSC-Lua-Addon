@@ -24,7 +24,7 @@ The definitions target BetaMoon 1.0.0.
 | Multiblocks | [multiblocks.lua](library/betamoon/multiblocks.lua) |
 | Particles | [particles.lua](library/betamoon/particles.lua) |
 | Entities | [entities.lua](library/betamoon/entities.lua) |
-| Tool and armor materials | [tool_and_armor_materials.lua](library/betamoon/tool_and_armor_materials.lua) |
+| Block, tool, and armor materials | [materials.lua](library/betamoon/materials.lua) |
 | Recipes | [recipes.lua](library/betamoon/recipes.lua) |
 | Overrides | [overrides.lua](library/betamoon/overrides.lua) |
 | World generation | [world_generation.lua](library/betamoon/world_generation.lua) |
@@ -33,6 +33,8 @@ The definitions target BetaMoon 1.0.0.
 | Events | [events.lua](library/betamoon/events.lua) |
 | Input and controls | [input_and_controls.lua](library/betamoon/input_and_controls.lua) |
 | Chat, modules, and utilities | [chat_modules_and_utilities.lua](library/betamoon/chat_modules_and_utilities.lua) |
+| Native discovery | [native_discovery.lua](library/betamoon/native_discovery.lua) |
+| Native references, reflection and scoped access | [native_access.lua](library/betamoon/native_access.lua) |
 | Public module | [public_module.lua](library/betamoon/public_module.lua) |
 
 Browse the category files for API declarations. `public_module.lua` defines the global `betamoon` entry point.

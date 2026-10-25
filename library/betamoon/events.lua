@@ -9,6 +9,7 @@ local Subscription = require("betamoon.handles").Subscription
 -- --------------------------------------------------------------------------
 
 ---@class BetaMoonScopedEvent
+---@field native? BetaMoonNativeAccess Scoped native access when discovery has identified the runtime. Expires on callback return.
 ---@field world? BetaMoonActionWorld Callback-only world access; absent in menus. Retired worlds are read-only.
 ---@field player? BetaMoonActionEntity Callback-only player access, when present in this world.
 

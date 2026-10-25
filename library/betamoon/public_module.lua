@@ -58,6 +58,7 @@ local Chat = require("betamoon.chat_modules_and_utilities").Chat
 local Log = require("betamoon.chat_modules_and_utilities").Log
 local Modules = require("betamoon.chat_modules_and_utilities").Modules
 local Positions = require("betamoon.chat_modules_and_utilities").Positions
+local Native = require("betamoon.native_discovery").Native
 
 -- --------------------------------------------------------------------------
 -- CATEGORY: PUBLIC MODULE
@@ -92,6 +93,7 @@ local TreeModes
 local CallbackResults
 
 ---@class BetaMoonModule
+---@field native BetaMoonNativeDiscovery
 ---@field dimensions BetaMoonDimensionRegistry
 ---@field teleport BetaMoonTeleport
 ---@field mc BetaMoonMinecraftConstants Read-only named Minecraft values. The values themselves are ordinary strings.
@@ -135,6 +137,7 @@ local CallbackResults
 ---@field stack fun(item: BetaMoonResourceReference|integer, count?: integer, damage?: integer): BetaMoonStack
 ---@type BetaMoonModule
 betamoon = {
+  native = Native,
   log = Log,
   dimensions = Dimensions,
   teleport = Teleport,
