@@ -69,6 +69,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field stages? BetaMoonEntityAiStages Native-mode opt-in to independently controlled ground AI stages.
 
 ---@class BetaMoonEntityAiStageContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field world BetaMoonActionWorld
 ---@field age integer
@@ -220,6 +221,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field allowEntities? boolean Default false.
 
 ---@class BetaMoonEntityTimerContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field world BetaMoonActionWorld
 ---@field age integer
@@ -227,6 +229,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field repeating boolean Whether this timer was rescheduled before the callback.
 
 ---@class BetaMoonEntityStateContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field world BetaMoonActionWorld
 ---@field age integer
@@ -289,16 +292,19 @@ function EntityTypeReference:override(definition) return {} end
 ---@field set fun(self: BetaMoonEntityMemoryAccess, name: string, value?: boolean|number|string|table) Nil clears the field; values are copied and not saved.
 
 ---@class BetaMoonEntityInteractionContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field player? BetaMoonActionEntity
 ---@field world? BetaMoonActionWorld
 
 ---@class BetaMoonEntityTickContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field world BetaMoonActionWorld
 ---@field age integer
 
 ---@class BetaMoonEntityLifecycleContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field world BetaMoonActionWorld
 ---@field age integer
@@ -306,6 +312,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field attacker? BetaMoonActionEntity Attacker on onDeath when known.
 
 ---@class BetaMoonEntityBeforeDamageContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field world BetaMoonActionWorld
 ---@field attacker? BetaMoonActionEntity Entity credited with the hit, when known.
@@ -316,6 +323,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field health? integer Current health when available.
 
 ---@class BetaMoonEntityAfterDamageContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field world BetaMoonActionWorld
 ---@field attacker? BetaMoonActionEntity Entity credited with the hit, when known.
@@ -330,6 +338,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field healthLost? integer Actual health lost when available.
 
 ---@class BetaMoonEntityImpactContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity
 ---@field owner? BetaMoonActionEntity
 ---@field target? BetaMoonActionEntity
@@ -338,6 +347,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field world BetaMoonActionWorld
 
 ---@class BetaMoonEntityPartInteractionContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity Parent entity.
 ---@field part string Named model part.
 ---@field hitbox BetaMoonActionEntity Collision target.
@@ -345,6 +355,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field world BetaMoonActionWorld
 
 ---@class BetaMoonEntityPartDamageContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity Parent entity.
 ---@field part string Named model part.
 ---@field hitbox BetaMoonActionEntity Collision target.
@@ -353,6 +364,7 @@ function EntityTypeReference:override(definition) return {} end
 ---@field world BetaMoonActionWorld
 
 ---@class BetaMoonEntitySensorContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field entity BetaMoonActionEntity Sensor owner.
 ---@field other BetaMoonActionEntity Matching occupant.
 ---@field sensor string Sensor name.
@@ -523,6 +535,7 @@ function EntityModifier:close() end
 ---@field sleeping boolean
 
 ---@class BetaMoonEntityModifierBindingContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field tick integer Monotonic simulated movement tick for this target binding.
 ---@field dt number Fixed 0.05 seconds; no catch-up while paused.
 ---@field generation integer Opaque target binding generation.

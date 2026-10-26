@@ -128,6 +128,7 @@ function CapabilityDataAccess:snapshot() return {} end
 ---@field port? string|false
 
 ---@class BetaMoonCapabilityCallbackContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field x integer
 ---@field y integer
 ---@field z integer
@@ -195,6 +196,7 @@ function Capabilities:one(query) end
 ---@field override fun(self: BetaMoonWorldServiceReference, definition: table): BetaMoonOverrideHandle
 
 ---@class BetaMoonWorldServiceContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field key string
 ---@field world BetaMoonActionWorld
 ---@field data BetaMoonCapabilityDataAccess Persistent per-world data.
@@ -309,6 +311,7 @@ local LogicalNetworkComponent = {}
 function LogicalNetworkComponent:pathDistance(first, second) return 0 end
 
 ---@class BetaMoonLogicalNetworkContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field network BetaMoonLogicalNetworkComponent
 ---@field nodes BetaMoonLogicalNetworkNodeList
 ---@field world BetaMoonActionWorld
@@ -398,6 +401,7 @@ local FuelAccess = {}
 function FuelAccess:getBurnTime(fuel, set) return 0 end
 
 ---@class BetaMoonTileTickContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field multiblock? BetaMoonMultiblockInstance Present for managed controllers.
 ---@field entity BetaMoonTileEntityContextValue
 ---@field x integer
@@ -541,6 +545,7 @@ function ContainerStateAccess:set(name, value) end
 ---@field conflicted? boolean True when tile text changed while the editor was focused.
 
 ---@class BetaMoonContainerControlContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field player {name: string}|table
 ---@field tile {x: integer, y: integer, z: integer, data: BetaMoonTileDataAccess}
 ---@field data BetaMoonTileDataAccess
@@ -693,6 +698,7 @@ function GuiDataReadAccess:get(key) end
 function GuiDataReadAccess:snapshot() return {} end
 
 ---@class BetaMoonGuiBindingView
+---@field native? BetaMoonNativeAccess Prepared read-only native access; no first binding, initialization or unknown calls.
 ---@field state BetaMoonGuiReadAccess Read-only typed temporary state; tracked reads.
 ---@field data BetaMoonGuiReadAccess Read-only synchronized integer/boolean data; tracked reads.
 local GuiBindingView = {}
@@ -763,6 +769,7 @@ function GuiRuntime:element(id) end
 ---@field reason? string
 
 ---@class BetaMoonContainerGuiEventContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field state BetaMoonContainerStateAccess Typed temporary state; read-only during close.
 ---@field data BetaMoonGuiDataReadAccess Read-only tile data.
 ---@field tile {x: integer, y: integer, z: integer, data: BetaMoonGuiDataReadAccess}

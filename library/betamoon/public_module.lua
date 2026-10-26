@@ -550,6 +550,7 @@ function TileView:getNbt() end
 ---@field face? BetaMoonBlockFace
 
 ---@class BetaMoonBlockActionContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field multiblock? BetaMoonMultiblockInstance Present for managed controllers.
 ---@field id integer
 ---@field damage integer Metadata at callback entry.
@@ -605,6 +606,7 @@ function TileView:getNbt() end
 ---@field action fun(ctx: BetaMoonBlockActionContext)
 
 ---@class BetaMoonItemActionContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field activateMultiblock fun(self: BetaMoonItemActionContext, definition: BetaMoonMultiblockReference, positionOrX: BetaMoonCellPosition|integer, yOrOptions?: integer|BetaMoonMultiblockActivateOptions, z?: integer, options?: BetaMoonMultiblockActivateOptions): BetaMoonMultiblockActivationResult Revalidates managed placement and current held-item eligibility/cost; use clicked/face for ray-traced onUse.
 ---@field world BetaMoonActionWorld
 ---@field stack BetaMoonActionStack

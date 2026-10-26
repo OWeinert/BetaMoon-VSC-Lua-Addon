@@ -218,6 +218,9 @@ function NativeFactories:withContext(callback) end
 ---@class BetaMoonNativeAccess
 local NativeAccess = {}
 
+---@return BetaMoonNativeContextInfo Read-only current phase and potential direct-effect permissions.
+function NativeAccess:describe() end
+
 ---@return BetaMoonNativeAccess Explicit direct policy; inherited restrictions still apply.
 function NativeAccess:direct() end
 
@@ -257,6 +260,58 @@ function NativeAccess:subject() end
 ---@return BetaMoonNativeObject Zero-based typed array view.
 function NativeAccess:array(component, lengthOrValues) end
 
+---Creates an independent owned primitive-array or exact native ItemStack copy in a mutable callback.
+---@param object BetaMoonNativeObject
+---@param options? {lifetime?: 'owner'|'world'} Defaults to owner; arrays are limited to 16384 elements.
+---@return BetaMoonNativeOwnedValue
+function NativeAccess:copy(object, options) end
+
+---Explicit direct retention; arbitrary native objects may contain hidden references or own resources.
+---@param object BetaMoonNativeObject Known client/world/entity/tile/screen roots are refused.
+---@param options BetaMoonNativeRetentionOptions
+---@return BetaMoonNativeOwnedValue
+function NativeAccess:retain(object, options) end
+
+---Borrows the same owned object into this callback; the resulting view expires on return or handle release.
+---@param value BetaMoonNativeOwnedValue
+---@return BetaMoonNativeObject
+function NativeAccess:use(value) end
+
+---Explicit direct disposal/release; repeated release of the same current-generation handle is harmless.
+---@param value BetaMoonNativeOwnedValue
+function NativeAccess:release(value) end
+
+---@class BetaMoonNativeRetentionOptions
+---@field lifetime 'owner'|'world' Explicit owner generation or world/player lifetime.
+---@field dispose? BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord Exact instance method ()V; no Lua closure.
+
+---@class BetaMoonNativeOwnedValue
+---@field type BetaMoonNativeTypeRef
+local NativeOwnedValue = {}
+---@return {type: BetaMoonNativeTypeRef, lifetime: 'owner'|'world', state: string} Detached status; use access:use() for live operations.
+function NativeOwnedValue:describe() end
+
+---@class BetaMoonNativeContextInfo
+---@field phase 'client'|'gameplay'|'query'|'binding'
+---@field side 'client'
+---@field lifetime 'callback'|'owned_borrow'
+---@field reads boolean
+---@field gameplayWrites boolean
+---@field directInitialization boolean
+---@field directUnknownCalls boolean
+---@field attachments false
+---@field hookEdits false
+
+---@class BetaMoonNativeExecutableInfo
+---@field identity string
+---@field descriptor string
+---@field effect 'read'|'write'|'unknown'|'initialize'
+---@field effectConfidence 'curated'|'unknown'
+---@field virtualOverridesRechecked boolean
+---@field nonPublic boolean
+---@field policy 'managed'|'direct'
+---@field context BetaMoonNativeContextInfo
+
 ---@class BetaMoonNativeView
 local NativeView = {}
 
@@ -272,7 +327,7 @@ function NativeView:method(name, descriptor, options) end
 ---@return BetaMoonNativeFieldView Bound to this instance or static class.
 function NativeView:field(name, descriptor, options) end
 
----@return {type: BetaMoonNativeTypeRef, identity: string, bound: boolean, policy: 'managed'|'direct'}
+---@return {type: BetaMoonNativeTypeRef, identity: string, bound: boolean, policy: 'managed'|'direct', context: BetaMoonNativeContextInfo}
 function NativeView:describe() end
 
 ---@class BetaMoonNativeClass: BetaMoonNativeView
@@ -328,6 +383,9 @@ function NativeObject:snapshot(limit) end
 ---@class BetaMoonNativeMethodView
 local NativeMethodView = {}
 
+---@return BetaMoonNativeExecutableInfo Scoped plan information; virtual receivers are checked again on calls.
+function NativeMethodView:describe() end
+
 ---@param receiver BetaMoonNativeObject|BetaMoonNativeExactValue|nil
 ---@param ... any
 ---@return any
@@ -335,6 +393,9 @@ function NativeMethodView:call(receiver, ...) end
 
 ---@class BetaMoonNativeConstructorView
 local NativeConstructorView = {}
+
+---@return BetaMoonNativeExecutableInfo
+function NativeConstructorView:describe() end
 
 ---@param ... any
 ---@return any
