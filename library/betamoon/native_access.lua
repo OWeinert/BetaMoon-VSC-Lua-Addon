@@ -273,13 +273,74 @@ function NativeAccess:copy(object, options) end
 function NativeAccess:retain(object, options) end
 
 ---Borrows the same owned object into this callback; the resulting view expires on return or handle release.
----@param value BetaMoonNativeOwnedValue
+---@param value BetaMoonNativeOwnedValue|BetaMoonNativeImplementation
 ---@return BetaMoonNativeObject
 function NativeAccess:use(value) end
 
 ---Explicit direct disposal/release; repeated release of the same current-generation handle is harmless.
----@param value BetaMoonNativeOwnedValue
+---@param value BetaMoonNativeOwnedValue|BetaMoonNativeImplementation
 function NativeAccess:release(value) end
+
+---Direct creation of an owned Java interface implementation; every instance/default method needs an exact callback.
+---@param options BetaMoonNativeImplementationOptions
+---@return BetaMoonNativeImplementation
+function NativeAccess:implement(options) end
+
+---Direct reversible registration. Both exact methods must take the same implemented interface and return void.
+---@param options BetaMoonNativeAttachmentOptions
+---@return BetaMoonNativeAttachment
+function NativeAccess:attach(options) end
+
+---Registers a read-only observer on the current world; omitted void methods receive audited no-op callbacks.
+---@param options {methods: BetaMoonNativeInterfaceMethod[]}
+---@return BetaMoonNativeAttachment
+function NativeAccess:observeWorld(options) end
+
+---@class BetaMoonNativeInterfaceCallbackContext
+---@field native BetaMoonNativeAccess Fresh invocation scope; query callbacks cannot promote authority.
+---@field method BetaMoonNativeMethodRef Exact selected interface method.
+
+---@class BetaMoonNativeInterfaceMethod
+---@field method BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord Exact interface instance method.
+---@field policy? 'query'|'gameplay' Overrides the implementation default for this exact method; world observers require query.
+---@field callback fun(ctx: BetaMoonNativeInterfaceCallbackContext, ...: any): any Native-compatible arguments and return; void callbacks return no value.
+
+---@class BetaMoonNativeImplementationOptions
+---@field interfaces (string|BetaMoonNativeTypeRef)[] One to eight distinct public interfaces visible from one existing loader.
+---@field methods BetaMoonNativeInterfaceMethod[] Every abstract/default method; at most 256 distinct runtime signatures.
+---@field policy? 'query'|'gameplay' Defaults to query; gameplay additionally requires an audited enclosing native callback.
+---@field lifetime? 'owner'|'world' Defaults to owner.
+
+---@class BetaMoonNativeImplementationInfo
+---@field interfaces BetaMoonNativeTypeRef[]
+---@field policy 'query'|'gameplay'
+---@field ownership {type: BetaMoonNativeTypeRef, lifetime: 'owner'|'world', state: string}
+
+---@class BetaMoonNativeImplementation
+---@field type BetaMoonNativeTypeRef Actual generated proxy type, not an implemented interface selector.
+---@field interfaces BetaMoonNativeTypeRef[]
+local NativeImplementation = {}
+---@return BetaMoonNativeImplementationInfo
+function NativeImplementation:describe() end
+
+---@class BetaMoonNativeAttachmentOptions
+---@field implementation BetaMoonNativeImplementation One managed attachment per implementation.
+---@field receiver? BetaMoonNativeObject Omit for static registration/removal.
+---@field add BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord Exact (Interface)V registration.
+---@field remove BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord Exact matching identity removal; must clean partial registration.
+---@field lifetime 'owner'|'world' Live world/entity/tile/screen/client roots require world lifetime.
+
+---@class BetaMoonNativeAttachmentInfo
+---@field state 'prepared'|'installing'|'active'|'pending_removal'|'closed'|'detach_failed'
+---@field implementation BetaMoonNativeImplementationInfo
+
+---@class BetaMoonNativeAttachment
+---@field implementation BetaMoonNativeImplementation Closing the attachment also disables its implementation.
+local NativeAttachment = {}
+---@return BetaMoonNativeAttachmentInfo Detached status; no native consumer reference is retained in this record.
+function NativeAttachment:describe() end
+---Immediately disables owned callbacks and requests removal at a client lifecycle boundary. Allowed in integrated read-only callbacks.
+function NativeAttachment:close() end
 
 ---@class BetaMoonNativeRetentionOptions
 ---@field lifetime 'owner'|'world' Explicit owner generation or world/player lifetime.
@@ -292,14 +353,14 @@ local NativeOwnedValue = {}
 function NativeOwnedValue:describe() end
 
 ---@class BetaMoonNativeContextInfo
----@field phase 'client'|'gameplay'|'query'|'binding'
+---@field phase 'client'|'gameplay'|'query'|'binding'|'interface'
 ---@field side 'client'
 ---@field lifetime 'callback'|'owned_borrow'
 ---@field reads boolean
 ---@field gameplayWrites boolean
 ---@field directInitialization boolean
 ---@field directUnknownCalls boolean
----@field attachments false
+---@field attachments boolean
 ---@field hookEdits false
 
 ---@class BetaMoonNativeExecutableInfo
