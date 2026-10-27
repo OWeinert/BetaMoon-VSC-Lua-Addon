@@ -144,6 +144,7 @@
 ---@field pendingGeneration? integer
 ---@field coverage? BetaMoonNativeCoverage
 ---@field warnings? string[]
+---@field work? {runningScans: integer, queuedScans: integer, lastScanNanos: integer?} One worker, at most one queued scan; timing describes the last published scan.
 ---@field hooks? {status: 'available'|'agent_unavailable', revision: integer, items: BetaMoonNativeRecord[]}
 ---@field execution? BetaMoonNativeExecutionStatus
 
