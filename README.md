@@ -181,3 +181,10 @@ For example, in `.luarc.json`, replacing the path with your actual checkout loca
 Alternatively, add the parent addon directory to `Lua.workspace.userThirdParty` in VS Code settings.
 The addon's `config.json` recommends enabling the definitions when a script uses `betamoon`.
 Use one installation method per project to avoid loading duplicate definitions.
+
+## Development checks
+
+Run `npm install` and `npm test` in a fresh checkout. Tests and their shared helpers, including the pure API
+splitter in `tools/`, are tracked and excluded from the VSIX. Canonical API maintenance uses the ignored
+`internal/api.lua` and local `scripts/` commands restored from the Internal repository; extension installation,
+native catalog import and ordinary tests do not require those private maintenance files.

@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { categories, splitApi } = require('../scripts/split-api');
+const { categories, splitApi } = require('../tools/split-api');
 
 function sourceFixture() {
     return '---@meta\n\n' + categories.map((category, index) => [
