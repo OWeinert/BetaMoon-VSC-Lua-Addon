@@ -28,6 +28,8 @@
 ---@field sourceAvailable? boolean
 ---@field includeSynthetic? boolean Includes synthetic classes/members and bridge methods; defaults to false.
 ---@field limit? integer Page size, 1-200; defaults to 50.
+---@field owner? string Exact hook package owner.
+---@field status? string Exact hook availability/subscription state or diagnostic reason.
 ---@field cursor? string Continue with exactly the same filters and page size; stale cursors raise an error.
 
 ---@class BetaMoonNativeCoverage
@@ -42,7 +44,7 @@
 ---@field estimatedMetadataBytes? integer
 ---@field indexLimited? boolean
 ---@field warningsMayBeTruncated? boolean
----@field hooks? 'not_implemented'
+---@field hooks? 'available'|'agent_unavailable'|'not_implemented'
 
 ---Detached inventory record. Fields depend on the query kind; no live Java object is returned.
 ---@class BetaMoonNativeRecord
@@ -103,6 +105,28 @@
 ---@field classCount? integer
 ---@field status? string
 ---@field reason? string
+---@field owner? string Hook package owner.
+---@field owners? string[] Hook-site owners sharing this exact target.
+---@field hook? string Diagnostic hook ID when available.
+---@field message? string Bounded copied diagnostic message.
+---@field envelopeVersion? integer Internal installed hook-envelope version.
+---@field normalReturns? integer Number of observed normal-return instructions before user instrumentation.
+---@field target? string Exact hook runtime method selector.
+---@field source? string Package-relative hook source.
+---@field at? BetaMoonHookPhase
+---@field effects? BetaMoonHookEffects
+---@field priority? integer
+---@field required? boolean
+---@field order? integer Actual phase order.
+---@field calls? integer
+---@field failures? integer
+---@field skippedReentry? integer
+---@field callbackNanos? integer
+---@field shortCircuits? integer
+---@field sourceSha256? string Hash of the evaluated UTF-8 hook source, separate from structural compatibility.
+---@field structuralFingerprint? string
+---@field observedInputSha256? string
+---@field outputSha256? string
 ---@field parentId? string
 ---@field enumerable? boolean
 
@@ -120,6 +144,45 @@
 ---@field pendingGeneration? integer
 ---@field coverage? BetaMoonNativeCoverage
 ---@field warnings? string[]
+---@field hooks? {status: 'available'|'agent_unavailable', revision: integer, items: BetaMoonNativeRecord[]}
+---@field execution? BetaMoonNativeExecutionStatus
+
+---@class BetaMoonNativeFailureDiagnostic
+---@field reason string
+---@field message string
+---@field count integer
+---@field namespace? string
+---@field mappingSha256? string
+---@field generation? integer
+---@field owner? string
+---@field ownerGeneration? integer
+---@field phase? string
+---@field policy? 'managed'|'direct'
+---@field scopeActive? boolean
+---@field requestedType? string
+---@field requestedMember? string
+---@field requestedDescriptor? string
+---@field requestedDeclaringType? string
+---@field requestedNames? string
+---@field requestedDescriptorNames? string
+---@field requestedLoaderId? string
+---@field requestedOriginId? string
+---@field runtimeOwner? string
+---@field runtimeMember? string
+---@field runtimeDescriptor? string
+---@field definingLoaderId? string
+---@field originId? string
+---@field nativeCauseType? string
+---@field availableOverloads? {name: string, descriptor: string, originId: string, access: string}[]
+---@field alternativesBounded? boolean
+
+---@class BetaMoonNativeExecutionStatus
+---@field session 'active'|'closed'
+---@field cachedTypeSelectors integer
+---@field failures table<string, integer>
+---@field failureDetails {maximumRecords: integer, omitted: integer, records: BetaMoonNativeFailureDiagnostic[]}
+---@field ownership BetaMoonNativeRecord
+---@field interfaces BetaMoonNativeRecord
 
 ---@class BetaMoonNativeScanStatus
 ---@field status 'pending'|'complete'|'failed'|'cancelled'

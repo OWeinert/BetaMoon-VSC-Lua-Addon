@@ -131,12 +131,14 @@ function NativeConstructor:describe() end
 ---@field accessSupport string Runtime verification is still required before access.
 
 ---@class BetaMoonNativeConstructorInfo: BetaMoonNativeRecord
+---@field kind 'CONSTRUCTOR'
 ---@field ref BetaMoonNativeConstructorRef
 ---@field parameters BetaMoonNativeParameterInfo[]
 ---@field lookupType BetaMoonNativeTypeRef
 ---@field declaringTypeRef BetaMoonNativeTypeRef
 
 ---@class BetaMoonNativeMethodInfo: BetaMoonNativeRecord
+---@field kind 'METHOD'
 ---@field ref BetaMoonNativeMethodRef
 ---@field parameters BetaMoonNativeParameterInfo[]
 ---@field returnType BetaMoonNativeTypeRef
@@ -218,16 +220,23 @@ function NativeFactories:withContext(callback) end
 ---@class BetaMoonNativeAccess
 local NativeAccess = {}
 
+---@class BetaMoonNativeBoundMethod<TCall>: BetaMoonNativeMethodView
+---@field call TCall
+
+
+
 ---@return BetaMoonNativeContextInfo Read-only current phase and potential direct-effect permissions.
 function NativeAccess:describe() end
 
 ---@return BetaMoonNativeAccess Explicit direct policy; inherited restrictions still apply.
 function NativeAccess:direct() end
 
----@overload fun(self: BetaMoonNativeAccess, method: BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord): BetaMoonNativeMethodView?, string?, string?
----@param type string|BetaMoonNativeTypeRef|BetaMoonNativeTypeInfo
----@param options? BetaMoonNativeTypeOptions
----@return BetaMoonNativeClass? view
+---@overload fun(self: BetaMoonNativeAccess, type: string|BetaMoonNativeTypeRef|BetaMoonNativeTypeInfo, options?: BetaMoonNativeTypeOptions): BetaMoonNativeClass?, string?, string?
+---@overload fun(self: BetaMoonNativeAccess, constructor: BetaMoonNativeConstructorRef|BetaMoonNativeConstructorInfo): BetaMoonNativeConstructorView?, string?, string?
+---@generic TCall
+---@param type {call: TCall}
+---@param options? nil
+---@return BetaMoonNativeBoundMethod<TCall>? view
 ---@return string? reason
 ---@return string? detail
 function NativeAccess:bind(type, options) end
@@ -239,16 +248,21 @@ function NativeAccess:bind(type, options) end
 ---@return any
 function NativeAccess:call(type, methodName, receiver, ...) end
 
----@return BetaMoonNativeObject? object
+---@class BetaMoonNativeClientObject: BetaMoonNativeObject
+---@class BetaMoonNativeWorldObject: BetaMoonNativeObject
+---@class BetaMoonNativePlayerObject: BetaMoonNativeObject
+---@class BetaMoonNativeScreenObject: BetaMoonNativeObject
+
+---@return BetaMoonNativeClientObject? object
 ---@return string? reason
 function NativeAccess:client() end
----@return BetaMoonNativeObject? object
+---@return BetaMoonNativeWorldObject? object
 ---@return string? reason
 function NativeAccess:world() end
----@return BetaMoonNativeObject? object
+---@return BetaMoonNativePlayerObject? object
 ---@return string? reason
 function NativeAccess:player() end
----@return BetaMoonNativeObject? object
+---@return BetaMoonNativeScreenObject? object
 ---@return string? reason
 function NativeAccess:screen() end
 ---@return BetaMoonNativeObject? object
@@ -353,7 +367,7 @@ local NativeOwnedValue = {}
 function NativeOwnedValue:describe() end
 
 ---@class BetaMoonNativeContextInfo
----@field phase 'client'|'gameplay'|'query'|'binding'|'interface'
+---@field phase 'client'|'gameplay'|'query'|'binding'|'interface'|'hook'
 ---@field side 'client'
 ---@field lifetime 'callback'|'owned_borrow'
 ---@field reads boolean

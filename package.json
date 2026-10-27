@@ -13,11 +13,24 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Programming Languages"],
-  "keywords": ["Lua", "LuaLS", "BetaMoon", "Minecraft"],
-  "extensionDependencies": ["sumneko.lua"],
-  "extensionKind": ["workspace"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "Lua",
+    "LuaLS",
+    "BetaMoon",
+    "Minecraft"
+  ],
+  "extensionDependencies": [
+    "sumneko.lua"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./src/extension.js",
   "contributes": {
     "commands": [
@@ -29,6 +42,41 @@
       {
         "command": "betamoon.disable",
         "title": "Disable API for Workspace Folder",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.importNativeCatalog",
+        "title": "Import Native Catalog",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.refreshNativeCatalog",
+        "title": "Refresh Native Catalog",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.removeNativeCatalog",
+        "title": "Remove Instance Native Catalog",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.searchNativeClasses",
+        "title": "Search Native Classes",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.inspectNativeMember",
+        "title": "Inspect Native Member",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.openNativeSource",
+        "title": "Open Native Source",
+        "category": "BetaMoon"
+      },
+      {
+        "command": "betamoon.resetNativeSources",
+        "title": "Reset Native Source Locations",
         "category": "BetaMoon"
       }
     ],
@@ -46,20 +94,34 @@
           "**/assets/*/loot_tables/**/*.json"
         ],
         "url": "./schemas/betamoon-loot-table.schema.json"
+      },
+      {
+        "fileMatch": [
+          "**/betamoon.hooks.json"
+        ],
+        "url": "./schemas/betamoon-hooks.schema.json"
       }
     ]
   },
   "scripts": {
     "sync-api": "node scripts/sync-api.js",
     "check-api": "node scripts/sync-api.js --check",
+    "generate-native": "node src/native-cli.js",
+    "check-native-baseline": "node scripts/build-native-baseline.js --check",
     "test": "node --test",
     "package": "vsce package",
     "vscode:prepublish": "npm test"
   },
   "dependencies": {
-    "jsonc-parser": "3.3.1"
+    "java-parser": "3.0.1",
+    "jsonc-parser": "3.3.1",
+    "yauzl": "3.4.0"
   },
   "devDependencies": {
     "@vscode/vsce": "3.2.2"
+  },
+  "overrides": {
+    "lodash": "4.18.1",
+    "lodash-es": "4.18.1"
   }
 }
