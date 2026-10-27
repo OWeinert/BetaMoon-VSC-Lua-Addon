@@ -188,6 +188,7 @@
 ---@field phase? string
 ---@field policy? 'managed'|'direct'
 ---@field scopeActive? boolean
+---@field capabilities? string[] Effective intersected entry capabilities.
 ---@field requestedType? string
 ---@field requestedMember? string
 ---@field requestedDescriptor? string
@@ -215,6 +216,7 @@
 ---@field failures table<string, integer>
 ---@field failureDetails {maximumRecords: integer, maximumRecordBytes: integer, maximumBytes: integer, encodedBytes: integer, omitted: integer, records: BetaMoonNativeFailureDiagnostic[]}
 ---@field ownership BetaMoonNativeRecord
+---@field client {sessions: integer, resources: integer, resourceSlots: integer, pendingDisposals: integer, pendingActions: integer, disposed: integer, failures: integer, cancelledActions: integer}
 ---@field interfaces BetaMoonNativeRecord
 
 ---@class BetaMoonNativeScanStatus

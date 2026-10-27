@@ -441,11 +441,14 @@ local NativeOwnedValue = {}
 function NativeOwnedValue:describe() end
 
 ---@class BetaMoonNativeContextInfo
----@field phase 'client'|'gameplay'|'query'|'binding'|'interface'|'hook'
+---@field phase 'client'|'gameplay'|'query'|'binding'|'interface'|'hook'|'client_preparation'|'client_action'
 ---@field side 'client'
 ---@field lifetime 'callback'|'owned_borrow'
 ---@field reads boolean
 ---@field gameplayWrites boolean
+---@field bindingPreparation boolean
+---@field clientResources boolean Curated Java-host resource preparation; does not authorize arbitrary native calls.
+---@field clientActions boolean Curated Java-host commands from authorized input.
 ---@field directInitialization boolean
 ---@field directUnknownCalls boolean
 ---@field attachments boolean
