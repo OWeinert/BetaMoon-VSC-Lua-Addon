@@ -206,6 +206,8 @@
 ---@field guidance? BetaMoonNativeGuidance
 ---@field availableOverloads? {name: string, descriptor: string, originId: string, access: string}[]
 ---@field alternativesBounded? boolean
+---@field requestIndex? integer One-based failed data-query request.
+---@field dataPath? string Selected data-query alias/element path.
 
 ---@class BetaMoonNativeExecutionStatus
 ---@field session 'active'|'closed'

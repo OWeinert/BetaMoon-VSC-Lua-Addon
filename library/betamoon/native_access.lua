@@ -217,6 +217,62 @@ function NativeFactories:null(type) end
 ---@return any
 function NativeFactories:withContext(callback) end
 
+---Reusable immutable query metadata. Use a scoped access object's sample/sampleMany methods to execute it.
+---@class BetaMoonNativeDataPlan
+
+---@class BetaMoonNativeDataSlice
+---@field start integer Zero-based native index; never rounded or clamped.
+---@field count integer Number of selected elements, at most 4096 and within actual bounds.
+
+---@class BetaMoonNativeDataProjection
+---@field each? BetaMoonNativeDataPlan|true Array/List elements; true copies scalars. Cannot combine with keys/values.
+---@field keys? BetaMoonNativeDataPlan|true Map keys; omitted or true copies scalars.
+---@field values? BetaMoonNativeDataPlan|true Map values; omitted or true copies scalars.
+
+---@alias BetaMoonNativeDataSelection BetaMoonNativeDataPlan|BetaMoonNativeDataProjection
+---@alias BetaMoonNativeDataArgument boolean|number|string|BetaMoonNativeExactValue|{input: string}
+
+---@class BetaMoonNativeDataField
+---@field field BetaMoonNativeFieldRef|BetaMoonNativeFieldInfo Exact field selector.
+---@field slice? BetaMoonNativeDataSlice
+---@field select? BetaMoonNativeDataSelection Explicit selection for object fields/elements.
+
+---@class BetaMoonNativeDataCall
+---@field key string Unique result alias, at most 128 UTF-8 bytes.
+---@field method BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo Exact non-void method selector.
+---@field arguments? BetaMoonNativeDataArgument[] Dense list matching the Java descriptor.
+---@field slice? BetaMoonNativeDataSlice Array/List result range.
+---@field select? BetaMoonNativeDataSelection
+
+---@class BetaMoonNativeDataPlanDefinition
+---@field type string|BetaMoonNativeTypeRef Expected root type; never a current-world/player instance.
+---@field fields? table<string, BetaMoonNativeFieldRef|BetaMoonNativeFieldInfo|BetaMoonNativeDataField> Canonical alias order.
+---@field calls? BetaMoonNativeDataCall[] Executes after fields, in declaration order.
+---@field maxBytes? integer Detached payload budget; defaults to 262144, cannot exceed it.
+
+---@class BetaMoonNativeDataRequest
+---@field receiver? BetaMoonNativeObject|BetaMoonNativeExactValue Static-only selection can use nil; owned objects use a current use() view.
+---@field inputs? table<string, boolean|number|string|BetaMoonNativeExactValue|BetaMoonNativeObject> Named per-execution arguments.
+
+---@class BetaMoonNativeDataFailure
+---@field reason string
+---@field message string
+---@field requestIndex? integer One-based failed batch request.
+---@field dataPath? string Selected alias/element path, bounded to 512 UTF-8 bytes.
+---@field guidance BetaMoonNativeGuidance
+---@field namespace? string
+---@field requestedType? string
+---@field requestedMember? string
+---@field requestedDescriptor? string
+---@field runtimeOwner? string
+---@field runtimeMember? string
+---@field runtimeDescriptor? string
+
+---Builds a plan from plain tables and exact references without loading/initializing native classes.
+---@param definition BetaMoonNativeDataPlanDefinition
+---@return BetaMoonNativeDataPlan
+function NativeFactories:dataPlan(definition) end
+
 ---@class BetaMoonNativeAccess
 local NativeAccess = {}
 
@@ -247,6 +303,24 @@ function NativeAccess:bind(type, options) end
 ---@param ... any
 ---@return any
 function NativeAccess:call(type, methodName, receiver, ...) end
+
+---Copies selected native data into ordinary detached tables/scalars; Java null and exact values remain explicit.
+---First preparation needs an eligible mutable entry. Prepared reads preserve current visibility/effect restrictions.
+---@param plan BetaMoonNativeDataPlan
+---@param receiver BetaMoonNativeObject|BetaMoonNativeExactValue|nil
+---@param inputs? table<string, boolean|number|string|BetaMoonNativeExactValue|BetaMoonNativeObject>
+---@return table<string, any>? result No live native views; remains valid after the scope expires.
+---@return string? reason Controlled refusal; native execution exceptions still raise errors.
+---@return BetaMoonNativeDataFailure? detail
+function NativeAccess:sample(plan, receiver, inputs) end
+
+---Executes an ordered batch with shared preparation/budgets. Validates known inputs before calls; publishes no success prefix.
+---@param plan BetaMoonNativeDataPlan
+---@param requests BetaMoonNativeDataRequest[] At most 256 requests; shared work/byte limits also apply.
+---@return table<string, any>[]? results Detached records in request order.
+---@return string? reason
+---@return BetaMoonNativeDataFailure? detail
+function NativeAccess:sampleMany(plan, requests) end
 
 ---@class BetaMoonNativeClientObject: BetaMoonNativeObject
 ---@class BetaMoonNativeWorldObject: BetaMoonNativeObject

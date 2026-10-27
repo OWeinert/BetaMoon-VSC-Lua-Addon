@@ -202,3 +202,10 @@ Keep `native_failures.json` with the catalog files when copying full exports. It
 manifest when available (`verified_export`); older exports report `legacy_generation_match` instead.
 Missing or mismatched optional diagnostics do not prevent metadata import. Export again and refresh to update them.
 The **Include detailed native catalogs** checkbox remains opt-in for **Export All**.
+
+The Native Interop API also provides reusable `betamoon.native:dataPlan` declarations with scoped
+`access:sample` and `access:sampleMany` execution. Select fields, ordered method calls, arrays, Lists and Maps;
+results are detached tables/scalars that remain usable after the callback. First runtime preparation needs an
+eligible mutable entry, and normal access/effect restrictions still apply to prepared queries.
+See [Bulk Native Data Queries](https://github.com/OWeinert/BetaMoon/wiki/API-Native-Data-Queries) for examples,
+runtime inputs, nested projections and limits. The declarations and sampling options receive LuaLS completion.
