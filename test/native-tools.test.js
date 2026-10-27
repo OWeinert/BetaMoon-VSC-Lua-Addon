@@ -88,6 +88,102 @@ test('native inspection copies an exact reusable reference and shows honest orig
     assert.ok(host.opened[0].getText().includes('runtimeUniverseComplete'));
 });
 
+test('member inspection preserves copied causes/guidance and verifies cached diagnostic bytes', async (t) => {
+    const failure = { requestedType: 'example.Api', requestedMember: 'read', requestedDescriptor: '()I', reason: 'native_exception',
+        nativeCauseType: 'example.Failure', nativeCauses: { chain: [{ type: 'example.Failure', message: 'why' }],
+            cycle: false, truncated: false, unavailable: false }, guidance: { code: 'inspect_cause', message: 'Inspect cause.' } };
+    const { host, catalog } = await fixture(t, { choices: [0, 'example.Api', 'read', null],
+        diagnostics: { execution: { failureDetails: { records: [failure,
+            { ...failure, requestedDescriptor: '(I)I', message: 'other overload' },
+            { ...failure, originId: 'other-mod', message: 'other origin' }] } } } });
+    const original = await fs.readFile(path.join(path.dirname(catalog.filename), 'native_failures.json'));
+    await host.run('importNativeCatalog');
+    const cached = host.state.get('native:scripts').cachedManifest;
+    assert.deepEqual(await fs.readFile(path.join(path.dirname(cached), 'native_failures.json')), original);
+    await host.run('inspectNativeMember');
+    const report = JSON.parse(host.opened[0].getText());
+    assert.equal(report.diagnosticEvidence.integrity, 'verified_export');
+    assert.equal(report.diagnosticEvidence.live, false);
+    assert.equal(report.recentFailures.length, 1);
+    assert.equal(report.recentFailures[0].nativeCauses.chain[0].message, 'why');
+    assert.equal(report.recentFailures[0].guidance.code, 'inspect_cause');
+});
+
+test('stale diagnostics at the same generation do not block metadata import or appear current', async (t) => {
+    const { host, catalog } = await fixture(t, { choices: [0, 'example.Api', 'read', null],
+        diagnostics: { execution: { failureDetails: { records: [] } } } });
+    const companion = path.join(path.dirname(catalog.filename), 'native_failures.json');
+    const data = JSON.parse(await fs.readFile(companion, 'utf8'));
+    data.execution.failureDetails.records.push({ requestedType: 'example.Api', requestedMember: 'read', message: 'stale' });
+    await fs.writeFile(companion, JSON.stringify(data));
+    await host.run('importNativeCatalog');
+    assert.ok(host.state.get('native:scripts').libraryPath, host.messages);
+    await host.run('inspectNativeMember');
+    const report = JSON.parse(host.opened[0].getText());
+    assert.equal(report.diagnosticEvidence.available, false);
+    assert.equal(report.diagnosticEvidence.live, false);
+    assert.equal(report.recentFailures.length, 0);
+    assert.equal(report.diagnosticEvidence.reason, 'snapshot_mismatch');
+});
+
+test('unreadable optional diagnostics leave native metadata usable', async (t) => {
+    const { host, catalog } = await fixture(t, { choices: [0, 'example.Api', 'read', null] });
+    await fs.mkdir(path.join(path.dirname(catalog.filename), 'native_failures.json'));
+    await host.run('importNativeCatalog');
+    assert.ok(host.state.get('native:scripts').libraryPath, host.messages);
+    await host.run('inspectNativeMember');
+    assert.equal(JSON.parse(host.opened[0].getText()).diagnosticEvidence.available, false);
+});
+
+test('hook inspection joins exact sites and reports exported evidence without binding classes', async (t) => {
+    const target = 'example/Api.read()I';
+    const hooks = [
+        { id: 'declaration', name: 'read_hook', owner: 'owner', kind: 'HOOK_DECLARATION', targets: [target], status: 'prepared' },
+        { id: 'site', name: target, target, kind: 'HOOK_SITE', status: 'applied',
+            matchCounts: { methods: 1, normalReturns: 1 }, installedCapabilities: ['before', 'after'],
+            observedInputSha256: hash('input'), outputSha256: hash('output') },
+        { id: 'group-failure', kind: 'HOOK_DIAGNOSTIC', owner: 'owner,other', owners: ['owner', 'other'],
+            hook: target, target, status: 'match_failed', guidance: { code: 'inspect_hook_site' } }
+    ];
+    const { host } = await fixture(t, { hooks, choices: [0, 'read_hook'] });
+    await host.run('importNativeCatalog');
+    await host.run('inspectNativeHook');
+    const report = JSON.parse(host.opened[0].getText());
+    assert.equal(report.evidence, 'exported_snapshot');
+    assert.equal(report.live, false);
+    assert.equal(report.sites.length, 1);
+    assert.equal(report.diagnostics.length, 1);
+    assert.equal(report.diagnostics[0].guidance.code, 'inspect_hook_site');
+    assert.equal(report.sites[0].matchCounts.methods, 1);
+    assert.deepEqual(report.sites[0].installedCapabilities, ['before', 'after']);
+});
+
+test('optional diagnostic links outside the export directory are not imported', async (t) => {
+    const { root, host, catalog } = await fixture(t, { choices: [0, 'example.Api', 'read', null],
+        diagnostics: { execution: { failureDetails: { records: [] } } } });
+    const companion = path.join(path.dirname(catalog.filename), 'native_failures.json');
+    const outside = path.join(root, 'unrelated-diagnostics.json');
+    await fs.rename(companion, outside);
+    try { await fs.symlink(outside, companion, 'file'); }
+    catch (error) {
+        if (error.code === 'EPERM') { t.skip('Host does not permit file symlinks.'); return; }
+        throw error;
+    }
+    await host.run('importNativeCatalog');
+    await host.run('inspectNativeMember');
+    assert.equal(JSON.parse(host.opened[0].getText()).diagnosticEvidence.available, false);
+});
+
+test('legacy diagnostic companions are labelled as generation matches, not verified exports', async (t) => {
+    const { host, catalog } = await fixture(t, { choices: [0, 'example.Api', 'read', null],
+        diagnostics: { execution: { failureDetails: { records: [] } } } });
+    delete catalog.manifest.diagnostics;
+    await fs.writeFile(catalog.filename, JSON.stringify(catalog.manifest));
+    await host.run('importNativeCatalog');
+    await host.run('inspectNativeMember');
+    assert.equal(JSON.parse(host.opened[0].getText()).diagnosticEvidence.integrity, 'legacy_generation_match');
+});
+
 test('browse without an import explains the next action and keeps the API enabled', async () => {
     const host = createHost();
     await host.activate();

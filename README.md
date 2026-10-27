@@ -33,9 +33,9 @@ The definitions target BetaMoon 1.0.0.
 | Events | [events.lua](library/betamoon/events.lua) |
 | Input and controls | [input_and_controls.lua](library/betamoon/input_and_controls.lua) |
 | Chat, modules, and utilities | [chat_modules_and_utilities.lua](library/betamoon/chat_modules_and_utilities.lua) |
-| Native discovery | [native_discovery.lua](library/betamoon/native_discovery.lua) |
-| Native references, reflection and scoped access | [native_access.lua](library/betamoon/native_access.lua) |
-| Scripted hooks | [scripted_hooks.lua](library/betamoon/scripted_hooks.lua) |
+| Discovery and Reflection | [native_discovery.lua](library/betamoon/native_discovery.lua) |
+| Native Interop API | [native_access.lua](library/betamoon/native_access.lua) |
+| Scripted Hooks API | [scripted_hooks.lua](library/betamoon/scripted_hooks.lua) |
 | Public module | [public_module.lua](library/betamoon/public_module.lua) |
 
 Browse the category files for API declarations. `public_module.lua` defines the global `betamoon` entry point.
@@ -86,7 +86,7 @@ The extension ships the BetaMoon API definitions and native tooling. Minecraft, 
 are generated locally from your instance's catalog, keeping the extension download small:
 
 1. Start that Minecraft instance. Open **Scripts → Debug**, wait for native discovery to finish, and choose
-   **Export** beside **Native access**. Alternatively, enable **Include detailed native catalogs** before **Export All**.
+   **Export** beside **Native Interop API**. Alternatively, enable **Include detailed native catalogs** before **Export All**.
 2. In VS Code, open your scripts folder and run **BetaMoon: Import Native Catalog** from the Command Palette.
 3. Choose your Minecraft instance folder or the export folder. You can also select `native_catalog.json` directly.
    If several exports exist, choose the one you want; the newest is listed first.
@@ -143,7 +143,7 @@ for package layout, supported methods, edit permissions and reload behavior.
 The standalone Node.js generator is optional for other editors and automation. It is separate from handwritten
 API synchronization. Generate definitions from your instance's exported catalog and add the output alongside `library`.
 
-1. In the game, open Debug Tools and export **Native access**, or enable **Include detailed native catalogs**
+1. In the game, open Debug Tools and export **Native Interop API**, or enable **Include detailed native catalogs**
    before Export All. Wait for native discovery to finish before exporting.
 2. Keep `native_catalog.json` and `native_catalog.jsonl` together in their export directory.
 3. From this addon checkout, run the following with Node.js, replacing the paths with your own:
@@ -188,3 +188,17 @@ Run `npm install` and `npm test` in a fresh checkout. Tests and their shared hel
 splitter in `tools/`, are tracked and excluded from the VSIX. Canonical API maintenance uses the ignored
 `internal/api.lua` and local `scripts/` commands restored from the Internal repository; extension installation,
 native catalog import and ordinary tests do not require those private maintenance files.
+
+### Native Interop API diagnostics
+
+Access Minecraft and installed-mod Java classes from Lua, inspect and query their data, invoke methods,
+and provide Lua-backed implementations. The **Native Interop API** uses `betamoon.native`;
+**Discovery and Reflection** covers metadata browsing, and the **Scripted Hooks API** covers interception.
+
+Run **BetaMoon: Inspect Native Member** to inspect an exact overload and its exported failures, copied causes
+and guidance. **BetaMoon: Inspect Native Hook** shows declarations, linked sites, observed match counts,
+installed capabilities and refusal guidance. Reports are exported snapshots (`live = false`), not live game checks.
+Keep `native_failures.json` with the catalog files when copying full exports. Its bytes are verified against the
+manifest when available (`verified_export`); older exports report `legacy_generation_match` instead.
+Missing or mismatched optional diagnostics do not prevent metadata import. Export again and refresh to update them.
+The **Include detailed native catalogs** checkbox remains opt-in for **Export All**.

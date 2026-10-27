@@ -215,4 +215,4 @@ async function readCatalog(filename, { signal } = {}) {
     return { manifest, tables, manifestPath };
 }
 
-module.exports = { FORMAT, KINDS, LIMITS, hash, snapshotId, readCatalog, readBounded, cancelled };
+module.exports = { FORMAT, KINDS, LIMITS, hash, snapshotId, readCatalog, readBounded, openLocal, cancelled };

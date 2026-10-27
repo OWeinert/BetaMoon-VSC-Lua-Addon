@@ -1,25 +1,49 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
-const { readCatalog, hash, cancelled, readBounded } = require('./native-catalog');
+const { readCatalog, hash, cancelled, readBounded, openLocal } = require('./native-catalog');
 const { publishLibrary } = require('./native-library');
 const { findCatalogs, createBrowser, selector } = require('./native-browse');
 const { readAttachedSource, parseSourceInWorker, memberLocation } = require('./native-sources');
 
-async function readDiagnostics(catalog) {
+async function readDiagnostics(catalog, destination) {
     const filename = path.join(path.dirname(catalog.manifestPath), 'native_failures.json');
-    const handle = await fs.open(filename, 'r').catch((error) => {
-        if (error.code !== 'ENOENT') { throw error; }
-    });
-    if (!handle) { return undefined; }
+    let handle;
     try {
-        const data = JSON.parse((await readBounded(handle, 5 * 1024 * 1024)).toString('utf8'));
-        if (data.schemaVersion !== 1 || data.generation !== catalog.manifest.generation
-            || data.namespace !== catalog.manifest.namespace || data.mappingSha256 !== catalog.manifest.mappingSha256) {
-            return undefined;
+        handle = await openLocal(filename, path.dirname(catalog.manifestPath), 5 * 1024 * 1024);
+        const bytes = await readBounded(handle, 5 * 1024 * 1024);
+        const descriptor = catalog.manifest.diagnostics;
+        if (descriptor && (descriptor.path !== 'native_failures.json' || descriptor.bytes !== bytes.length
+            || descriptor.sha256 !== hash(bytes))) {
+            return { available: false, reason: 'snapshot_mismatch', live: false };
         }
-        const records = data.execution?.failureDetails?.records;
-        return Array.isArray(records) && records.length <= 64 ? data : undefined;
-    } finally { await handle.close(); }
+        const data = JSON.parse(bytes.toString('utf8'));
+        if (!data || typeof data !== 'object' || Array.isArray(data)
+            || data.schemaVersion !== 1 || data.generation !== catalog.manifest.generation
+            || data.namespace !== catalog.manifest.namespace || data.mappingSha256 !== catalog.manifest.mappingSha256) {
+            return { available: false, reason: 'snapshot_mismatch', live: false };
+        }
+        const records = data.execution?.failureDetails?.records ?? [];
+        if (!Array.isArray(records) || records.length > 64
+            || records.some((r) => !r || typeof r !== 'object' || Array.isArray(r))) {
+            return { available: false, reason: 'invalid_diagnostics', live: false };
+        }
+        if (destination) { await fs.writeFile(destination, bytes); }
+        return { available: true, integrity: descriptor ? 'verified_export' : 'legacy_generation_match',
+            live: false, data };
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            return { available: false, reason: catalog.manifest.diagnostics ? 'diagnostics_missing' : 'not_exported', live: false };
+        }
+        if (error instanceof SyntaxError) {
+            return { available: false, reason: 'invalid_diagnostics', live: false };
+        }
+        return { available: false, reason: 'diagnostics_unreadable', live: false };
+    } finally { if (handle) { await handle.close(); } }
+}
+
+function diagnosticEvidence(diagnostics) {
+    return { available: diagnostics?.available === true, integrity: diagnostics?.integrity,
+        reason: diagnostics?.reason, live: false };
 }
 
 function registerNativeTools(vscode, context, { enqueue, selectFolder, configureFolder }) {
@@ -36,6 +60,10 @@ function registerNativeTools(vscode, context, { enqueue, selectFolder, configure
             const instance = await readCatalog(state.cachedManifest);
             const data = createBrowser(instance);
             data.diagnostics = await readDiagnostics(instance);
+            if (!data.diagnostics.available && state.diagnosticIssue
+                && ['not_exported', 'diagnostics_missing'].includes(data.diagnostics.reason)) {
+                data.diagnostics.reason = state.diagnosticIssue;
+            }
             browsers.set(key(folder), data);
         }
         return browsers.get(key(folder));
@@ -71,8 +99,11 @@ function registerNativeTools(vscode, context, { enqueue, selectFolder, configure
         if (copy.manifest.snapshotId !== catalog.manifest.snapshotId) {
             throw new Error('The exported catalog changed while importing. Export it again and retry.');
         }
-        const diagnostics = await readDiagnostics(catalog);
-        if (diagnostics) { await fs.writeFile(path.join(directory, 'native_failures.json'), JSON.stringify(diagnostics)); }
+        // Copy validated bytes exactly: the manifest binds this companion by byte length and hash.
+        if (JSON.stringify(copy.manifest.diagnostics) === JSON.stringify(catalog.manifest.diagnostics)) {
+            const diagnostics = await readDiagnostics(catalog, path.join(directory, 'native_failures.json'));
+            if (!diagnostics.available) { copy.diagnosticIssue = diagnostics.reason; }
+        }
         return copy;
     }
     async function importManifest(folder, filename) {
@@ -85,10 +116,14 @@ function registerNativeTools(vscode, context, { enqueue, selectFolder, configure
             const library = await publishLibrary(copy, path.join(root, 'libraries'), options);
             cancelled(options.signal);
             const state = { source: filename, cachedManifest: copy.manifestPath, libraryPath: library.directory,
-                snapshotId: original.manifest.snapshotId, sourceRoots: previous?.sourceRoots || {} };
+                snapshotId: original.manifest.snapshotId, sourceRoots: previous?.sourceRoots || {},
+                diagnosticIssue: copy.diagnosticIssue };
             await configureFolder(folder, true, state);
             const data = createBrowser(copy);
             data.diagnostics = await readDiagnostics(copy);
+            if (!data.diagnostics.available && copy.diagnosticIssue) {
+                data.diagnostics.reason = copy.diagnosticIssue;
+            }
             browsers.set(key(folder), data);
         });
         void vscode.window.showInformationMessage('Native catalog imported. Minecraft and mod completion is ready for this folder.');
@@ -261,17 +296,58 @@ function registerNativeTools(vscode, context, { enqueue, selectFolder, configure
                 const data = await browser(folder);
                 if (documents.size >= 16) { documents.delete(documents.keys().next().value); }
                 const uri = vscode.Uri.parse(`betamoon-native:/inspect/${hash(member.id)}/member.json`);
-                const report = { requestedType: type.name, member, origin: data.origin(data.typeFor(member) || type),
+                const declaring = data.typeFor(member) || type;
+                const runtimeName = member.runtimeName || member.name;
+                const runtimeDescriptor = member.runtimeDescriptor || member.descriptor;
+                const uniqueOrigin = data.catalog.tables.classes.filter((r) => r.name === declaring.name).length === 1;
+                const report = { requestedType: type.name, member, origin: data.origin(declaring),
                     namespace: data.catalog.manifest.namespace, mappingSha256: data.catalog.manifest.mappingSha256,
                     generation: data.catalog.manifest.generation, coverage: data.catalog.manifest.coverage,
                     binding: 'Metadata only; loadability, access, phase and lifetime are checked by the game.',
-                    recentFailures: (data.diagnostics?.execution?.failureDetails?.records || []).filter((r) =>
-                        (r.requestedType === type.name || r.runtimeOwner === type.runtimeName)
-                        && (r.requestedMember === member.name || r.runtimeMember === member.runtimeName)).slice(0, 8) };
+                    diagnosticEvidence: diagnosticEvidence(data.diagnostics),
+                    relatedHooks: data.catalog.tables.hooks.filter((r) =>
+                        r.runtimeOwner === declaring.runtimeName && r.runtimeMember === runtimeName
+                            && r.runtimeDescriptor === runtimeDescriptor).slice(0, 32),
+                    recentFailures: (data.diagnostics?.data?.execution?.failureDetails?.records || []).filter((r) =>
+                        ((r.runtimeOwner === declaring.runtimeName && r.runtimeMember === runtimeName
+                            && r.runtimeDescriptor === runtimeDescriptor)
+                        || (r.requestedType === type.name && r.requestedMember === member.name
+                            && r.requestedDescriptor === member.descriptor))
+                        && ((r.originId || r.requestedOriginId)
+                            ? (r.originId || r.requestedOriginId) === declaring.originId : uniqueOrigin)).slice(0, 8) };
                 documents.set(uri.toString(), JSON.stringify(report, null, 2));
                 await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri));
                 await referenceActions(folder, type, member, targetEditor);
             }
+        },
+        async inspectNativeHook(folder) {
+            const data = await browser(folder);
+            const rows = data.catalog.tables.hooks;
+            const choice = await vscode.window.showQuickPick(rows.slice(0, 4096).map((record) => ({
+                label: typeof record.name === 'string' && record.name ? record.name : record.id,
+                description: `${typeof record.kind === 'string' ? record.kind : 'hook'}; ${typeof record.status === 'string' ? record.status : 'unknown'}`,
+                detail: typeof record.owner === 'string' ? record.owner
+                    : (Array.isArray(record.owners) ? record.owners.filter((v) => typeof v === 'string') : []).join(', '), record
+            })), { placeHolder: 'Inspect exported hook evidence (not live game state)' });
+            if (!choice) { return; }
+            const selected = choice.record;
+            const targets = new Set(Array.isArray(selected.targets) ? selected.targets.filter((v) => typeof v === 'string')
+                : typeof selected.target === 'string' ? [selected.target] : []);
+            const owners = new Set([selected.owner, ...(Array.isArray(selected.owners) ? selected.owners : [])]
+                .filter((value) => typeof value === 'string' && value));
+            const report = { evidence: 'exported_snapshot', live: false,
+                namespace: data.catalog.manifest.namespace, generation: data.catalog.manifest.generation,
+                mappingSha256: data.catalog.manifest.mappingSha256, snapshotId: data.catalog.manifest.snapshotId,
+                selected, sites: rows.filter((r) => r.kind === 'HOOK_SITE'
+                    && targets.has(r.target)).slice(0, 32),
+                diagnostics: rows.filter((r) => r.kind === 'HOOK_DIAGNOSTIC'
+                    && [r.owner, ...(Array.isArray(r.owners) ? r.owners : [])].some((owner) => owners.has(owner))
+                    && (!r.hook || r.hook === selected.name || targets.has(r.target))).slice(0, 16),
+                diagnosticEvidence: diagnosticEvidence(data.diagnostics) };
+            if (documents.size >= 16) { documents.delete(documents.keys().next().value); }
+            const uri = vscode.Uri.parse(`betamoon-native:/inspect/${hash(selected.id)}/hook.json`);
+            documents.set(uri.toString(), JSON.stringify(report, null, 2));
+            await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri));
         },
         async openNativeSource(folder) {
             const mode = await vscode.window.showQuickPick(['Find source by class', 'Browse all source files'],

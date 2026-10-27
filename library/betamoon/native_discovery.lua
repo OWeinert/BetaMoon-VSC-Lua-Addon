@@ -129,6 +129,16 @@
 ---@field outputSha256? string
 ---@field parentId? string
 ---@field enumerable? boolean
+---@field guidance? BetaMoonNativeGuidance Actionable advice for a failed or refused record.
+---@field runtimeNamespace? 'named'|'client'|'server'|'unknown' Namespace captured with hook query results.
+---@field runtimeOwner? string Exact dotted runtime hook owner.
+---@field runtimeMember? string Exact runtime method name.
+---@field namespaceCandidates? string[] Startup namespaces resolving to this exact site; not proof of runtime activation.
+---@field installedEnvelopeVersion? integer Present only when the site was installed.
+---@field installedCapabilities? string[] Empty when the site is unavailable.
+---@field matchCounts? {methods: integer?, normalReturns: integer?} Nil means not observed.
+---@field provenance? {boundary: string, observed: boolean, structureAnalyzed: boolean, laterTransformersObserved: boolean}
+---@field targets? string[] Exact startup site keys for a hook declaration.
 
 ---@class BetaMoonNativeQueryPage
 ---@field items BetaMoonNativeRecord[]
@@ -147,6 +157,24 @@
 ---@field work? {runningScans: integer, queuedScans: integer, lastScanNanos: integer?} One worker, at most one queued scan; timing describes the last published scan.
 ---@field hooks? {status: 'available'|'agent_unavailable', revision: integer, items: BetaMoonNativeRecord[]}
 ---@field execution? BetaMoonNativeExecutionStatus
+
+---Detached advice. Codes are stable; messages describe an eligible next step without granting permissions.
+---@class BetaMoonNativeGuidance
+---@field code string
+---@field message string
+
+---@class BetaMoonNativeCauseRecord
+---@field type string
+---@field message? string Stored Throwable message, limited to 2 KiB of UTF-8.
+---@field messageTruncated? boolean
+
+---Copied stored Throwable fields; overridden native getters and formatters are never executed.
+---@class BetaMoonNativeCauseEvidence
+---@field source 'stored_throwable_fields'
+---@field chain BetaMoonNativeCauseRecord[] At most eight causes; no native objects are retained.
+---@field cycle boolean
+---@field truncated boolean More causes exist beyond the limit.
+---@field unavailable boolean Stored fields could not be read; type-only evidence remains.
 
 ---@class BetaMoonNativeFailureDiagnostic
 ---@field reason string
@@ -174,6 +202,8 @@
 ---@field definingLoaderId? string
 ---@field originId? string
 ---@field nativeCauseType? string
+---@field nativeCauses? BetaMoonNativeCauseEvidence
+---@field guidance? BetaMoonNativeGuidance
 ---@field availableOverloads? {name: string, descriptor: string, originId: string, access: string}[]
 ---@field alternativesBounded? boolean
 
@@ -181,7 +211,7 @@
 ---@field session 'active'|'closed'
 ---@field cachedTypeSelectors integer
 ---@field failures table<string, integer>
----@field failureDetails {maximumRecords: integer, omitted: integer, records: BetaMoonNativeFailureDiagnostic[]}
+---@field failureDetails {maximumRecords: integer, maximumRecordBytes: integer, maximumBytes: integer, encodedBytes: integer, omitted: integer, records: BetaMoonNativeFailureDiagnostic[]}
 ---@field ownership BetaMoonNativeRecord
 ---@field interfaces BetaMoonNativeRecord
 

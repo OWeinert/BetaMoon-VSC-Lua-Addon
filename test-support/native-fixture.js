@@ -2,7 +2,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { KINDS, hash, snapshotId } = require('../src/native-catalog');
 
-async function writeCatalog(root, name = 'example.Api', { generation = 1, source } = {}) {
+async function writeCatalog(root, name = 'example.Api', { generation = 1, source, hooks = [], diagnostics } = {}) {
     await fs.mkdir(root, { recursive: true });
     const originId = name.startsWith('example') ? 'mod-origin' : 'base-origin';
     const type = { id: originId + ':' + name, name, runtimeName: name, originId, namespace: 'named',
@@ -11,7 +11,7 @@ async function writeCatalog(root, name = 'example.Api', { generation = 1, source
     const member = { id: type.id + ':read', kind: 'METHOD', name: 'read', descriptor: '()I',
         declaringType: name, originId, namespace: 'named', modifiers: 1, access: 'public', parameterNames: [] };
     const tables = { classes: [type], members: [member], origins: [{ id: originId, name: name + '.jar',
-        status: 'indexed', fingerprint: hash(name) }], sources: source ? [source] : [], files: [], loaders: [], hooks: [] };
+        status: 'indexed', fingerprint: hash(name) }], sources: source ? [source] : [], files: [], loaders: [], hooks };
     const rows = KINDS.flatMap((kind) => tables[kind].map((record) => JSON.stringify({ kind, record }) + '\n'));
     const bytes = Buffer.from(rows.join(''));
     const manifest = { format: 'betamoon-native-catalog', schemaVersion: 1, extractorVersion: 'betamoon-classfile-1',
@@ -20,6 +20,12 @@ async function writeCatalog(root, name = 'example.Api', { generation = 1, source
         counts: Object.fromEntries(KINDS.map((kind) => [kind, tables[kind].length])),
         files: [{ path: 'native_catalog.jsonl', bytes: bytes.length, rows: rows.length, sha256: hash(bytes) }] };
     manifest.snapshotId = snapshotId(manifest);
+    if (diagnostics) {
+        const failures = Buffer.from(JSON.stringify({ schemaVersion: 1, generation, namespace: 'named',
+            mappingSha256: 'unknown', evidence: 'exported_snapshot', ...diagnostics }) + '\n');
+        manifest.diagnostics = { path: 'native_failures.json', bytes: failures.length, sha256: hash(failures) };
+        await fs.writeFile(path.join(root, 'native_failures.json'), failures);
+    }
     await fs.writeFile(path.join(root, 'native_catalog.jsonl'), bytes);
     const filename = path.join(root, 'native_catalog.json');
     await fs.writeFile(filename, JSON.stringify(manifest));

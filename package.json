@@ -70,6 +70,11 @@
         "category": "BetaMoon"
       },
       {
+        "command": "betamoon.inspectNativeHook",
+        "title": "Inspect Native Hook",
+        "category": "BetaMoon"
+      },
+      {
         "command": "betamoon.openNativeSource",
         "title": "Open Native Source",
         "category": "BetaMoon"

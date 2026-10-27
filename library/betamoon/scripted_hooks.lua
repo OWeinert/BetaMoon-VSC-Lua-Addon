@@ -48,6 +48,7 @@ function HookArguments:set(index, value) end
 ---@class BetaMoonHookException
 ---@field type string Native exception class name.
 ---@field message string Bounded copied diagnostic; observation cannot consume or replace the exception.
+---@field nativeCauses BetaMoonNativeCauseEvidence
 
 ---Expires after this callback. Native access is read-only; editing this call grants no general world-write authority.
 ---@class BetaMoonHookCall
