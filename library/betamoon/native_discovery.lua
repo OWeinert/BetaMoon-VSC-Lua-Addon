@@ -121,7 +121,16 @@
 ---@field calls? integer
 ---@field failures? integer
 ---@field skippedReentry? integer
----@field callbackNanos? integer
+---@field attempts? integer Admitted callback attempts, including failed or invalidated callbacks.
+---@field callbackNanos? integer Inclusive nanoseconds for timed attempts only; counts mode reports zero.
+---@field callbackOwnNanos? integer Timed callback cost excluding its around continuation, including other native work.
+---@field continuationNanos? integer Timed around continuation cost; includes downstream wrappers and the native body.
+---@field timingMode? 'counts'|'sampled'|'full'
+---@field timingSampleEvery? integer Effective interval: 0 in counts mode, 1 in full mode.
+---@field timingAttempts? integer Admitted attempts since the timing mode or effective interval changed.
+---@field timedCalls? integer Number of attempts included in the timing totals; never extrapolated.
+---@field count? integer Occurrences grouped by owner/hook/reason for a diagnostic record.
+---@field reported? integer Number of rate-limited log messages for a diagnostic record.
 ---@field shortCircuits? integer
 ---@field sourceSha256? string Hash of the evaluated UTF-8 hook source, separate from structural compatibility.
 ---@field structuralFingerprint? string
