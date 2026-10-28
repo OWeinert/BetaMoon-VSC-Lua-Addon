@@ -6,7 +6,7 @@
 -- CATEGORY: SCRIPTED HOOKS
 -- --------------------------------------------------------------------------
 
----@alias BetaMoonHookPhase 'before'|'after'|'error'
+---@alias BetaMoonHookPhase 'before'|'after'|'error'|'around'
 ---@alias BetaMoonHookEffects 'observe'|'edit'
 
 ---Exact declared Java method. Use the native catalog to select the descriptor, including its return type.
@@ -22,11 +22,13 @@
 ---@field id string Stable owner-local identifier, unique across listed files.
 ---@field target BetaMoonHookTarget|BetaMoonNativeMethodRef Exact declaring owner, without session loader/origin IDs.
 ---@field at BetaMoonHookPhase Required entry, native normal-return or exceptional-exit phase.
----@field effects? BetaMoonHookEffects Defaults to observe; edit supports before/after only.
+---@field effects? BetaMoonHookEffects Defaults to observe; around requires edit. Before/after edits remain supported.
 ---@field priority? integer Signed 32-bit priority; higher first at entry, reverse order at normal return.
 ---@field required? boolean Defaults to false; unavailable required targets prevent owner initialization.
 ---@field thread? 'client' Checked at invocation; never schedules synchronous work.
 ---@field side? 'client'
+---@field nativeErrors? 'propagate'|'recover' Around only; default propagate preserves native errors even if pcall catches them.
+---@field reentry? 'native'|'error' Around only; default native skips this owner's entered around wrapper on native recursion.
 
 ---@class BetaMoonHookDefinitionToken
 ---@field id string Immutable symbolic declaration identity; does not activate a hook.
@@ -40,14 +42,14 @@ local HookArguments = {}
 ---@return any
 function HookArguments:get(index) end
 
----Stages a typed argument replacement. Requires effects=edit on a before hook and an eligible enclosing phase.
+---Stages a typed argument replacement. Requires effects=edit on a before hook or before an around continuation, and an eligible enclosing phase.
 ---@param index integer Zero-based Java parameter index.
 ---@param value any Exact native conversions apply; use native.NULL for Java null and native:long for exact longs.
 function HookArguments:set(index, value) end
 
 ---@class BetaMoonHookException
 ---@field type string Native exception class name.
----@field message string Bounded copied diagnostic; observation cannot consume or replace the exception.
+---@field message string Bounded copied diagnostic; the evidence contains no live native Throwable.
 ---@field nativeCauses BetaMoonNativeCauseEvidence
 
 ---Expires after this callback. Native access is read-only; editing this call grants no general world-write authority.
@@ -61,6 +63,7 @@ function HookArguments:set(index, value) end
 ---@field native BetaMoonNativeAccess Fresh read-only native scope, inheriting enclosing restrictions.
 ---@field result? any Native normal-return value in after hooks; absent for void. Reflects this callback's staged result.
 ---@field exception? BetaMoonHookException Copied diagnostic in error hooks.
+---@field failure? BetaMoonHookException Scoped opaque evidence after a failed around continuation; expires with the call.
 local HookCall = {}
 
 ---Stages a void early return in an editing before hook. Skips the native body and ordinary after hooks.
@@ -74,13 +77,23 @@ function HookCall:returnValue(value) end
 ---@param value any Must match the non-void method return type using native conversions.
 function HookCall:setResult(value) end
 
+---Around only: continue once with the current argument buffer. Pre-continuation native views expire.
+---Return a typed final result from the around callback; return no value for void. Enclosing restrictions remain.
+---@return any result
+function HookCall:proceed() end
+
+---Around only: validate the exact Java parameter list and continue once. Java null uses native.NULL.
+---@param ... any
+---@return any result
+function HookCall:proceedWith(...) end
+
 ---@class BetaMoonHookRegistry
 local HookRegistry = {}
 
 ---Collects and snapshots a complete definition without invoking its callback or activating a subscription.
 ---All edits commit atomically after successful callback completion. Registries seal when their listed file finishes.
 ---@param definition BetaMoonHookDefinition
----@param callback fun(call: BetaMoonHookCall)
+---@param callback fun(call: BetaMoonHookCall): any
 ---@return BetaMoonHookDefinitionToken
 function HookRegistry:register(definition, callback) end
 
