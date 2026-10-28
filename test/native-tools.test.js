@@ -163,6 +163,24 @@ test('hook inspection joins exact sites and reports exported evidence without bi
     assert.equal(report.sites[0].operations[0].owner, 'example/Other');
 });
 
+test('constructor hook inspection preserves exact declaring completion and observation capabilities', async (t) => {
+    const target = 'example/Api.<init>(I)V';
+    const hooks = [
+        {id: 'constructor-declaration', name: 'created', owner: 'owner', kind: 'HOOK_DECLARATION',
+            at: 'constructed', targets: [target], status: 'prepared'},
+        {id: 'constructor-site', name: target, target, kind: 'HOOK_SITE', status: 'applied',
+            executableKind: 'constructor', completion: 'declaring_constructor_return',
+            installedCapabilities: ['constructed']}
+    ];
+    const {host} = await fixture(t, {hooks, choices: [0, 'created']});
+    await host.run('importNativeCatalog');
+    await host.run('inspectNativeHook');
+    const report = JSON.parse(host.opened[0].getText());
+    assert.equal(report.sites[0].executableKind, 'constructor');
+    assert.equal(report.sites[0].completion, 'declaring_constructor_return');
+    assert.deepEqual(report.sites[0].installedCapabilities, ['constructed']);
+});
+
 test('optional diagnostic links outside the export directory are not imported', async (t) => {
     const { root, host, catalog } = await fixture(t, { choices: [0, 'example.Api', 'read', null],
         diagnostics: { execution: { failureDetails: { records: [] } } } });

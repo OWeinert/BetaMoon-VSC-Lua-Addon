@@ -214,3 +214,7 @@ runtime inputs, nested projections and limits. The declarations and sampling opt
 Scripted hook definitions include exact call-site and field-operation selectors. LuaLS distinguishes operation
 callback operands from the containing method and completes typed argument/result/value edits. See the
 [Scripted Hooks API](https://github.com/OWeinert/BetaMoon/wiki/API-Hooks) for selection and lifetime rules.
+
+Constructor hook declarations use an exact `ConstructorRef` with `at="constructed"`. This observes that
+declaring constructor returning, before derived initialization may finish. Its dedicated callback type offers
+read-only arguments and a scoped receiver. See the same hook guide for delegation, failure and lifetime rules.

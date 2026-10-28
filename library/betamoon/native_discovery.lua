@@ -113,7 +113,7 @@
 ---@field normalReturns? integer Number of observed normal-return instructions before user instrumentation.
 ---@field target? string Exact hook runtime method selector.
 ---@field source? string Package-relative hook source.
----@field at? BetaMoonHookPhase|'invoke_before'|'invoke_after'|'field_read'|'field_write'
+---@field at? BetaMoonHookPhase|'invoke_before'|'invoke_after'|'field_read'|'field_write'|'constructed'
 ---@field effects? BetaMoonHookEffects
 ---@field priority? integer
 ---@field required? boolean
@@ -139,6 +139,8 @@
 ---@field matchCounts? {methods: integer?, normalReturns: integer?} Nil means not observed.
 ---@field provenance? {boundary: string, observed: boolean, structureAnalyzed: boolean, laterTransformersObserved: boolean}
 ---@field targets? string[] Exact startup site keys for a hook declaration.
+---@field executableKind? 'method'|'constructor'
+---@field completion? 'declaring_constructor_return' Exact declaring-constructor meaning; not most-derived completion.
 ---@field point? table Copied requested operation selector on declarations/subscriptions.
 ---@field points? BetaMoonHookPointEvidence[] Installed/observed point evidence on a site.
 ---@field operations? BetaMoonHookOperationPoint[] Actual selected runtime operations; ordinal/matches belong to points.

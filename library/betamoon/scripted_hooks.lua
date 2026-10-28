@@ -109,6 +109,34 @@ function HookOperationCall:setResult(value) end
 ---@param value any
 function HookOperationCall:setValue(value) end
 
+---Exact declaring constructor selector. The constructor field is the complete JVM descriptor.
+---@class BetaMoonHookConstructorTarget
+---@field class string
+---@field constructor string Complete constructor descriptor ending in )V.
+---@field names? BetaMoonNativeNamePolicy
+---@field descriptorNames? BetaMoonNativeNamePolicy
+
+---Observes normal return of this declaring constructor, before derived initialization may finish.
+---@class BetaMoonConstructorHookDefinition
+---@field id string
+---@field target BetaMoonNativeConstructorRef|BetaMoonHookConstructorTarget
+---@field at 'constructed'
+---@field effects? 'observe' Constructor editing is unavailable.
+---@field priority? integer Reverse priority/owner/ID return order.
+---@field required? boolean
+---@field thread? 'client'
+---@field side? 'client'
+
+---An observation of one exact declaring constructor's successful return, not complete derived construction.
+---@class BetaMoonHookConstructedCall
+---@field id string
+---@field owner string
+---@field site string Exact declaring <init> selector and descriptor.
+---@field mode 'constructed'
+---@field receiver BetaMoonNativeObject Scoped receiver; derived fields may still be uninitialized.
+---@field arguments BetaMoonHookObservedArguments Saved entry arguments, including synthetic parameters.
+---@field native BetaMoonNativeAccess Read-only; no constructor editing, cancellation or continuation methods.
+
 ---@class BetaMoonHookDefinitionToken
 ---@field id string Immutable symbolic declaration identity; does not activate a hook.
 
@@ -171,8 +199,8 @@ local HookRegistry = {}
 
 ---Collects and snapshots a complete definition without invoking its callback or activating a subscription.
 ---All edits commit atomically after successful callback completion. Registries seal when their listed file finishes.
----@param definition BetaMoonHookDefinition|BetaMoonOperationHookDefinition
----@param callback fun(call: BetaMoonHookCall|BetaMoonHookOperationCall): any
+---@param definition BetaMoonHookDefinition|BetaMoonOperationHookDefinition|BetaMoonConstructorHookDefinition
+---@param callback fun(call: BetaMoonHookCall|BetaMoonHookOperationCall|BetaMoonHookConstructedCall): any
 ---@return BetaMoonHookDefinitionToken
 function HookRegistry:register(definition, callback) end
 
