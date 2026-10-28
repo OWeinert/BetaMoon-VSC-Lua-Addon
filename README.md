@@ -80,6 +80,17 @@ VS Code desktop and remote workspaces are supported; install the extension in th
 SSH, WSL or containers. Browser-only VS Code is not supported. Open the folder containing the LuaLS configuration;
 externally configured `Lua.misc.parameters` configuration files are not managed by this extension.
 
+## Lua-backed native classes
+
+The Native Interop API also provides `betamoon.native:hostType{base, constructor, overrides}` and
+`ctx.native:direct():newHost(type, options)` for public, non-final native base classes. Exact method references
+select the shape; per-instance callbacks, setup, query/gameplay policy and owner/world lifetime are separate.
+LuaLS completes the setup/callback contexts, `ctx:callSuper(...)`, owned handles and attachment options.
+Creation requires an eligible native entry and does not install the instance in a consumer automatically.
+See [Native class hosts](https://github.com/OWeinert/BetaMoon/wiki/API-Native-Class-Hosts) for supported
+constructors, overrides, closed policies, permissions and examples. The UI framework and Lua drawing API
+remain separate features.
+
 ## Native completion for your Minecraft instance
 
 The extension ships the BetaMoon API definitions and native tooling. Minecraft, Forge and installed-mod definitions

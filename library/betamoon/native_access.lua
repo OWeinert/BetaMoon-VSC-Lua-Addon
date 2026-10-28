@@ -273,6 +273,61 @@ function NativeFactories:withContext(callback) end
 ---@return BetaMoonNativeDataPlan
 function NativeFactories:dataPlan(definition) end
 
+---Immutable symbolic class shape; class loading and JVM validation happen on newHost in an eligible entry.
+---@class BetaMoonNativeHostType
+
+---@class BetaMoonNativeHostTypeDefinition
+---@field base string|BetaMoonNativeTypeRef Public non-final class.
+---@field constructor BetaMoonNativeConstructorRef|BetaMoonNativeConstructorInfo Exact public/protected constructor on the base.
+---@field overrides (BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo)[] One to 128 distinct public/protected virtual methods; include all abstract requirements.
+
+---Creates reusable metadata without loading a native class or retaining callbacks/receivers.
+---@param definition BetaMoonNativeHostTypeDefinition
+---@return BetaMoonNativeHostType
+function NativeFactories:hostType(definition) end
+
+---@class BetaMoonNativeHostCallbackContext
+---@field native BetaMoonNativeAccess Fresh inherited query/gameplay scope, expiring on exit.
+---@field receiver BetaMoonNativeObject Scoped generated instance.
+---@field method BetaMoonNativeMethodRef Exact selected override.
+local NativeHostCallback = {}
+
+---Calls the exact concrete native super body with an explicit parameter list. Requires unknown-effect authority.
+---Arguments/results use normal native conversion. The closure and native views expire with this callback.
+---@param ... any
+---@return any result
+function NativeHostCallback:callSuper(...) end
+
+---@class BetaMoonNativeHostSetupContext
+---@field native BetaMoonNativeAccess Fresh scope preserving creation permissions.
+---@field receiver BetaMoonNativeObject Owned instance before callback activation; expires after setup.
+
+---@class BetaMoonNativeHostMethod
+---@field method BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo One selected override.
+---@field callback fun(ctx: BetaMoonNativeHostCallbackContext, ...: any): any Exact native-compatible return; void callbacks return no value.
+---@field policy? 'query'|'gameplay' Defaults to query. Gameplay requires an audited mutable enclosing caller.
+---@field onClosed? 'super'|'error'|'noop' Defaults to super for concrete methods, error for abstract; noop requires void.
+
+---@class BetaMoonNativeHostOptions
+---@field arguments any[] Exact constructor arguments; use native.NULL instead of holes.
+---@field methods BetaMoonNativeHostMethod[] Exactly one callback for every selected override.
+---@field lifetime? 'owner'|'world' Defaults to owner; live-root constructor arguments require world.
+---@field dispose? BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo Exact instance method ()V; curated client screens allow native onGuiClosed only.
+---@field setup? fun(ctx: BetaMoonNativeHostSetupContext) Runs after ownership registration and before activation with inherited creation permissions.
+
+---@class BetaMoonNativeClassHostInfo
+---@field base BetaMoonNativeTypeRef Actual base identity.
+---@field shape string Immutable shape fingerprint.
+---@field ownership {type: BetaMoonNativeTypeRef, lifetime: 'owner'|'world', state: string}
+
+---@class BetaMoonNativeClassHost
+---@field type BetaMoonNativeTypeRef Actual generated subclass type.
+---@field base BetaMoonNativeTypeRef Actual native base selector.
+local NativeClassHost = {}
+
+---@return BetaMoonNativeClassHostInfo
+function NativeClassHost:describe() end
+
 ---@class BetaMoonNativeAccess
 local NativeAccess = {}
 
@@ -361,12 +416,12 @@ function NativeAccess:copy(object, options) end
 function NativeAccess:retain(object, options) end
 
 ---Borrows the same owned object into this callback; the resulting view expires on return or handle release.
----@param value BetaMoonNativeOwnedValue|BetaMoonNativeImplementation
+---@param value BetaMoonNativeOwnedValue|BetaMoonNativeImplementation|BetaMoonNativeClassHost
 ---@return BetaMoonNativeObject
 function NativeAccess:use(value) end
 
 ---Explicit direct disposal/release; repeated release of the same current-generation handle is harmless.
----@param value BetaMoonNativeOwnedValue|BetaMoonNativeImplementation
+---@param value BetaMoonNativeOwnedValue|BetaMoonNativeImplementation|BetaMoonNativeClassHost
 function NativeAccess:release(value) end
 
 ---Direct creation of an owned Java interface implementation; every instance/default method needs an exact callback.
@@ -374,7 +429,15 @@ function NativeAccess:release(value) end
 ---@return BetaMoonNativeImplementation
 function NativeAccess:implement(options) end
 
----Direct reversible registration. Both exact methods must take the same implemented interface and return void.
+---Direct creation of an owned generated subclass, with exact typed callbacks and explicit native setup.
+---Requires binding preparation and native initialization/effect authority; audited GuiScreen() also supports client preparation.
+---@param type BetaMoonNativeHostType
+---@param options BetaMoonNativeHostOptions
+---@return BetaMoonNativeClassHost
+function NativeAccess:newHost(type, options) end
+
+
+---Direct reversible registration. Both exact methods must take the same implemented interface/base contract and return void.
 ---@param options BetaMoonNativeAttachmentOptions
 ---@return BetaMoonNativeAttachment
 function NativeAccess:attach(options) end
@@ -412,18 +475,18 @@ local NativeImplementation = {}
 function NativeImplementation:describe() end
 
 ---@class BetaMoonNativeAttachmentOptions
----@field implementation BetaMoonNativeImplementation One managed attachment per implementation.
+---@field implementation BetaMoonNativeImplementation|BetaMoonNativeClassHost One managed attachment per implementation.
 ---@field receiver? BetaMoonNativeObject Omit for static registration/removal.
----@field add BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord Exact (Interface)V registration.
+---@field add BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord Exact (ReferenceType)V registration accepting the implementation.
 ---@field remove BetaMoonNativeMethodRef|BetaMoonNativeMethodInfo|BetaMoonNativeRecord Exact matching identity removal; must clean partial registration.
 ---@field lifetime 'owner'|'world' Live world/entity/tile/screen/client roots require world lifetime.
 
 ---@class BetaMoonNativeAttachmentInfo
 ---@field state 'prepared'|'installing'|'active'|'pending_removal'|'closed'|'detach_failed'
----@field implementation BetaMoonNativeImplementationInfo
+---@field implementation BetaMoonNativeImplementationInfo|BetaMoonNativeClassHostInfo
 
 ---@class BetaMoonNativeAttachment
----@field implementation BetaMoonNativeImplementation Closing the attachment also disables its implementation.
+---@field implementation BetaMoonNativeImplementation|BetaMoonNativeClassHost Closing the attachment also disables its implementation.
 local NativeAttachment = {}
 ---@return BetaMoonNativeAttachmentInfo Detached status; no native consumer reference is retained in this record.
 function NativeAttachment:describe() end
