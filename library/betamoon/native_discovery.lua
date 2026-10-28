@@ -232,7 +232,7 @@
 ---@field failures table<string, integer>
 ---@field failureDetails {maximumRecords: integer, maximumRecordBytes: integer, maximumBytes: integer, encodedBytes: integer, omitted: integer, records: BetaMoonNativeFailureDiagnostic[]}
 ---@field ownership BetaMoonNativeRecord
----@field client {sessions: integer, resources: integer, resourceSlots: integer, pendingDisposals: integer, pendingActions: integer, disposed: integer, failures: integer, cancelledActions: integer}
+---@field client {sessions: integer, resources: integer, resourceSlots: integer, pendingDisposals: integer, oldestPendingMillis: integer, pendingActions: integer, disposed: integer, failures: integer, cancelledActions: integer}
 ---@field interfaces BetaMoonNativeRecord
 
 ---@class BetaMoonNativeScanStatus
