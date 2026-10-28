@@ -210,3 +210,7 @@ results are detached tables/scalars that remain usable after the callback. First
 eligible mutable entry, and normal access/effect restrictions still apply to prepared queries.
 See [Bulk Native Data Queries](https://github.com/OWeinert/BetaMoon/wiki/API-Native-Data-Queries) for examples,
 runtime inputs, nested projections and limits. The declarations and sampling options receive LuaLS completion.
+
+Scripted hook definitions include exact call-site and field-operation selectors. LuaLS distinguishes operation
+callback operands from the containing method and completes typed argument/result/value edits. See the
+[Scripted Hooks API](https://github.com/OWeinert/BetaMoon/wiki/API-Hooks) for selection and lifetime rules.

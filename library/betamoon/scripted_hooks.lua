@@ -30,6 +30,85 @@
 ---@field nativeErrors? 'propagate'|'recover' Around only; default propagate preserves native errors even if pcall catches them.
 ---@field reentry? 'native'|'error' Around only; default native skips this owner's entered around wrapper on native recursion.
 
+---Exact field operand owner and descriptor; name policies are independent of the containing method.
+---@class BetaMoonHookFieldSelector
+---@field class string
+---@field field string
+---@field descriptor string
+---@field names? BetaMoonNativeNamePolicy
+---@field descriptorNames? BetaMoonNativeNamePolicy
+
+---@class BetaMoonHookInvokePoint
+---@field kind 'invoke_before'|'invoke_after'
+---@field method BetaMoonNativeMethodRef|BetaMoonHookTarget Exact referenced operand owner/name/descriptor.
+---@field ordinal integer Zero-based occurrence, smaller than matches.exact.
+---@field matches {exact: integer} Required total matching instruction count, from 1 to 65535.
+
+---@class BetaMoonHookFieldPoint
+---@field kind 'field_read'|'field_write'
+---@field field BetaMoonNativeFieldRef|BetaMoonHookFieldSelector Exact referenced operand owner/name/descriptor.
+---@field ordinal integer Zero-based occurrence, smaller than matches.exact.
+---@field matches {exact: integer} Required total matching instruction count, from 1 to 65535.
+
+---Selects one operation inside an ordinary method. No skipping, continuation or exception recovery.
+---@class BetaMoonOperationHookDefinition
+---@field id string Stable owner-local ID.
+---@field target BetaMoonHookTarget|BetaMoonNativeMethodRef Exact containing method.
+---@field at BetaMoonHookInvokePoint|BetaMoonHookFieldPoint
+---@field effects? BetaMoonHookEffects Defaults to observe.
+---@field priority? integer Higher first before calls/writes, reversed after calls/reads.
+---@field required? boolean Defaults to false.
+---@field thread? 'client'
+---@field side? 'client'
+
+---@class BetaMoonHookObservedArguments
+---@field count integer
+local HookObservedArguments = {}
+
+---@param index integer Zero-based Java parameter index.
+---@return any
+function HookObservedArguments:get(index) end
+
+---@class BetaMoonHookOperationPoint
+---@field id integer Installed runtime operation ID.
+---@field kind 'invoke_before'|'invoke_after'|'field_read'|'field_write'
+---@field opcode integer Actual JVM opcode.
+---@field opcodeName string Lowercase instruction name, such as invokevirtual or getfield.
+---@field opcodeIndex integer Instruction index excluding labels/debug metadata.
+---@field owner string Actual JVM operand owner.
+---@field name string Actual runtime member name.
+---@field descriptor string Actual JVM operand descriptor.
+---@field ordinal? integer Requested zero-based occurrence on a callback.
+---@field matches? integer Required matching instruction count on a callback.
+
+---@class BetaMoonHookEnclosingCall
+---@field site string Exact containing method.
+---@field receiver? BetaMoonNativeObject Scoped containing receiver; absent for static methods.
+---@field arguments BetaMoonHookObservedArguments Read-only saved entry arguments of the containing method.
+
+---A fresh expiring view of one selected operation, separate from its containing method.
+---@class BetaMoonHookOperationCall
+---@field id string
+---@field owner string
+---@field site string Exact containing method.
+---@field mode 'invoke_before'|'invoke_after'|'field_read'|'field_write'
+---@field point BetaMoonHookOperationPoint Immutable actual runtime selection.
+---@field enclosing BetaMoonHookEnclosingCall
+---@field receiver? BetaMoonNativeObject Callee/field receiver, native.NULL for a null instance receiver; absent for static operations.
+---@field arguments BetaMoonHookArguments Actual invocation operands; empty for field operations. Only invoke_before can edit them.
+---@field native BetaMoonNativeAccess Fresh read-only native scope.
+---@field result? any Only after successful invoke_after/field_read; absent for void.
+---@field value? any Incoming typed field_write value.
+local HookOperationCall = {}
+
+---Stages a typed result replacement for a non-void invoke_after or field_read operation.
+---@param value any
+function HookOperationCall:setResult(value) end
+
+---Stages a typed incoming value replacement for field_write; final fields are unavailable.
+---@param value any
+function HookOperationCall:setValue(value) end
+
 ---@class BetaMoonHookDefinitionToken
 ---@field id string Immutable symbolic declaration identity; does not activate a hook.
 
@@ -92,8 +171,8 @@ local HookRegistry = {}
 
 ---Collects and snapshots a complete definition without invoking its callback or activating a subscription.
 ---All edits commit atomically after successful callback completion. Registries seal when their listed file finishes.
----@param definition BetaMoonHookDefinition
----@param callback fun(call: BetaMoonHookCall): any
+---@param definition BetaMoonHookDefinition|BetaMoonOperationHookDefinition
+---@param callback fun(call: BetaMoonHookCall|BetaMoonHookOperationCall): any
 ---@return BetaMoonHookDefinitionToken
 function HookRegistry:register(definition, callback) end
 

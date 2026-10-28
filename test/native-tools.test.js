@@ -141,6 +141,9 @@ test('hook inspection joins exact sites and reports exported evidence without bi
         { id: 'declaration', name: 'read_hook', owner: 'owner', kind: 'HOOK_DECLARATION', targets: [target], status: 'prepared' },
         { id: 'site', name: target, target, kind: 'HOOK_SITE', status: 'applied',
             matchCounts: { methods: 1, normalReturns: 1 }, installedCapabilities: ['before', 'after'],
+            points: [{kind: 'invoke_after', ordinal: 0, exact: 1, observed: 1,
+                matches: [{ordinal: 0, opcodeIndex: 7, selected: true}]}],
+            operations: [{id: 0, kind: 'invoke_after', owner: 'example/Other', name: 'value', descriptor: '()I'}],
             observedInputSha256: hash('input'), outputSha256: hash('output') },
         { id: 'group-failure', kind: 'HOOK_DIAGNOSTIC', owner: 'owner,other', owners: ['owner', 'other'],
             hook: target, target, status: 'match_failed', guidance: { code: 'inspect_hook_site' } }
@@ -156,6 +159,8 @@ test('hook inspection joins exact sites and reports exported evidence without bi
     assert.equal(report.diagnostics[0].guidance.code, 'inspect_hook_site');
     assert.equal(report.sites[0].matchCounts.methods, 1);
     assert.deepEqual(report.sites[0].installedCapabilities, ['before', 'after']);
+    assert.equal(report.sites[0].points[0].matches[0].opcodeIndex, 7);
+    assert.equal(report.sites[0].operations[0].owner, 'example/Other');
 });
 
 test('optional diagnostic links outside the export directory are not imported', async (t) => {

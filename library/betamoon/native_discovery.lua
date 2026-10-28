@@ -113,7 +113,7 @@
 ---@field normalReturns? integer Number of observed normal-return instructions before user instrumentation.
 ---@field target? string Exact hook runtime method selector.
 ---@field source? string Package-relative hook source.
----@field at? BetaMoonHookPhase
+---@field at? BetaMoonHookPhase|'invoke_before'|'invoke_after'|'field_read'|'field_write'
 ---@field effects? BetaMoonHookEffects
 ---@field priority? integer
 ---@field required? boolean
@@ -139,6 +139,20 @@
 ---@field matchCounts? {methods: integer?, normalReturns: integer?} Nil means not observed.
 ---@field provenance? {boundary: string, observed: boolean, structureAnalyzed: boolean, laterTransformersObserved: boolean}
 ---@field targets? string[] Exact startup site keys for a hook declaration.
+---@field point? table Copied requested operation selector on declarations/subscriptions.
+---@field points? BetaMoonHookPointEvidence[] Installed/observed point evidence on a site.
+---@field operations? BetaMoonHookOperationPoint[] Actual selected runtime operations; ordinal/matches belong to points.
+
+---@class BetaMoonHookPointEvidence
+---@field point table Copied requested selector.
+---@field alternatives {owner: string, name: string, descriptor: string}[] Exact supported runtime aliases.
+---@field operationId integer -1 until successfully selected.
+---@field observed integer -1 until inspected.
+---@field matches {ordinal: integer, opcodeIndex: integer, opcode: integer, selected: boolean}[] At most 128, retaining selected ordinal.
+---@field matchesTruncated boolean
+---@field maximumMatchRecords integer
+---@field selectorConfidence 'exact_operand_member'
+---@field ordinalBasis 'filtered_operations'
 
 ---@class BetaMoonNativeQueryPage
 ---@field items BetaMoonNativeRecord[]
