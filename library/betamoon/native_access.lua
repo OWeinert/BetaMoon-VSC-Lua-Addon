@@ -328,6 +328,7 @@ local NativeClassHost = {}
 ---@return BetaMoonNativeClassHostInfo
 function NativeClassHost:describe() end
 
+---Scoped access: reuse selected handles. A callback supports 16384 distinct native values and 16384 distinct prepared class/member identities.
 ---@class BetaMoonNativeAccess
 local NativeAccess = {}
 
