@@ -570,7 +570,7 @@ local NativeObject = {}
 ---@return boolean Native reference identity; never calls Java equals().
 function NativeObject:sameObject(other) end
 
----@return integer Arrays/lists/maps only; custom collection reads require direct mutable access.
+---@return integer Arrays/exact standard ArrayList/LinkedList support read-only access; custom collections and maps need direct mutable access.
 function NativeObject:length() end
 
 ---@param key any Zero-based array/list index, or map key.
