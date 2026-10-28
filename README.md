@@ -132,7 +132,8 @@ phase, authority and lifetime. Use LuaLS 3.17 or newer; verification uses LuaLS 
 ### Scripted hooks
 
 The API library includes `betamoon.hooks:createRegistry()`, complete hook definitions, callback data and typed
-argument/return edits. `betamoon.hooks.json` files receive JSON validation automatically: list only relative
+argument/return edits, plus around callbacks with one-use `proceed()`/`proceedWith(...)` and explicit native-error
+recovery. `betamoon.hooks.json` files receive JSON validation automatically: list only relative
 `.lua` paths. Each listed file creates one registry and calls `registry:register(definition, callback)`; it does
 not need to return the registry. Keep imports/runtime work inside callbacks. Native catalog import supplies
 class/member selection for exact targets. See the [hook guide](https://github.com/OWeinert/BetaMoon/wiki/API-Hooks)
