@@ -34,6 +34,7 @@
 ---@field repeatWhileHeld? boolean Invoke on each ModLoader input tick while held instead of only on press; default false.
 
 ---@class BetaMoonHotkeyEvent
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field key string Canonical hotkey key.
 ---@field binding string Current normalized Controls binding.
 ---@field keyCode integer Current LWJGL keyboard code.
@@ -59,6 +60,7 @@
 ---@field deactivated boolean Logical state became inactive this cycle.
 
 ---@class BetaMoonInputActionEvent: BetaMoonInputActionState
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field world? BetaMoonActionWorld Read-only gameplay access; teleport requests may be queued.
 ---@field player? BetaMoonActionEntity Fresh callback-only local player, nil in menus.
 ---@field map string Canonical input-map key.
@@ -187,6 +189,7 @@ function Hotkey:close() end
 ---@field action? {kind: 'attack'|'use'|'heldBreaking'|'open'|'drop'|'hotbar'|'hotbarWheel', result: 'pass'|'deny'} A pass applies only to the named action kind on the next input cycle.
 
 ---@class BetaMoonControllerEvent
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field world BetaMoonActionWorld Read-only access; queued teleportation is permitted.
 ---@field stage BetaMoonControllerStage
 ---@field tick integer

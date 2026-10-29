@@ -8,3 +8,6 @@ luals-*-diagnostics.json
 luals-*-log/
 
 package-lock.json
+
+# Local generated verification input, never shipped.
+native/

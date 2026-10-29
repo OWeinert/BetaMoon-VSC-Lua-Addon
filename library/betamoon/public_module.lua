@@ -58,6 +58,8 @@ local Chat = require("betamoon.chat_modules_and_utilities").Chat
 local Log = require("betamoon.chat_modules_and_utilities").Log
 local Modules = require("betamoon.chat_modules_and_utilities").Modules
 local Positions = require("betamoon.chat_modules_and_utilities").Positions
+local Native = require("betamoon.native_discovery").Native
+local Hooks = require("betamoon.scripted_hooks").Hooks
 
 -- --------------------------------------------------------------------------
 -- CATEGORY: PUBLIC MODULE
@@ -92,6 +94,8 @@ local TreeModes
 local CallbackResults
 
 ---@class BetaMoonModule
+---@field native BetaMoonNativeDiscovery
+---@field hooks BetaMoonHooks
 ---@field dimensions BetaMoonDimensionRegistry
 ---@field teleport BetaMoonTeleport
 ---@field mc BetaMoonMinecraftConstants Read-only named Minecraft values. The values themselves are ordinary strings.
@@ -135,6 +139,8 @@ local CallbackResults
 ---@field stack fun(item: BetaMoonResourceReference|integer, count?: integer, damage?: integer): BetaMoonStack
 ---@type BetaMoonModule
 betamoon = {
+  native = Native,
+  hooks = Hooks,
   log = Log,
   dimensions = Dimensions,
   teleport = Teleport,
@@ -547,6 +553,7 @@ function TileView:getNbt() end
 ---@field face? BetaMoonBlockFace
 
 ---@class BetaMoonBlockActionContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field multiblock? BetaMoonMultiblockInstance Present for managed controllers.
 ---@field id integer
 ---@field damage integer Metadata at callback entry.
@@ -602,6 +609,7 @@ function TileView:getNbt() end
 ---@field action fun(ctx: BetaMoonBlockActionContext)
 
 ---@class BetaMoonItemActionContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field activateMultiblock fun(self: BetaMoonItemActionContext, definition: BetaMoonMultiblockReference, positionOrX: BetaMoonCellPosition|integer, yOrOptions?: integer|BetaMoonMultiblockActivateOptions, z?: integer, options?: BetaMoonMultiblockActivateOptions): BetaMoonMultiblockActivationResult Revalidates managed placement and current held-item eligibility/cost; use clicked/face for ray-traced onUse.
 ---@field world BetaMoonActionWorld
 ---@field stack BetaMoonActionStack

@@ -174,6 +174,7 @@
 ---@field data BetaMoonCapabilityDataAccess Scoped persistent data; removed callbacks may read but cannot write it.
 
 ---@class BetaMoonMultiblockContext: BetaMoonPositionI
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field owner string Declaring script identity.
 ---@field key string
 ---@field reason string

@@ -198,6 +198,7 @@ local TickWorld = {}
 ---@field pitch? number
 
 ---@class BetaMoonBlockTickContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field state BetaMoonBlockStateAccess
 ---@field redstone BetaMoonBlockPowerAccess
 ---@field tileEntity? {data: BetaMoonTileDataAccess}

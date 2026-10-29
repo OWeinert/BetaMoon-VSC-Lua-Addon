@@ -127,6 +127,7 @@ function ParticleAccess:setDrag(drag) end
 function ParticleAccess:remove() end
 
 ---@class BetaMoonParticleTickContext
+---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field particle BetaMoonParticleAccess Expires when this callback returns.
 ---@field memory table Independent transient state for this sprite.
 ---@field age integer Starts at 1 on the first update.

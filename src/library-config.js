@@ -13,6 +13,18 @@ function updateLibraries(libraries, libraryPath, previousPath, enabled) {
 }
 
 function updateLuaConfig(text, fallbackLibraries, libraryPath, previousPath, enabled) {
+    return editLuaLibraries(text, fallbackLibraries,
+        (libraries) => updateLibraries(libraries, libraryPath, previousPath, enabled));
+}
+
+function updateLibrarySet(libraries, additions, removals) {
+    if (!Array.isArray(libraries) || libraries.some((entry) => typeof entry !== 'string')) {
+        throw new Error('Lua workspace.library must be an array of paths.');
+    }
+    return [...new Set([...libraries.filter((entry) => !removals.includes(entry)), ...additions])];
+}
+
+function editLuaLibraries(text, fallbackLibraries, transform) {
     const errors = [];
     const config = jsonc.parse(text, errors, { allowTrailingComma: true });
     if (errors.length > 0 || !config || Array.isArray(config) || typeof config !== 'object') {
@@ -30,7 +42,7 @@ function updateLuaConfig(text, fallbackLibraries, libraryPath, previousPath, ena
 
     const configured = key.length === 1 ? config[key[0]] : config.workspace.library;
     const libraries = configured === undefined ? fallbackLibraries : configured;
-    const updated = updateLibraries(libraries, libraryPath, previousPath, enabled);
+    const updated = transform(libraries);
     if (JSON.stringify(libraries) === JSON.stringify(updated)) {
         return text;
     }
@@ -46,4 +58,4 @@ function updateLuaConfig(text, fallbackLibraries, libraryPath, previousPath, ena
     }));
 }
 
-module.exports = { updateLibraries, updateLuaConfig };
+module.exports = { updateLibraries, updateLuaConfig, updateLibrarySet, editLuaLibraries };
