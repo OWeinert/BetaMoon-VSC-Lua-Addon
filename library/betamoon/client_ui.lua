@@ -176,7 +176,7 @@
 ---@class BetaMoonUiActionTicket
 ---@field id integer
 ---@field status fun(self: BetaMoonUiActionTicket): 'queued'|'running'|'succeeded'|'refused'|'failed'|'cancelled'
----@field reason fun(self: BetaMoonUiActionTicket): string?
+---@field reason fun(self: BetaMoonUiActionTicket): string? origin_expired cancels intent from a failed callback or expired component lifetime.
 ---@field result fun(self: BetaMoonUiActionTicket): any Read-only detached completion value; nil before success.
 
 ---@class BetaMoonUiScreenInstance
@@ -190,7 +190,7 @@
 ---@field push fun(self: BetaMoonUiScreenInstance, key: string, options?: BetaMoonUiOpenOptions): BetaMoonUiScreenInstance?, string?
 ---@field replace fun(self: BetaMoonUiScreenInstance, key: string, options?: BetaMoonUiOpenOptions): BetaMoonUiScreenInstance?, string?
 ---@field dialog fun(self: BetaMoonUiScreenInstance, key: string, options?: BetaMoonUiOpenOptions): BetaMoonUiScreenInstance?, string? Modal document in the same native screen.
----@field request fun(self: BetaMoonUiScreenInstance, name: string, payload?: table<string, any>): BetaMoonUiActionTicket?, string? Admission failure returns nil/reason.
+---@field request fun(self: BetaMoonUiScreenInstance, name: string, payload?: table<string, any>): BetaMoonUiActionTicket?, string? Admission failure returns nil/reason. Requests from callbacks run only after successful callback completion.
 ---@field element fun(self: BetaMoonUiScreenInstance, id: string): BetaMoonGuiElementHandle Expires on compatible visual refresh.
 
 ---@class BetaMoonUiComponentInfo
