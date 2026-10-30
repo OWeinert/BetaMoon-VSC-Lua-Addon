@@ -53,6 +53,7 @@ local Systems = require("betamoon.tile_entities_containers_and_container_guis").
 local LogicalNetworks = require("betamoon.tile_entities_containers_and_container_guis").LogicalNetworks
 local Events = require("betamoon.events").Events
 local Input = require("betamoon.input_and_controls").Input
+local ClientUi = require("betamoon.client_ui").ClientUi
 local Config = require("betamoon.chat_modules_and_utilities").Config
 local Chat = require("betamoon.chat_modules_and_utilities").Chat
 local Log = require("betamoon.chat_modules_and_utilities").Log
@@ -94,6 +95,7 @@ local TreeModes
 local CallbackResults
 
 ---@class BetaMoonModule
+---@field client {ui: BetaMoonClientUi, visuals: {atmospheres: BetaMoonAtmosphereRegistry}}
 ---@field native BetaMoonNativeDiscovery
 ---@field hooks BetaMoonHooks
 ---@field dimensions BetaMoonDimensionRegistry
@@ -172,7 +174,7 @@ betamoon = {
   recipeBindings = RecipeBindingRegistry,
   recipeMatchers = RecipeMatcherRegistry,
   lootTables = LootTables,
-  client = {visuals = {atmospheres = Atmospheres}},
+  client = {ui = ClientUi, visuals = {atmospheres = Atmospheres}},
   worldgen = {
     spatial = {noises = SpatialNoises, fields = SpatialFields, anchors = SpatialAnchors},
     terrain = {sources = TerrainSources, profiles = TerrainProfiles, overrides = TerrainOverrides},

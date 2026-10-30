@@ -40,6 +40,7 @@ const categories = [
     },
     { name: 'EVENTS', file: 'events', imports: { handles: ['Subscription'] }, exports: ['Events'] },
     { name: 'INPUT AND CONTROLS', file: 'input_and_controls', exports: ['Input'] },
+    { name: 'CLIENT UI', file: 'client_ui', exports: ['ClientUi'] },
     { name: 'CHAT, MODULES, AND UTILITIES', file: 'chat_modules_and_utilities', exports: ['Config', 'Chat', 'Log', 'Modules', 'Positions'] },
     { name: 'NATIVE ACCESS', file: 'native_access' },
     { name: 'NATIVE DISCOVERY', file: 'native_discovery', exports: ['Native'] },

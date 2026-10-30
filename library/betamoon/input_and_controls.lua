@@ -60,6 +60,7 @@
 ---@field deactivated boolean Logical state became inactive this cycle.
 
 ---@class BetaMoonInputActionEvent: BetaMoonInputActionState
+---Named action callbacks permit local client UI publication; gameplay stays read-only.
 ---@field native? BetaMoonNativeAccess Invocation-scoped native access; inherits callback restrictions.
 ---@field world? BetaMoonActionWorld Read-only gameplay access; teleport requests may be queued.
 ---@field player? BetaMoonActionEntity Fresh callback-only local player, nil in menus.
