@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -84,6 +84,8 @@
 ---@field grow? number
 ---@field padding? number Layout padding 0..1024.
 ---@field gap? number
+---@field columns? integer Grid: fixed 1..64 columns (default 1), or 0 with minimumCellWidth.
+---@field minimumCellWidth? integer Grid: responsive width 1..16384 when columns=0; otherwise 0 (default).
 ---@field fill? boolean
 ---@field align? 'start'|'center'|'end'|'stretch'
 ---@field justify? 'start'|'center'|'end'
