@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'list'|'tree'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -50,6 +50,23 @@
 ---@field payload? table<string, any>
 ---@field reason? string Close reason.
 
+---@class BetaMoonUiCollectionRecord
+---@field key string Unique nonempty stable key, at most 255 UTF-16 units.
+---@field parent? string Tree parent key; omit for lists and root records.
+---@field label? string Defaults to key; at most 8192 UTF-16 units.
+---@field enabled? boolean Defaults to true.
+---@field data? table<string, any> Detached read-only row data; defaults to an empty record.
+
+---@class BetaMoonUiCollectionRow
+---@field key string
+---@field parent? string
+---@field label string
+---@field enabled boolean
+---@field data table<string, any>
+---@field depth integer Zero-based tree depth.
+---@field selected boolean
+---@field expanded boolean
+
 ---@class BetaMoonUiNode
 ---@field type? BetaMoonUiControl Exactly one of type/component/slot.
 ---@field component? string Registered component key.
@@ -59,7 +76,7 @@
 ---@field key? string Stable sibling key for compatible local-state retention.
 ---@field props? table<string, any> Declared component props.
 ---@field slots? table<string, BetaMoonUiNode[]>
----@field children? BetaMoonUiNode[] Built-in container children.
+---@field children? BetaMoonUiNode[] Built-in container children; list/tree content uses row instead.
 ---@field on? table<string, fun(ctx: BetaMoonUiContext, event: BetaMoonUiEvent): boolean?>
 ---@field bind? fun(view: BetaMoonUiBindingView): table<string, any>, BetaMoonGuiTransitionPolicy|false|nil
 ---@field transition? BetaMoonGuiTransitionPolicy|false
@@ -86,6 +103,13 @@
 ---@field gap? number
 ---@field columns? integer Grid: fixed 1..64 columns (default 1), or 0 with minimumCellWidth.
 ---@field minimumCellWidth? integer Grid: responsive width 1..16384 when columns=0; otherwise 0 (default).
+---@field records? BetaMoonUiCollectionRecord[] List/tree: dense ordered model, at most 4096 unique keys.
+---@field row? fun(row: BetaMoonUiCollectionRow): BetaMoonUiNode Read-only realization outside paint; omit for default rows.
+---@field rowState? table<string, any> Typed row-local state schema; requires row.
+---@field rowHeight? integer List/tree: fixed height 1..1024, default 20.
+---@field overscan? integer List/tree: extra realized rows on each side, 0..8; default 1.
+---@field selectedKey? string List/tree: selected key; empty string clears selection. Bound values require acknowledgement.
+---@field expandedKeys? string[] Tree: unique expanded branch keys; default empty.
 ---@field fill? boolean
 ---@field align? 'start'|'center'|'end'|'stretch'
 ---@field justify? 'start'|'center'|'end'
