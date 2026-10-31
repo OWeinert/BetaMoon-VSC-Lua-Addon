@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'list'|'tree'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -44,11 +44,17 @@
 ---@field player? BetaMoonActionEntity
 
 ---@class BetaMoonUiEvent
----@field type string activate/change/input/open/refresh/update/close or a declared component event.
+---@field type string activate/change/expand/sort/input/open/refresh/update/close or a declared component event.
 ---@field elementId? string Local authored ID.
 ---@field value? any
 ---@field payload? table<string, any>
 ---@field reason? string Close reason.
+
+---@class BetaMoonUiTableColumn
+---@field key string Unique nonempty column key, at most 255 UTF-16 units.
+---@field label? string Header label; defaults to key.
+---@field field? string Top-level primitive record.data field; defaults to key.
+---@field width? integer Fixed GUI pixels 1..16384, or 0 for an equal flexible share (default).
 
 ---@class BetaMoonUiCollectionRecord
 ---@field key string Unique nonempty stable key, at most 255 UTF-16 units.
@@ -76,7 +82,7 @@
 ---@field key? string Stable sibling key for compatible local-state retention.
 ---@field props? table<string, any> Declared component props.
 ---@field slots? table<string, BetaMoonUiNode[]>
----@field children? BetaMoonUiNode[] Built-in container children; list/tree content uses row instead.
+---@field children? BetaMoonUiNode[] Built-in container children; list/tree/table content uses row instead.
 ---@field on? table<string, fun(ctx: BetaMoonUiContext, event: BetaMoonUiEvent): boolean?>
 ---@field bind? fun(view: BetaMoonUiBindingView): table<string, any>, BetaMoonGuiTransitionPolicy|false|nil
 ---@field transition? BetaMoonGuiTransitionPolicy|false
@@ -101,15 +107,19 @@
 ---@field grow? number
 ---@field padding? number Layout padding 0..1024.
 ---@field gap? number
----@field columns? integer Grid: fixed 1..64 columns (default 1), or 0 with minimumCellWidth.
+---@field columns? integer|BetaMoonUiTableColumn[] Grid column count, or a table control's 1..64 keyed columns.
 ---@field minimumCellWidth? integer Grid: responsive width 1..16384 when columns=0; otherwise 0 (default).
----@field records? BetaMoonUiCollectionRecord[] List/tree: dense ordered model, at most 4096 unique keys.
+---@field records? BetaMoonUiCollectionRecord[] List/tree/table: dense ordered model, at most 4096 unique keys.
 ---@field row? fun(row: BetaMoonUiCollectionRow): BetaMoonUiNode Read-only realization outside paint; omit for default rows.
 ---@field rowState? table<string, any> Typed row-local state schema; requires row.
----@field rowHeight? integer List/tree: fixed height 1..1024, default 20.
----@field overscan? integer List/tree: extra realized rows on each side, 0..8; default 1.
----@field selectedKey? string List/tree: selected key; empty string clears selection. Bound values require acknowledgement.
+---@field rowHeight? integer List/tree/table: fixed height 1..1024, default 20.
+---@field overscan? integer List/tree/table: extra realized rows on each side, 0..8; default 1.
+---@field selectedKey? string List/tree/table: selected key; empty string clears selection. Bound values require acknowledgement.
 ---@field expandedKeys? string[] Tree: unique expanded branch keys; default empty.
+---@field headerHeight? integer Table header height 1..1024, default 20.
+---@field sortColumn? string Table column key; empty string means no selected sort column.
+---@field sortDirection? 'none'|'ascending'|'descending' Table sort direction, default none; requires a column when active.
+---@field filter? string Table: case-insensitive substring filter over labels and declared primitive cells.
 ---@field fill? boolean
 ---@field align? 'start'|'center'|'end'|'stretch'
 ---@field justify? 'start'|'center'|'end'
