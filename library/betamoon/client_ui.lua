@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -140,7 +140,7 @@
 ---@field visible? boolean
 ---@field visibility? 'visible'|'hidden'|'collapsed'
 ---@field enabled? boolean
----@field text? string Text, button, checkbox, choice, stepper prefix, textbox, dialog, tooltip.
+---@field text? string Text, button, checkbox, choice, stepper prefix, textbox, textarea, dialog, tooltip.
 ---@field image? string Prepared image/drawable name.
 ---@field selected? boolean Checkbox value.
 ---@field value? number Slider/stepper/progress value, or 1-based choice index. Stepper values snap to decimal steps.
@@ -150,13 +150,14 @@
 ---@field step? number Slider/stepper step; default 1. Stepper accepts 0.000001..1000000000000.
 ---@field orientation? 'horizontal'|'vertical' Slider/progress default horizontal; radio defaults vertical.
 ---@field optionHeight? integer Radio option height 1..1024, default 20.
----@field maximumLength? integer Textbox limit 0..65536; default 4096.
+---@field maximumLength? integer Textbox/textarea UTF-16 limit 0..65536; default 4096. Textarea normalizes CRLF/CR to LF before checking.
+---@field wrap? boolean Textarea: wrap to viewport width (default true); false allows horizontal scrolling.
 ---@field direction? 'vertical'|'horizontal'|'both' Scroll axes; default vertical.
 ---@field contentWidth? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
 ---@field contentHeight? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
 ---@field scrollX? integer Scroll/table: initial or controlled horizontal offset 0..16384; clamped to content. Table proposes on.scroll {scrollX}.
 ---@field scrollY? integer Scroll: initial/controlled vertical offset 0..16384; clamped to limits.
----@field scrollbars? boolean Scroll/list/tree/table: show default tracks/thumbs (default true); wheel/keyboard work when false.
+---@field scrollbars? boolean Scroll/list/tree/table/textarea: show default tracks/thumbs (default true); wheel/keyboard work when false.
 
 ---@class BetaMoonUiComponentDefinition
 ---@field key string
@@ -204,7 +205,26 @@
 ---@field props table<string, any> Control values; fraction is normalized slider/progress fill.
 ---@field font string
 ---@field styles table<string, table<string, number|boolean>> Resolved scalar styles for default and each single state.
----@field metrics {lineHeight: integer, textWidth: integer, padding: integer, stepperButtonWidth: integer?, radioOptions: BetaMoonUiRadioOptionBounds[]?, caretX: integer?, selectionLeft: integer?, selectionRight: integer?}
+---@field metrics {lineHeight: integer, textWidth: integer, padding: integer, stepperButtonWidth: integer?, radioOptions: BetaMoonUiRadioOptionBounds[]?, textarea: BetaMoonUiTextAreaMetrics?, caretX: integer?, selectionLeft: integer?, selectionRight: integer?}
+
+---@class BetaMoonUiTextAreaRect
+---@field x integer Control-local coordinates.
+---@field y integer
+---@field width integer
+---@field height integer
+
+---@class BetaMoonUiTextAreaRun
+---@field text string Visible plain-text run; tabs expand to four spaces. A visual line may contain several runs.
+---@field x integer Control-local coordinates.
+---@field y integer
+
+---@class BetaMoonUiTextAreaMetrics
+---@field viewport BetaMoonUiTextAreaRect Clip text commands to this rectangle.
+---@field caret BetaMoonUiTextAreaRect Clipped caret; zero width/height when outside the viewport.
+---@field scrollX integer Accepted horizontal offset.
+---@field scrollY integer Accepted vertical offset.
+---@field lines BetaMoonUiTextAreaRun[] Visible text runs with scrolling already applied.
+---@field selection BetaMoonUiTextAreaRect[] Clipped visible selection rectangles.
 
 ---@class BetaMoonUiActionDefinition
 ---@field scope 'client'|'world'|'player_data' player_data requests currently return player_data_unavailable.
