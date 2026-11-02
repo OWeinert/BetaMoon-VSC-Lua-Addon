@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'stepper'|'textbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -49,6 +49,19 @@
 ---@field value? any
 ---@field payload? table<string, any>
 ---@field reason? string Close reason.
+
+---@class BetaMoonUiSelectionOption
+---@field key string Unique nonempty stable key, at most 255 UTF-16 units.
+---@field label? string Defaults to key; at most 8192 UTF-16 units. Duplicate labels are allowed.
+---@field enabled? boolean Defaults to true; disabled options cannot be selected.
+
+---@class BetaMoonUiRadioOptionBounds
+---@field key string Stable option key, in declaration order.
+---@field x integer Local left edge.
+---@field y integer Local top edge.
+---@field width integer Clipped option width.
+---@field height integer Clipped option height.
+---@field focusTarget boolean Selected option, or first enabled option when selection is empty.
 
 ---@class BetaMoonUiTableColumn
 ---@field key string Unique nonempty column key, at most 255 UTF-16 units.
@@ -114,7 +127,7 @@
 ---@field rowState? table<string, any> Typed row-local state schema; requires row.
 ---@field rowHeight? integer List/tree/table: fixed height 1..1024, default 20.
 ---@field overscan? integer List/tree/table: extra realized rows on each side, 0..8; default 1.
----@field selectedKey? string List/tree/table: selected key; empty string clears selection. Bound values require acknowledgement.
+---@field selectedKey? string List/tree/table/radio: selected key; empty string clears selection. Bound values require acknowledgement.
 ---@field expandedKeys? string[] Tree: unique expanded branch keys; default empty.
 ---@field headerHeight? integer Table header height 1..1024, default 20.
 ---@field sortColumn? string Table column key; empty string means no selected sort column.
@@ -131,11 +144,12 @@
 ---@field image? string Prepared image/drawable name.
 ---@field selected? boolean Checkbox value.
 ---@field value? number Slider/stepper/progress value, or 1-based choice index. Stepper values snap to decimal steps.
----@field options? string[] Choice labels.
+---@field options? string[]|BetaMoonUiSelectionOption[] Choice labels, or 0..256 keyed radio options.
 ---@field minimum? number Slider/stepper/progress minimum; default 0.
 ---@field maximum? number Slider/stepper/progress maximum; default 100.
 ---@field step? number Slider/stepper step; default 1. Stepper accepts 0.000001..1000000000000.
----@field orientation? 'horizontal'|'vertical'
+---@field orientation? 'horizontal'|'vertical' Slider/progress default horizontal; radio defaults vertical.
+---@field optionHeight? integer Radio option height 1..1024, default 20.
 ---@field maximumLength? integer Textbox limit 0..65536; default 4096.
 ---@field direction? 'vertical'|'horizontal'|'both' Scroll axes; default vertical.
 ---@field contentWidth? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
@@ -190,7 +204,7 @@
 ---@field props table<string, any> Control values; fraction is normalized slider/progress fill.
 ---@field font string
 ---@field styles table<string, table<string, number|boolean>> Resolved scalar styles for default and each single state.
----@field metrics {lineHeight: integer, textWidth: integer, padding: integer, stepperButtonWidth: integer?, caretX: integer?, selectionLeft: integer?, selectionRight: integer?}
+---@field metrics {lineHeight: integer, textWidth: integer, padding: integer, stepperButtonWidth: integer?, radioOptions: BetaMoonUiRadioOptionBounds[]?, caretX: integer?, selectionLeft: integer?, selectionRight: integer?}
 
 ---@class BetaMoonUiActionDefinition
 ---@field scope 'client'|'world'|'player_data' player_data requests currently return player_data_unavailable.
