@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'stepper'|'textbox'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -127,14 +127,14 @@
 ---@field visible? boolean
 ---@field visibility? 'visible'|'hidden'|'collapsed'
 ---@field enabled? boolean
----@field text? string Text, button, checkbox, choice, textbox, dialog, tooltip.
+---@field text? string Text, button, checkbox, choice, stepper prefix, textbox, dialog, tooltip.
 ---@field image? string Prepared image/drawable name.
 ---@field selected? boolean Checkbox value.
----@field value? number Slider/progress value, or 1-based choice index.
+---@field value? number Slider/stepper/progress value, or 1-based choice index. Stepper values snap to decimal steps.
 ---@field options? string[] Choice labels.
----@field minimum? number Slider/progress minimum; default 0.
----@field maximum? number Slider/progress maximum; default 100.
----@field step? number Slider step; default 1.
+---@field minimum? number Slider/stepper/progress minimum; default 0.
+---@field maximum? number Slider/stepper/progress maximum; default 100.
+---@field step? number Slider/stepper step; default 1. Stepper accepts 0.000001..1000000000000.
 ---@field orientation? 'horizontal'|'vertical'
 ---@field maximumLength? integer Textbox limit 0..65536; default 4096.
 ---@field direction? 'vertical'|'horizontal'|'both' Scroll axes; default vertical.
@@ -190,7 +190,7 @@
 ---@field props table<string, any> Control values; fraction is normalized slider/progress fill.
 ---@field font string
 ---@field styles table<string, table<string, number|boolean>> Resolved scalar styles for default and each single state.
----@field metrics {lineHeight: integer, textWidth: integer, padding: integer, caretX: integer?, selectionLeft: integer?, selectionRight: integer?}
+---@field metrics {lineHeight: integer, textWidth: integer, padding: integer, stepperButtonWidth: integer?, caretX: integer?, selectionLeft: integer?, selectionRight: integer?}
 
 ---@class BetaMoonUiActionDefinition
 ---@field scope 'client'|'world'|'player_data' player_data requests currently return player_data_unavailable.
