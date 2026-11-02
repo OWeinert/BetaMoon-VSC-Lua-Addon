@@ -140,9 +140,9 @@
 ---@field direction? 'vertical'|'horizontal'|'both' Scroll axes; default vertical.
 ---@field contentWidth? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
 ---@field contentHeight? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
----@field scrollX? integer Scroll: initial/controlled horizontal offset 0..16384; clamped to limits.
+---@field scrollX? integer Scroll/table: initial or controlled horizontal offset 0..16384; clamped to content. Table proposes on.scroll {scrollX}.
 ---@field scrollY? integer Scroll: initial/controlled vertical offset 0..16384; clamped to limits.
----@field scrollbars? boolean Scroll: show default tracks/thumbs (default true); wheel/keyboard work when false.
+---@field scrollbars? boolean Scroll/list/tree/table: show default tracks/thumbs (default true); wheel/keyboard work when false.
 
 ---@class BetaMoonUiComponentDefinition
 ---@field key string
