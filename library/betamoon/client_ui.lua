@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'numberbox'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -143,11 +143,11 @@
 ---@field text? string Text, button, checkbox, choice, stepper prefix, textbox, textarea, dialog, tooltip.
 ---@field image? string Prepared image/drawable name.
 ---@field selected? boolean Checkbox value.
----@field value? number Slider/stepper/progress value, or 1-based choice index. Stepper values snap to decimal steps.
+---@field value? number Slider/stepper/numberbox/progress value, or 1-based choice index. Numberbox proposes on.change on Enter/blur and keeps a 128-unit text draft.
 ---@field options? string[]|BetaMoonUiSelectionOption[] Choice labels, or 0..256 keyed radio options.
----@field minimum? number Slider/stepper/progress minimum; default 0.
----@field maximum? number Slider/stepper/progress maximum; default 100.
----@field step? number Slider/stepper step; default 1. Stepper accepts 0.000001..1000000000000.
+---@field minimum? number Slider/stepper/numberbox/progress minimum; default 0.
+---@field maximum? number Slider/stepper/numberbox/progress maximum; default 100.
+---@field step? number Slider/stepper default 1. Numberbox default 0 disables rounding; positive steps accept 0.000001..1000000000000.
 ---@field orientation? 'horizontal'|'vertical' Slider/progress default horizontal; radio defaults vertical.
 ---@field optionHeight? integer Radio option height 1..1024, default 20.
 ---@field maximumLength? integer Textbox/textarea UTF-16 limit 0..65536; default 4096. Textarea normalizes CRLF/CR to LF before checking.
