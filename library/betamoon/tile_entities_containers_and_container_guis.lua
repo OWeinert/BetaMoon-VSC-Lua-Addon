@@ -669,6 +669,16 @@ function ContainerStateAccess:set(name, value) end
 ---@class BetaMoonGuiControlTargets: BetaMoonGuiSizedArtworkTargets
 ---@field text? string Display label only; unavailable on sliders/text editors.
 
+---@class BetaMoonGuiScrollTargets: BetaMoonGuiDrawableTargets
+---@field width? number Retained client scroll viewport only.
+---@field height? number
+---@field direction? 'vertical'|'horizontal'|'both'
+---@field contentWidth? integer 0 for measured width, or 1..16384 content pixels.
+---@field contentHeight? integer 0 for measured height, or 1..16384 content pixels.
+---@field scrollX? integer Horizontal offset, 0..16384; clamped to content limits.
+---@field scrollY? integer Vertical offset, 0..16384; clamped to content limits.
+---@field scrollbars? boolean Show default scrollbar tracks/thumbs; defaults to true.
+
 ---@class BetaMoonGuiIconButtonTargets: BetaMoonGuiControlTargets
 ---@field iconTint? BetaMoonGuiColor
 
@@ -679,7 +689,7 @@ function ContainerStateAccess:set(name, value) end
 ---@class BetaMoonGuiGroupTargets: BetaMoonGuiSizedArtworkTargets
 ---@field clip? boolean Requires explicitly bounded group.
 
----@alias BetaMoonGuiTargets BetaMoonGuiBaseTargets|BetaMoonGuiPanelTargets|BetaMoonGuiTextTargets|BetaMoonGuiRectangleTargets|BetaMoonGuiProgressTargets|BetaMoonGuiControlTargets|BetaMoonGuiIconButtonTargets|BetaMoonGuiTooltipTargets|BetaMoonGuiGroupTargets
+---@alias BetaMoonGuiTargets BetaMoonGuiBaseTargets|BetaMoonGuiPanelTargets|BetaMoonGuiTextTargets|BetaMoonGuiRectangleTargets|BetaMoonGuiProgressTargets|BetaMoonGuiControlTargets|BetaMoonGuiIconButtonTargets|BetaMoonGuiTooltipTargets|BetaMoonGuiGroupTargets|BetaMoonGuiScrollTargets
 ---@alias BetaMoonGuiBinding fun(view: BetaMoonGuiBindingView): BetaMoonGuiTargets, BetaMoonGuiTransitionPolicy|false|nil
 ---@alias BetaMoonGuiInteraction 'hovered'|'pressed'|'focused'|'disabled'|'selected'|'invalid'
 

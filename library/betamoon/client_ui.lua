@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'slider'|'textbox'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -82,7 +82,7 @@
 ---@field key? string Stable sibling key for compatible local-state retention.
 ---@field props? table<string, any> Declared component props.
 ---@field slots? table<string, BetaMoonUiNode[]>
----@field children? BetaMoonUiNode[] Built-in container children; list/tree/table content uses row instead.
+---@field children? BetaMoonUiNode[] Built-in children; scroll requires one concrete child tree, and list/tree/table content uses row instead.
 ---@field on? table<string, fun(ctx: BetaMoonUiContext, event: BetaMoonUiEvent): boolean?>
 ---@field bind? fun(view: BetaMoonUiBindingView): table<string, any>, BetaMoonGuiTransitionPolicy|false|nil
 ---@field transition? BetaMoonGuiTransitionPolicy|false
@@ -137,6 +137,12 @@
 ---@field step? number Slider step; default 1.
 ---@field orientation? 'horizontal'|'vertical'
 ---@field maximumLength? integer Textbox limit 0..65536; default 4096.
+---@field direction? 'vertical'|'horizontal'|'both' Scroll axes; default vertical.
+---@field contentWidth? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
+---@field contentHeight? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
+---@field scrollX? integer Scroll: initial/controlled horizontal offset 0..16384; clamped to limits.
+---@field scrollY? integer Scroll: initial/controlled vertical offset 0..16384; clamped to limits.
+---@field scrollbars? boolean Scroll: show default tracks/thumbs (default true); wheel/keyboard work when false.
 
 ---@class BetaMoonUiComponentDefinition
 ---@field key string
