@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'numberbox'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'numberbox'|'dropdown'|'contextmenu'|'tabs'|'progress'|'dialog'|'tooltip'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -127,7 +127,7 @@
 ---@field rowState? table<string, any> Typed row-local state schema; requires row.
 ---@field rowHeight? integer List/tree/table: fixed height 1..1024, default 20.
 ---@field overscan? integer List/tree/table: extra realized rows on each side, 0..8; default 1.
----@field selectedKey? string List/tree/table/radio: selected key; empty string clears selection. Bound values require acknowledgement.
+---@field selectedKey? string List/tree/table/radio/tabs/dropdown/contextmenu: selected key; empty string clears selection. Bound values require acknowledgement.
 ---@field expandedKeys? string[] Tree: unique expanded branch keys; default empty.
 ---@field headerHeight? integer Table header height 1..1024, default 20.
 ---@field sortColumn? string Table column key; empty string means no selected sort column.
@@ -140,18 +140,21 @@
 ---@field visible? boolean
 ---@field visibility? 'visible'|'hidden'|'collapsed'
 ---@field enabled? boolean
----@field text? string Text, button, checkbox, choice, stepper prefix, textbox, textarea, dialog, tooltip.
+---@field text? string Text, button, checkbox, choice, stepper prefix, textbox, textarea, dropdown/contextmenu placeholder, progress label prefix, dialog, tooltip.
 ---@field image? string Prepared image/drawable name.
 ---@field selected? boolean Checkbox value.
 ---@field value? number Slider/stepper/numberbox/progress value, or 1-based choice index. Numberbox proposes on.change on Enter/blur and keeps a 128-unit text draft.
----@field options? string[]|BetaMoonUiSelectionOption[] Choice labels, or 0..256 keyed radio options.
+---@field options? string[]|BetaMoonUiSelectionOption[] Choice labels, or 0..256 keyed radio/tabs/dropdown/contextmenu options.
 ---@field minimum? number Slider/stepper/numberbox/progress minimum; default 0.
 ---@field maximum? number Slider/stepper/numberbox/progress maximum; default 100.
 ---@field step? number Slider/stepper default 1. Numberbox default 0 disables rounding; positive steps accept 0.000001..1000000000000.
----@field orientation? 'horizontal'|'vertical' Slider/progress default horizontal; radio defaults vertical.
----@field optionHeight? integer Radio option height 1..1024, default 20.
+---@field orientation? 'horizontal'|'vertical' Slider/progress/tabs default horizontal; radio defaults vertical.
+---@field optionHeight? integer Radio/tabs option height 1..1024, default 20.
 ---@field maximumLength? integer Textbox/textarea UTF-16 limit 0..65536; default 4096. Textarea normalizes CRLF/CR to LF before checking.
 ---@field wrap? boolean Textarea: wrap to viewport width (default true); false allows horizontal scrolling.
+---@field presentation? 'linear'|'segmented'|'radial'|'label' Progress presentation, default linear.
+---@field indeterminate? boolean Progress: Java-clock indicator, default false.
+---@field segments? integer Progress segmented presentation: 1..256, default 10.
 ---@field direction? 'vertical'|'horizontal'|'both' Scroll axes; default vertical.
 ---@field contentWidth? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
 ---@field contentHeight? integer Scroll: 0 for measured extent, or explicit 1..16384 pixels.
@@ -266,6 +269,7 @@
 ---@field push fun(self: BetaMoonUiScreenInstance, key: string, options?: BetaMoonUiOpenOptions): BetaMoonUiScreenInstance?, string?
 ---@field replace fun(self: BetaMoonUiScreenInstance, key: string, options?: BetaMoonUiOpenOptions): BetaMoonUiScreenInstance?, string?
 ---@field dialog fun(self: BetaMoonUiScreenInstance, key: string, options?: BetaMoonUiOpenOptions): BetaMoonUiScreenInstance?, string? Modal document in the same native screen.
+---@field popover fun(self: BetaMoonUiScreenInstance, key: string, anchor: string, options?: BetaMoonUiOpenOptions): BetaMoonUiScreenInstance?, string? Anchored owned document; Escape/outside/Tab dismiss. Anchor is a visible local/exported element ID.
 ---@field request fun(self: BetaMoonUiScreenInstance, name: string, payload?: table<string, any>): BetaMoonUiActionTicket?, string? Admission failure returns nil/reason. Requests require successful callback and GUI command-batch validation.
 ---@field element fun(self: BetaMoonUiScreenInstance, id: string): BetaMoonGuiElementHandle Expires on compatible visual refresh.
 
