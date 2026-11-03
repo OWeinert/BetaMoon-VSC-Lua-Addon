@@ -35,6 +35,7 @@
 ---@class BetaMoonUiContext
 ---@field native BetaMoonNativeAccess Read-only native entry except in a declared action's explicit action scope.
 ---@field screen BetaMoonUiScreenInstance
+---@field menu? BetaMoonUiMenuContext Scoped native menu actions in a contributed document.
 ---@field state BetaMoonUiLocalState
 ---@field data BetaMoonUiModel Root data is writable only by its owning script.
 ---@field props table<string, any>
@@ -328,11 +329,60 @@ function UiScreens:open(key, options) end
 ---@return BetaMoonUiScreenInstance? instance Current root owned by the calling script.
 function UiScreens:current() end
 
+---@alias BetaMoonUiMenuTarget 'minecraft:main'|'minecraft:pause'|'minecraft:options'|'minecraft:world_select'|'betamoon:world_create'
+---@class BetaMoonUiMenuDefinition
+---@field key string Canonical owned contribution key.
+---@field target BetaMoonUiMenuTarget Exact supported native menu.
+---@field screen string Registered screen owned by this script.
+---@field region? 'actions'|'footer'|'content' Defaults to actions, or content for replacements.
+---@field replace? boolean Explicit replacement claim; main/pause only. Defaults to false.
+---@field priority? integer Replacement priority -10000..10000; defaults to zero. Additive entries require zero.
+---@field before? string[] At most 32 keys in the same target/region; additive only.
+---@field after? string[] At most 32 keys in the same target/region; additive only.
+
+---@class BetaMoonUiMenuInfo
+---@field key string
+---@field target BetaMoonUiMenuTarget
+---@field screen string
+---@field region 'actions'|'footer'|'content'
+---@field replace boolean
+---@field priority integer
+
+---@class BetaMoonUiMenuActivation
+---@field key string
+---@field status fun(self: BetaMoonUiMenuActivation): 'queued'|'active'|'suspended'|'refused'|'closed'
+---@field reason fun(self: BetaMoonUiMenuActivation): string?
+---@field instance fun(self: BetaMoonUiMenuActivation): BetaMoonUiScreenInstance? Attached instance, when prepared and active.
+---@field close fun(self: BetaMoonUiMenuActivation) Immediately release the claim; cleanup follows at a logical boundary.
+
+---@class BetaMoonUiMenuContext
+---@field target BetaMoonUiMenuTarget
+---@field key string Contribution key.
+---@field enabled fun(self: BetaMoonUiMenuContext, action: string): boolean Native button availability.
+---@field action fun(self: BetaMoonUiMenuContext, action: string): BetaMoonUiActionTicket?, string? Queue a typed native action; callback/command validation must succeed.
+
+---@class BetaMoonUiMenus
+local UiMenus = {}
+---@param definition BetaMoonUiMenuDefinition
+---@return BetaMoonUiMenuInfo
+function UiMenus:add(definition) end
+---@param key string
+---@return BetaMoonUiMenuInfo? info nil when unregistered.
+function UiMenus:get(key) end
+---@param key string
+---@return BetaMoonUiMenuInfo
+function UiMenus:getRequired(key) end
+---Requires the BetaMoon Java agent.
+---@param key string
+---@return BetaMoonUiMenuActivation
+function UiMenus:activate(key) end
+
 ---@class BetaMoonClientUi
 ---@field components BetaMoonUiComponents
 ---@field themes BetaMoonUiThemes
 ---@field screens BetaMoonUiScreens
-local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens}
+---@field menus BetaMoonUiMenus
+local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens, menus = UiMenus}
 
 ---@alias BetaMoonUiExpression number|{source: 'width'|'height'|'property', property: string?, factor: number?, offset: number?} Affine reference; property must be declared numeric.
 ---@class BetaMoonUiPaintView
