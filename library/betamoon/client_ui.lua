@@ -36,6 +36,7 @@
 ---@field native BetaMoonNativeAccess Read-only native entry except in a declared action's explicit action scope.
 ---@field screen BetaMoonUiScreenInstance
 ---@field menu? BetaMoonUiMenuContext Scoped native menu actions in a contributed document.
+---@field inventory? BetaMoonUiInventoryContext Scoped detached geometry in a player inventory document.
 ---@field state BetaMoonUiLocalState
 ---@field data BetaMoonUiModel Root data is writable only by its owning script.
 ---@field props table<string, any>
@@ -377,12 +378,76 @@ function UiMenus:getRequired(key) end
 ---@return BetaMoonUiMenuActivation
 function UiMenus:activate(key) end
 
+---@class BetaMoonUiInventoryPosition
+---@field x integer Panel-local item position, 1..4096; preserve the one-pixel native hit margin.
+---@field y integer
+---@class BetaMoonUiInventoryPreview
+---@field visible? boolean Defaults to true.
+---@field x? integer Defaults to 21.
+---@field y? integer Defaults to 15.
+---@field width? integer 1..256, defaults to 60.
+---@field height? integer 1..256, defaults to 60.
+---@class BetaMoonUiInventoryDefinition
+---@field key string Canonical owned presentation key.
+---@field screen? string Owned registered screen for content, resources and actions.
+---@field priority? integer -10000..10000, defaults to zero; ties sort by key.
+---@field panel? {width: integer?, height: integer?} Dimensions 36..4096; omitted dimensions retain native size.
+---@field groups? table<'output'|'crafting'|'armor'|'storage'|'hotbar', BetaMoonUiInventoryPosition> Top-left item position; native 18-pixel spacing.
+---@field positions? table<string, BetaMoonUiInventoryPosition> Overrides semantic IDs such as hotbar/1 or storage/27.
+---@field background? 'native'|'panel'|'none' Defaults to panel; native requires original panel/slots.
+---@field backgroundImage? string Prepared image/drawable resource name in screen.
+---@field slotFrames? boolean Defaults to false for native background, true otherwise.
+---@field craftingLabel? boolean Defaults to true.
+---@field preview? BetaMoonUiInventoryPreview
+---@class BetaMoonUiInventoryInfo
+---@field key string
+---@field priority integer
+---@field screen? string
+---@class BetaMoonUiInventoryActivation
+---@field key string
+---@field status fun(self: BetaMoonUiInventoryActivation): 'queued'|'active'|'suspended'|'refused'|'closed'
+---@field reason fun(self: BetaMoonUiInventoryActivation): string?
+---@field instance fun(self: BetaMoonUiInventoryActivation): BetaMoonUiScreenInstance? Nil for layout-only profiles.
+---@field close fun(self: BetaMoonUiInventoryActivation) Immediately revoke eligibility; restore geometry at the next paint boundary.
+---@class BetaMoonUiBounds
+---@field x integer
+---@field y integer
+---@field width integer
+---@field height integer
+---@class BetaMoonUiInventorySlot: BetaMoonUiBounds
+---@field id string Semantic group/index ID.
+---@field group 'output'|'crafting'|'armor'|'storage'|'hotbar'
+---@field index integer One-based index within its group.
+---@class BetaMoonUiInventoryLayout
+---@field panel BetaMoonUiBounds Global centered panel bounds.
+---@field preview BetaMoonUiBounds Panel-local preview bounds; zero extent when hidden.
+---@field slots BetaMoonUiInventorySlot[] Panel-local 16x16 item rectangles; native hit regions extend one pixel around them.
+---@field displayed boolean Whether the current eligible presentation has a complete displayed frame.
+---@class BetaMoonUiInventoryContext
+---@field layout fun(self: BetaMoonUiInventoryContext): BetaMoonUiInventoryLayout Read-only detached snapshot; method expires with the callback.
+---@class BetaMoonUiInventories
+local UiInventories = {}
+---@param definition BetaMoonUiInventoryDefinition
+---@return BetaMoonUiInventoryInfo
+function UiInventories:add(definition) end
+---@param key string
+---@return BetaMoonUiInventoryInfo? info Nil when unregistered.
+function UiInventories:get(key) end
+---@param key string
+---@return BetaMoonUiInventoryInfo
+function UiInventories:getRequired(key) end
+---Requires the BetaMoon Java agent. Applies to the exact native local single-player inventory.
+---@param key string
+---@return BetaMoonUiInventoryActivation
+function UiInventories:activate(key) end
+
 ---@class BetaMoonClientUi
 ---@field components BetaMoonUiComponents
 ---@field themes BetaMoonUiThemes
 ---@field screens BetaMoonUiScreens
 ---@field menus BetaMoonUiMenus
-local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens, menus = UiMenus}
+---@field inventories BetaMoonUiInventories
+local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens, menus = UiMenus, inventories = UiInventories}
 
 ---@alias BetaMoonUiExpression number|{source: 'width'|'height'|'property', property: string?, factor: number?, offset: number?} Affine reference; property must be declared numeric.
 ---@class BetaMoonUiPaintView
