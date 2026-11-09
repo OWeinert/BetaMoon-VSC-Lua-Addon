@@ -230,7 +230,8 @@ Constructor hook declarations use an exact `ConstructorRef` with `at="constructe
 declaring constructor returning, before derived initialization may finish. Its dedicated callback type offers
 read-only arguments and a scoped receiver. See the same hook guide for delegation, failure and lifetime rules.
 
-Client UI definitions cover `betamoon.client.ui` screens, components, themes, prepared drawing and explicit raw
+Client UI definitions cover `betamoon.client.ui` screens, menu/inventory presentation, HUDs and cursor regions,
+components, themes, prepared drawing and explicit raw
 graphics. See [Client screens](https://github.com/OWeinert/BetaMoon/wiki/API-Client-UI),
 [Components and themes](https://github.com/OWeinert/BetaMoon/wiki/API-UI-Components) and
 [UI drawing](https://github.com/OWeinert/BetaMoon/wiki/API-UI-Drawing) for Lua usage.

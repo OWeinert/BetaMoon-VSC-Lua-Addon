@@ -31,12 +31,15 @@
 ---@class BetaMoonUiBindingView: BetaMoonGuiBindingView
 ---@field props table<string, any> Detached component props.
 ---@field state BetaMoonGuiReadAccess Component-local state, or screen state for root/caller-owned content.
+---@field inventory? BetaMoonUiInventoryContext Scoped inventory layout in an attached inventory document.
+---@field hud? BetaMoonUiHudContext Scoped HUD snapshot; reading it observes logical snapshot changes.
 
 ---@class BetaMoonUiContext
 ---@field native BetaMoonNativeAccess Read-only native entry except in a declared action's explicit action scope.
 ---@field screen BetaMoonUiScreenInstance
 ---@field menu? BetaMoonUiMenuContext Scoped native menu actions in a contributed document.
 ---@field inventory? BetaMoonUiInventoryContext Scoped detached geometry in a player inventory document.
+---@field hud? BetaMoonUiHudContext Scoped detached observations in an additive/native replacement HUD document.
 ---@field state BetaMoonUiLocalState
 ---@field data BetaMoonUiModel Root data is writable only by its owning script.
 ---@field props table<string, any>
@@ -441,13 +444,89 @@ function UiInventories:getRequired(key) end
 ---@return BetaMoonUiInventoryActivation
 function UiInventories:activate(key) end
 
+---@alias BetaMoonUiHudPart 'crosshair'|'hotbar'|'health'|'armor'|'breath'|'chat'
+---@alias BetaMoonUiHudVisibility 'gameplay'|'chat'|'inventory'|'pause'|'menu'
+---@class BetaMoonUiHudNativePart
+---@field hide? boolean True requests hiding; choose exactly one hide or replace.
+---@field replace? string Owned registered screen key for a passive replacement.
+---@class BetaMoonUiHudDefinition
+---@field key string Canonical owned HUD key.
+---@field screen? string Owned registered screen key for additive content.
+---@field nativeParts? table<BetaMoonUiHudPart, BetaMoonUiHudNativePart> Additive content or at least one native claim is required.
+---@field priority? integer -10000..10000; higher replacement priority wins, ties use latest activation.
+---@field visibility? {contexts: BetaMoonUiHudVisibility[]?, debug: boolean?, hideGui: boolean?} Default gameplay, debug=true, hideGui=false.
+---@field safeArea? boolean Defaults to true for additive content; reserve native/notification/recovery chrome.
+---@field interactive? boolean Defaults to false; replacement documents always stay passive.
+---@field regions? string[] 1..32 local/exported element IDs, required only for interactive additive content.
+---@class BetaMoonUiHudInfo
+---@field key string
+---@field priority integer
+---@field interactive boolean
+---@field screen? string
+---@class BetaMoonUiHudPartStatus
+---@field status 'queued'|'hidden'|'replaced'|'covered'|'unavailable'|'suspended'|'failed'|'closed'
+---@field reason? 'not_rendered'|'native_hook_unavailable'
+---@class BetaMoonUiHudActivation
+---@field key string
+---@field status fun(self: BetaMoonUiHudActivation): 'queued'|'active'|'suspended'|'refused'|'closed'
+---@field reason fun(self: BetaMoonUiHudActivation): string?
+---@field instance fun(self: BetaMoonUiHudActivation, part?: BetaMoonUiHudPart): BetaMoonUiScreenInstance? Omit part for additive content.
+---@field parts fun(self: BetaMoonUiHudActivation): table<BetaMoonUiHudPart, BetaMoonUiHudPartStatus> Read-only detached status for each requested part.
+---@field inputAvailable fun(self: BetaMoonUiHudActivation): boolean Declared painted regions in a compatible native cursor host or explicit gameplay cursor mode.
+---@field enterCursorMode fun(self: BetaMoonUiHudActivation): boolean, string? Explicit gameplay request; false plus reason when unavailable.
+---@field leaveCursorMode fun(self: BetaMoonUiHudActivation) Release this claim's gameplay cursor token.
+---@field isCursorMode fun(self: BetaMoonUiHudActivation): boolean Whether this claim owns the current gameplay cursor token.
+---@field close fun(self: BetaMoonUiHudActivation) Immediately revoke the claim and its cursor; dispose presentation at the next logical boundary.
+---@class BetaMoonUiHudPlayer
+---@field health integer
+---@field armor integer
+---@field air integer
+---@field selectedSlot integer One-based hotbar selection, 1..9.
+---@field onGround boolean
+---@field x number
+---@field y number
+---@field z number
+---@field motionX number
+---@field motionY number
+---@field motionZ number
+---@class BetaMoonUiHudSnapshot
+---@field context BetaMoonUiHudVisibility|'unavailable'
+---@field worldAvailable boolean Healthy local single-player world/player.
+---@field hideGui boolean
+---@field debug boolean
+---@field viewport BetaMoonUiBounds Logical screen rectangle.
+---@field safeArea BetaMoonUiBounds Reserved-area-aware additive rectangle.
+---@field player? BetaMoonUiHudPlayer Absent without a healthy local player.
+---@class BetaMoonUiHudContext
+---@field key string HUD definition key.
+---@field snapshot fun(self: BetaMoonUiHudContext): BetaMoonUiHudSnapshot Read-only detached values; method expires with its callback.
+---@class BetaMoonUiHuds
+local UiHuds = {}
+---@param definition BetaMoonUiHudDefinition
+---@return BetaMoonUiHudInfo
+function UiHuds:add(definition) end
+---@param key string
+---@return BetaMoonUiHudInfo? info Nil when unregistered.
+function UiHuds:get(key) end
+---@param key string
+---@return BetaMoonUiHudInfo
+function UiHuds:getRequired(key) end
+---Current native hook support; false preserves native drawing for an unsupported part.
+---@return table<BetaMoonUiHudPart, boolean>
+function UiHuds:capabilities() end
+---Requires the BetaMoon Java agent; registration alone changes nothing.
+---@param key string
+---@return BetaMoonUiHudActivation
+function UiHuds:activate(key) end
+
 ---@class BetaMoonClientUi
 ---@field components BetaMoonUiComponents
 ---@field themes BetaMoonUiThemes
 ---@field screens BetaMoonUiScreens
 ---@field menus BetaMoonUiMenus
 ---@field inventories BetaMoonUiInventories
-local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens, menus = UiMenus, inventories = UiInventories}
+---@field huds BetaMoonUiHuds
+local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens, menus = UiMenus, inventories = UiInventories, huds = UiHuds}
 
 ---@alias BetaMoonUiExpression number|{source: 'width'|'height'|'property', property: string?, factor: number?, offset: number?} Affine reference; property must be declared numeric.
 ---@class BetaMoonUiPaintView
@@ -456,6 +535,8 @@ local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScre
 ---@field props table<string, any>
 ---@field state BetaMoonGuiReadAccess
 ---@field data BetaMoonGuiDataReadAccess
+---@field inventory? BetaMoonUiInventoryContext Scoped inventory layout when provided by the host.
+---@field hud? BetaMoonUiHudContext Scoped HUD observation when provided by the host.
 
 ---@class BetaMoonUiPaintCommand
 ---@field op 'rect'|'line'|'mesh'|'ring'|'text'|'image'|'pushTransform'|'popTransform'|'pushClip'|'popClip'|'hitRect'|'hitCircle'|'hitPolygon'
