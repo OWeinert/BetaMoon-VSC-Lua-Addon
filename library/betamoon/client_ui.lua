@@ -33,6 +33,7 @@
 ---@field state BetaMoonGuiReadAccess Component-local state, or screen state for root/caller-owned content.
 ---@field inventory? BetaMoonUiInventoryContext Scoped inventory layout in an attached inventory document.
 ---@field hud? BetaMoonUiHudContext Scoped HUD snapshot; reading it observes logical snapshot changes.
+---@field notification? BetaMoonUiNotificationContext Scoped notification presentation metadata.
 
 ---@class BetaMoonUiContext
 ---@field native BetaMoonNativeAccess Read-only native entry except in a declared action's explicit action scope.
@@ -40,6 +41,7 @@
 ---@field menu? BetaMoonUiMenuContext Scoped native menu actions in a contributed document.
 ---@field inventory? BetaMoonUiInventoryContext Scoped detached geometry in a player inventory document.
 ---@field hud? BetaMoonUiHudContext Scoped detached observations in an additive/native replacement HUD document.
+---@field notification? BetaMoonUiNotificationContext Scoped metadata in a notification document.
 ---@field state BetaMoonUiLocalState
 ---@field data BetaMoonUiModel Root data is writable only by its owning script.
 ---@field props table<string, any>
@@ -519,6 +521,69 @@ function UiHuds:capabilities() end
 ---@return BetaMoonUiHudActivation
 function UiHuds:activate(key) end
 
+---@alias BetaMoonUiNotificationCorner 'top_left'|'top_right'|'bottom_left'|'bottom_right'
+---@class BetaMoonUiNotificationDefinition
+---@field key string Owned template key.
+---@field screen string Owned registered screen; its data schema validates show/update data.
+---@field width? integer 80..512, default 160; narrowed to fit a viewport column.
+---@field height? integer 20..256, default 40.
+---@field corner? BetaMoonUiNotificationCorner Default top_right.
+---@field interactive? boolean Default false.
+---@field regions? string[] 1..32 local/exported IDs, required for interactive templates.
+---@class BetaMoonUiNotificationInfo
+---@field key string
+---@field screen string
+---@field width integer
+---@field height integer
+---@field corner BetaMoonUiNotificationCorner
+---@field interactive boolean
+---@class BetaMoonUiNotificationOptions
+---@field data? table<string, any> Typed screen data; updates merge a patch into the handle's detached data.
+---@field duration? number 0.5..60 seconds, default 5; rounded to milliseconds.
+---@field corner? BetaMoonUiNotificationCorner Overrides template/default/current corner.
+---@field urgency? 'low'|'normal'|'high' Default normal; presentation metadata, without bypassing queue fairness.
+---@field lifetime? 'client'|'world' Default client; immutable after showing.
+---@field dedupKey? string 1..160 characters; owner/template scoped, immutable after showing.
+---@field restartDuration? boolean Default true for show/dedup, false for handle update.
+---@field pauseOnHover? boolean Default false; requires an available interaction host.
+---@field pauseOnFocus? boolean Default false.
+---@class BetaMoonUiNotification
+---@field id integer
+---@field key string Template key.
+---@field status fun(self: BetaMoonUiNotification): 'queued'|'visible'|'exiting'|'dismissed'|'expired'|'cancelled'|'failed'
+---@field reason fun(self: BetaMoonUiNotification): string?
+---@field update fun(self: BetaMoonUiNotification, options?: BetaMoonUiNotificationOptions): boolean, string? Atomic typed patch; false plus reason when inactive or admission fails.
+---@field dismiss fun(self: BetaMoonUiNotification) Revoke input/actions immediately; a displayed view has a short Java exit transition.
+---@field instance fun(self: BetaMoonUiNotification): BetaMoonUiScreenInstance? Prepared instance, including while awaiting its first paint; nil when unavailable/exiting/terminal.
+---@field inputAvailable fun(self: BetaMoonUiNotification): boolean Declared regions in a compatible native cursor host or explicit gameplay cursor mode.
+---@field enterCursorMode fun(self: BetaMoonUiNotification): boolean, string? Explicit gameplay cursor request; false plus reason when unavailable.
+---@field leaveCursorMode fun(self: BetaMoonUiNotification)
+---@field isCursorMode fun(self: BetaMoonUiNotification): boolean
+---@class BetaMoonUiNotificationSnapshot
+---@field id integer
+---@field key string Template key.
+---@field corner BetaMoonUiNotificationCorner
+---@field urgency 'low'|'normal'|'high'
+---@class BetaMoonUiNotificationContext
+---@field snapshot fun(self: BetaMoonUiNotificationContext): BetaMoonUiNotificationSnapshot Read-only detached metadata; method expires with the callback.
+---@class BetaMoonUiNotifications
+local UiNotifications = {}
+---@param definition BetaMoonUiNotificationDefinition
+---@return BetaMoonUiNotificationInfo
+function UiNotifications:add(definition) end
+---@param key string
+---@return BetaMoonUiNotificationInfo? info Nil when unregistered.
+function UiNotifications:get(key) end
+---@param key string
+---@return BetaMoonUiNotificationInfo
+function UiNotifications:getRequired(key) end
+---Requires the BetaMoon Java agent and a ready client update boundary. A queued handle is not yet visible.
+---@param key string
+---@param options? BetaMoonUiNotificationOptions
+---@return BetaMoonUiNotification? notification Same live handle ID for matching owner/template/dedup key.
+---@return string? reason Explicit client/world/queue/data/template refusal.
+function UiNotifications:show(key, options) end
+
 ---@class BetaMoonClientUi
 ---@field components BetaMoonUiComponents
 ---@field themes BetaMoonUiThemes
@@ -526,7 +591,8 @@ function UiHuds:activate(key) end
 ---@field menus BetaMoonUiMenus
 ---@field inventories BetaMoonUiInventories
 ---@field huds BetaMoonUiHuds
-local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens, menus = UiMenus, inventories = UiInventories, huds = UiHuds}
+---@field notifications BetaMoonUiNotifications
+local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScreens, menus = UiMenus, inventories = UiInventories, huds = UiHuds, notifications = UiNotifications}
 
 ---@alias BetaMoonUiExpression number|{source: 'width'|'height'|'property', property: string?, factor: number?, offset: number?} Affine reference; property must be declared numeric.
 ---@class BetaMoonUiPaintView
@@ -537,6 +603,7 @@ local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScre
 ---@field data BetaMoonGuiDataReadAccess
 ---@field inventory? BetaMoonUiInventoryContext Scoped inventory layout when provided by the host.
 ---@field hud? BetaMoonUiHudContext Scoped HUD observation when provided by the host.
+---@field notification? BetaMoonUiNotificationContext Scoped notification metadata when provided by the host.
 
 ---@class BetaMoonUiPaintCommand
 ---@field op 'rect'|'line'|'mesh'|'ring'|'text'|'image'|'pushTransform'|'popTransform'|'pushClip'|'popClip'|'hitRect'|'hitCircle'|'hitPolygon'
