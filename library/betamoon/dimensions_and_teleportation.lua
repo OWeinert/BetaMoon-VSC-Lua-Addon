@@ -51,6 +51,15 @@
 ---@field type? 'local'|'dimension'|'return' Default dimension, targeting minecraft:overworld.
 ---@field dimension? BetaMoonDimensionTarget Destination for dimension mode.
 ---@field fallbackDimension? BetaMoonDimensionTarget Destination when return history is absent/unavailable; default minecraft:overworld.
+---@class BetaMoonLoadingAppearance
+---@field background? string|BetaMoonTextureAsset Registered texture key/reference; missing artwork falls back to the destination appearance, then Minecraft.
+---@field mode? 'tile'|'cover'|'stretch' Defaults to cover with a background, tile otherwise. Cover crops centrally and preserves aspect ratio.
+---@field tileSize? integer Tile width in logical pixels, 8..1024; default 32. Valid only in tile mode; image aspect ratio determines tile height.
+---@field tint? BetaMoonUiColor Default #FFFFFFFF with a background, #FF404040 otherwise.
+---@field titleColor? BetaMoonUiColor Default #FFFFFFFF.
+---@field textColor? BetaMoonUiColor Default #FFFFFFFF.
+---@field barColor? BetaMoonUiColor Default #FF80FF80.
+---@field barBackgroundColor? BetaMoonUiColor Default #FF808080.
 ---@class BetaMoonDimensionDefinition
 ---@field key string Canonical namespace:dimension/path; namespace:path expands to it. Native keys cannot be replaced.
 ---@field displayName? string Optional plain-text label, up to 128 characters; defaults to key.
@@ -62,6 +71,7 @@
 ---@field environment? BetaMoonDimensionEnvironment
 ---@field spawn? BetaMoonDimensionSpawn
 ---@field respawn? BetaMoonDimensionRespawn
+---@field loading? BetaMoonLoadingAppearance Cosmetic default for this destination; changes do not alter generation compatibility.
 ---@class BetaMoonDimensionDescriptor
 ---@field key string
 ---@field native boolean
@@ -73,6 +83,7 @@
 ---@field environment? BetaMoonDimensionEnvironment
 ---@field spawn? BetaMoonDimensionSpawn
 ---@field respawn? BetaMoonDimensionRespawn
+---@field loading? BetaMoonLoadingAppearance Current registered cosmetic default; saved generation metadata does not pin artwork.
 ---@class BetaMoonDimensionState
 ---@field key string
 ---@field state 'uninitialized'|'ready'|'unavailable'
@@ -123,6 +134,7 @@ function Dimensions:list() return {} end
 ---@field yaw? number Keeps departure orientation when absent.
 ---@field pitch? number -90..90; keeps departure orientation when absent.
 ---@class BetaMoonTeleportCommonOptions
+---@field loading? BetaMoonLoadingAppearance Per-transfer cosmetic override, before the destination default and Minecraft fallback. Noninteractive; prepared before blocking work.
 ---@field channel? string Default default; 1..64 identifier characters. Return history is isolated by script and channel.
 ---@field safety? 'safe'|'collision'|'unchecked' Default safe. unchecked requires an exact request without a platform.
 ---@field searchRadius? integer 0..64, default 16.

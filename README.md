@@ -235,3 +235,6 @@ components, themes, prepared drawing and explicit raw
 graphics. See [Client screens](https://github.com/OWeinert/BetaMoon/wiki/API-Client-UI),
 [Components and themes](https://github.com/OWeinert/BetaMoon/wiki/API-UI-Components) and
 [UI drawing](https://github.com/OWeinert/BetaMoon/wiki/API-UI-Drawing) for Lua usage.
+
+Dimension and teleport definitions also cover optional prepared loading backgrounds, image modes and colors.
+See [loading appearance](https://github.com/OWeinert/BetaMoon/wiki/API-Teleportation#loading-appearance).
