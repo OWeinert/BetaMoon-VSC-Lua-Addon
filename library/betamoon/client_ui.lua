@@ -243,6 +243,7 @@
 
 ---@class BetaMoonUiScreenDefinition
 ---@field key string
+---@field displayName? string Plain-text label, 1..128 characters; defaults to the canonical key.
 ---@field context? 'client'|'world' Default client; world requires a healthy local player and single-player world.
 ---@field pauseGame? boolean Default false; effective only with a world.
 ---@field root BetaMoonUiNode
@@ -289,6 +290,7 @@
 ---@field builtIn? boolean
 ---@class BetaMoonUiScreenInfo
 ---@field key string
+---@field displayName string Detached human-readable label or canonical key.
 ---@field context 'client'|'world'
 ---@field pauseGame boolean
 
