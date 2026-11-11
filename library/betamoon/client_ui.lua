@@ -241,9 +241,14 @@
 ---@field payload? BetaMoonUiSchema
 ---@field handler fun(ctx: BetaMoonUiContext, payload: table<string, any>): any Detached serializable result.
 
+---@class BetaMoonUiWorldTransitionReplacement
+---@field replace string Same-owner screen key, revalidated after a healthy local world/player change.
+---@field state? table<string, any> Detached initial values, validated against the destination schema; defaults are otherwise used.
+---@field data? table<string, any> Detached initial values. Old screen data/history/native handles are not carried forward.
 ---@class BetaMoonUiScreenDefinition
 ---@field key string
 ---@field displayName? string Plain-text label, 1..128 characters; defaults to the canonical key.
+---@field worldTransition? 'close'|BetaMoonUiWorldTransitionReplacement Default close. Standalone healthy-root replacement uses a fresh activation; protected/native screen replacement wins.
 ---@field context? 'client'|'world' Default client; world requires a healthy local player and single-player world.
 ---@field pauseGame? boolean Default false; effective only with a world.
 ---@field root BetaMoonUiNode
@@ -291,6 +296,7 @@
 ---@class BetaMoonUiScreenInfo
 ---@field key string
 ---@field displayName string Detached human-readable label or canonical key.
+---@field worldTransition 'close'|BetaMoonUiWorldTransitionReplacement Detached policy; replacement initialization is read-only.
 ---@field context 'client'|'world'
 ---@field pauseGame boolean
 
