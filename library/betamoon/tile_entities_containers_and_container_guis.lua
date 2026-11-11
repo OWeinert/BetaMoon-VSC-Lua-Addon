@@ -990,6 +990,15 @@ function GuiApi:ease(easing, t) end
 ---@field elements? BetaMoonGuiElement[]
 ---@field events? BetaMoonContainerGuiEventType[] Omitted selects ordinary families; animation_property is explicit opt-in.
 ---@field onEvent? fun(ctx: BetaMoonContainerGuiEventContext, event: BetaMoonContainerGuiEvent)
+---@field root? BetaMoonUiNode Retained panel-local document; can coexist with legacy elements and native slots.
+---@field state? BetaMoonUiSchema Local document state, independent of container session state; requires root.
+---@field data? BetaMoonUiSchema Typed published document data; requires root.
+---@field actions? table<string, BetaMoonUiActionDefinition> Declared queued document actions; requires root.
+---@field on? {open: fun(ctx: BetaMoonUiContext, event: BetaMoonUiEvent)?, refresh: fun(ctx: BetaMoonUiContext, event: BetaMoonUiEvent)?, update: fun(ctx: BetaMoonUiContext, event: BetaMoonUiEvent)?, close: fun(ctx: BetaMoonUiContext, event: BetaMoonUiEvent)?} Retained document callbacks; requires root.
+---@field theme? string Shared built-in or owned registered theme; requires root.
+---@field resources? BetaMoonUiResources Declared owned prepared/raw graphics resources; requires root.
+---@field requires? BetaMoonUiCapability[] Required host capabilities; requires root.
+---@field updateInterval? integer Retained update callback interval, 1..1200 logical updates; default 1; requires root.
 
 ---@class BetaMoonTileEntityRegistry
 local TileEntityRegistry = {}
