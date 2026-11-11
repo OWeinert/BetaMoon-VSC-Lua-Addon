@@ -530,8 +530,8 @@ function ContainerStateAccess:set(name, value) end
 ---@field enabled boolean
 
 ---@class BetaMoonContainerInput
----@field source 'mouse'|'keyboard'|'focus'|'script'
----@field phase? 'press'|'drag'|'release'|'scroll'|'focus'|'blur'
+---@field source 'mouse'|'keyboard'|'focus'|'script'|'ui'
+---@field phase? string Pointer/focus phases, request, or an authored UI input phase.
 ---@field button? integer
 ---@field wheel? integer
 ---@field x? number Element-local coordinate under the current transform.

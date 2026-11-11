@@ -32,6 +32,7 @@
 ---@field props table<string, any> Detached component props.
 ---@field state BetaMoonGuiReadAccess Component-local state, or screen state for root/caller-owned content.
 ---@field inventory? BetaMoonUiInventoryContext Scoped inventory layout in an attached inventory document.
+---@field container? BetaMoonUiContainerReadContext Scoped observed container data and native layout.
 ---@field hud? BetaMoonUiHudContext Scoped HUD snapshot; reading it observes logical snapshot changes.
 ---@field notification? BetaMoonUiNotificationContext Scoped notification presentation metadata.
 
@@ -40,6 +41,7 @@
 ---@field screen BetaMoonUiScreenInstance
 ---@field menu? BetaMoonUiMenuContext Scoped native menu actions in a contributed document.
 ---@field inventory? BetaMoonUiInventoryContext Scoped detached geometry in a player inventory document.
+---@field container? BetaMoonUiContainerContext Scoped observations and queued named-control requests in a tile container.
 ---@field hud? BetaMoonUiHudContext Scoped detached observations in an additive/native replacement HUD document.
 ---@field notification? BetaMoonUiNotificationContext Scoped metadata in a notification document.
 ---@field state BetaMoonUiLocalState
@@ -391,6 +393,77 @@ function UiMenus:getRequired(key) end
 ---@return BetaMoonUiMenuActivation
 function UiMenus:activate(key) end
 
+---@alias BetaMoonUiContainerControlType 'action'|'toggle'|'number'|'text'|'choice'|'custom'
+---@class BetaMoonUiContainerControlSchema
+---@field type BetaMoonUiContainerControlType
+---@field source 'none'|'data'|'session'
+---@field field? string Bound container session or tile-data field.
+---@field minimum? number Number controls only.
+---@field maximum? number
+---@field step? number
+---@field maximumLength? integer Text controls only.
+---@field choices? (boolean|number|string)[]
+
+---@class BetaMoonUiContainerSchema
+---@field name string Qualified container name.
+---@field session table<string, {type: string, maximumLength: integer}>
+---@field data table<string, 'integer'|'boolean'> Only synchronized native-container tile fields.
+---@field controls table<string, BetaMoonUiContainerControlSchema>
+
+---@class BetaMoonUiContainerControlValue
+---@field type BetaMoonUiContainerControlType
+---@field enabled boolean
+---@field value? boolean|number|string Omitted for valueless controls and unsynchronized tile values.
+
+---@class BetaMoonUiContainerSlot
+---@field id string tile/<name>, player/inventory/1..27, or player/hotbar/1..9.
+---@field nativeIndex integer Zero-based actual native container slot index.
+---@field x integer Panel-local position.
+---@field y integer
+---@field width integer 16.
+---@field height integer 16.
+
+---@class BetaMoonUiContainerLayout
+---@field windowId integer Actual native window identity.
+---@field panel {x: integer, y: integer, width: integer, height: integer} Screen-local panel bounds.
+---@field slots BetaMoonUiContainerSlot[] Native order; positions remain unscaled integer coordinates.
+
+---@class BetaMoonUiContainerInput
+---@field phase? string Defaults to request.
+---@field button? integer
+---@field wheel? integer
+---@field x? number
+---@field y? number
+---@field deltaX? number
+---@field deltaY? number
+---@field key? integer
+---@field character? string
+---@field shift? boolean
+---@field control? boolean
+
+---@class BetaMoonUiContainerRequestOptions
+---@field value? number|string Required for number/text controls; existing normalization/commit validation applies.
+---@field direction? -1|1 Choice controls; defaults to 1.
+---@field input? BetaMoonUiContainerInput Custom controls only; source is always ui.
+
+---@class BetaMoonUiContainerRequestResult
+---@field control string
+---@field accepted boolean Existing control operation's acceptance/handling result.
+---@field value? boolean|number|string Current synchronized/session value; omitted when unavailable/unsynchronized.
+
+---@class BetaMoonUiContainerTicket: BetaMoonUiActionTicket
+---@field result fun(self: BetaMoonUiContainerTicket): BetaMoonUiContainerRequestResult? Detached result after success.
+
+---@class BetaMoonUiContainerReadContext
+---@field schema fun(self: BetaMoonUiContainerReadContext): BetaMoonUiContainerSchema Read-only detached metadata.
+---@field session fun(self: BetaMoonUiContainerReadContext, name: string): any Observes a declared native-container session field.
+---@field data fun(self: BetaMoonUiContainerReadContext, name: string): integer|boolean Observes a synchronized tile field; unknown/unsynchronized fields fail.
+---@field control fun(self: BetaMoonUiContainerReadContext, name: string): BetaMoonUiContainerControlValue Observes current availability/value.
+---@field layout fun(self: BetaMoonUiContainerReadContext): BetaMoonUiContainerLayout Observes actual panel/slot geometry.
+
+---@class BetaMoonUiContainerContext: BetaMoonUiContainerReadContext
+---@field request fun(self: BetaMoonUiContainerContext, name: string, options?: BetaMoonUiContainerRequestOptions): BetaMoonUiContainerTicket?, string? Shared client-boundary queue; callback success and fresh native identities are required. Works while the container pauses the world.
+
 ---@class BetaMoonUiInventoryPosition
 ---@field x integer Panel-local item position, 1..4096; preserve the one-pixel native hit margin.
 ---@field y integer
@@ -610,6 +683,7 @@ local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScre
 ---@field state BetaMoonGuiReadAccess
 ---@field data BetaMoonGuiDataReadAccess
 ---@field inventory? BetaMoonUiInventoryContext Scoped inventory layout when provided by the host.
+---@field container? BetaMoonUiContainerReadContext Scoped observed container data when provided by the host.
 ---@field hud? BetaMoonUiHudContext Scoped HUD observation when provided by the host.
 ---@field notification? BetaMoonUiNotificationContext Scoped notification metadata when provided by the host.
 
