@@ -982,6 +982,9 @@ function GuiApi:ease(easing, t) end
 
 ---@alias BetaMoonGuiElement BetaMoonGuiImageElement|BetaMoonGuiSlotElement|BetaMoonGuiPanelElement|BetaMoonGuiTextElement|BetaMoonGuiProgressElement|BetaMoonGuiStateImageElement|BetaMoonGuiRectangleElement|BetaMoonGuiTooltipElement|BetaMoonGuiItemElement|BetaMoonGuiGroupElement|BetaMoonGuiButtonElement|BetaMoonGuiIconButtonElement|BetaMoonGuiCheckboxElement|BetaMoonGuiToggleButtonElement|BetaMoonGuiToggleElement|BetaMoonGuiSliderElement|BetaMoonGuiTextBoxElement|BetaMoonGuiChoiceElement|BetaMoonGuiInteractiveElement
 
+---A native tile-container UI. Reopening starts fresh document state.
+---Expired native identity cancels input/requests without old-world close or editor-commit callbacks.
+---A failed retained drawing pass removes that document; the native inventory remains usable.
 ---@class BetaMoonContainerGuiDefinition
 ---@field name string
 ---@field container BetaMoonContainerHandle
