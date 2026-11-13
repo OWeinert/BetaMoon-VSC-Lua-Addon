@@ -8,7 +8,7 @@
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
 ---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'numberbox'|'dropdown'|'contextmenu'|'tabs'|'progress'|'dialog'|'tooltip'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'numberbox'|'dropdown'|'contextmenu'|'tabs'|'progress'|'dialog'|'tooltip'|'iconmeter'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -95,6 +95,20 @@
 ---@field selected boolean
 ---@field expanded boolean
 
+---@class BetaMoonUiIconPartial
+---@field fraction number Strictly increasing fraction within (0,1); full artwork supplies 1.
+---@field drawable string Prepared drawable name.
+---@class BetaMoonUiIconSkin
+---@field iconWidth? integer 1..256, default 9.
+---@field iconHeight? integer 1..256, default 9.
+---@field pitchX? integer 1..512, default iconWidth.
+---@field pitchY? integer 1..512, default iconHeight.
+---@field empty? string Prepared empty drawable; omitted is transparent.
+---@field full string Prepared full drawable.
+---@field partials? BetaMoonUiIconPartial[] At most 32 ordered states.
+---@field reference? {full: string, partials: BetaMoonUiIconPartial[]?} Optional previous/comparison artwork.
+---@field flashEmpty? string Prepared native flash background.
+---@field tints? {empty: BetaMoonUiColor?, fill: BetaMoonUiColor?, reference: BetaMoonUiColor?}
 ---@class BetaMoonUiNode
 ---@field type? BetaMoonUiControl Exactly one of type/component/slot.
 ---@field component? string Registered component key.
@@ -161,6 +175,16 @@
 ---@field optionHeight? integer Radio/tabs option height 1..1024, default 20.
 ---@field maximumLength? integer Textbox/textarea UTF-16 limit 0..65536; default 4096. Textarea normalizes CRLF/CR to LF before checking.
 ---@field wrap? boolean Textarea: wrap to viewport width (default true); false allows horizontal scrolling.
+---@field unitsPerIcon? number Icon meter: positive units per cell; default 1.
+---@field maxIcons? integer Icon meter admission bound 1..256, default 256.
+---@field iconWidth? integer Icon meter: 0 for skin width, or 1..256.
+---@field iconHeight? integer Icon meter: 0 for skin height, or 1..256.
+---@field pitchX? integer Icon meter: 0 for skin pitch, or 1..512.
+---@field pitchY? integer Icon meter: 0 for skin pitch, or 1..512.
+---@field skin? string Icon meter: minecraft:hearts/armor/air or local resources.iconSkins name; required.
+---@field partialMode? 'clip'|'steps' Icon meter fraction representation; default clip.
+---@field referenceValue? number Optional comparison/previous-value layer.
+---@field fillOrder? 'left_to_right'|'right_to_left'|'top_to_bottom'|'bottom_to_top' Icon meter cell order.
 ---@field presentation? 'linear'|'segmented'|'radial'|'label' Progress presentation, default linear.
 ---@field indeterminate? boolean Progress: Java-clock indicator, default false.
 ---@field segments? integer Progress segmented presentation: 1..256, default 10.
@@ -766,6 +790,7 @@ local ClientUi = {components = UiComponents, themes = UiThemes, screens = UiScre
 ---@field radius? BetaMoonUiExpression
 
 ---@class BetaMoonUiResources
+---@field iconSkins? table<string, BetaMoonUiIconSkin> Prepared skins referencing local named drawables/images.
 ---@field images? table<string, {source: BetaMoonTextureInput, nearest: boolean?}> Whole texture images only.
 ---@field meshes? table<string, {mode: 'triangles'|'lines'|'quads'?, vertices: number[]}>
 ---@field buffers? table<string, {mode: 'triangles'|'lines'|'quads'?, stride: integer?, vertices: number[]}> Stride 2 (xy) or 4 (xyuv).
