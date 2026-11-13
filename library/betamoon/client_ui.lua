@@ -561,7 +561,48 @@ function UiInventories:activate(key) end
 ---@field leaveCursorMode fun(self: BetaMoonUiHudActivation) Release this claim's gameplay cursor token.
 ---@field isCursorMode fun(self: BetaMoonUiHudActivation): boolean Whether this claim owns the current gameplay cursor token.
 ---@field close fun(self: BetaMoonUiHudActivation) Immediately revoke the claim and its cursor; dispose presentation at the next logical boundary.
----@class BetaMoonUiHudPlayer
+---@class BetaMoonUiHudStats
+---@field health? integer Absent without a healthy local player.
+---@field healthCapacity? integer Native display baseline 20; not a gameplay maximum-health API.
+---@field previousHealth? integer Native damage-history value.
+---@field damageFlashTicks? integer Native heartsLife.
+---@field armor? integer Durability-adjusted native armor value.
+---@field armorCapacity? integer Native display baseline 20.
+---@field air? integer Native air value.
+---@field airCapacity? integer Native display baseline 300.
+---@field showSurvivalStats? boolean Native controller display policy.
+---@field showBreath? boolean Effective native/custom-fluid air policy.
+---@class BetaMoonUiHudHotbarSlot
+---@field slot integer One-based 1..9; empty slots are explicit.
+---@field present boolean
+---@field id? integer
+---@field damage? integer
+---@field count? integer
+---@field maximumDamage? integer
+---@field pickupTicks? integer
+---@class BetaMoonUiHudHotbar
+---@field selectedSlot? integer One-based selection when a player is available.
+---@field slots BetaMoonUiHudHotbarSlot[] Nine detached entries; no mutable native stacks.
+---@class BetaMoonUiHudPartLayout
+---@field available boolean
+---@field visible boolean Native visibility condition; chat presence is not inferred.
+---@field source 'native'|'modified'|'replacement'
+---@field body BetaMoonUiBounds Stable unmodified placement reference.
+---@field ink BetaMoonUiBounds Known native overhang envelope.
+---@field effective {body: BetaMoonUiBounds, ink: BetaMoonUiBounds}
+---@class BetaMoonUiHudLayout
+---@field revision integer
+---@field viewport BetaMoonUiBounds
+---@field parts table<BetaMoonUiHudPart, BetaMoonUiHudPartLayout>
+---@field reservations BetaMoonUiBounds[]
+---@class BetaMoonUiHudPartCapability
+---@field hide boolean
+---@field replace boolean
+---@field modify boolean
+---@field layout boolean
+---@field reasons? table<string, string> Per-operation refusal codes.
+---@class BetaMoonUiHudPlayer: BetaMoonUiHudStats
+---@field hotbar BetaMoonUiHudHotbarSlot[]
 ---@field health integer
 ---@field armor integer
 ---@field air integer
@@ -575,6 +616,8 @@ function UiInventories:activate(key) end
 ---@field motionZ number
 ---@class BetaMoonUiHudSnapshot
 ---@field context BetaMoonUiHudVisibility|'unavailable'
+---@field layer 'world'|'overlay' Resolved additive placement.
+---@field behindMenu boolean Player HUD is behind a foreground screen.
 ---@field worldAvailable boolean Healthy local single-player world/player.
 ---@field hideGui boolean
 ---@field debug boolean
@@ -584,6 +627,9 @@ function UiInventories:activate(key) end
 ---@class BetaMoonUiHudContext
 ---@field key string HUD definition key.
 ---@field snapshot fun(self: BetaMoonUiHudContext): BetaMoonUiHudSnapshot Read-only detached values; method expires with its callback.
+---@field stats fun(self: BetaMoonUiHudContext): BetaMoonUiHudStats Focused observed stats; excludes position and hotbar changes.
+---@field hotbar fun(self: BetaMoonUiHudContext): BetaMoonUiHudHotbar Focused detached item/selection publication.
+---@field layout fun(self: BetaMoonUiHudContext): BetaMoonUiHudLayout Focused logical native-part geometry/reservations.
 ---@class BetaMoonUiHuds
 local UiHuds = {}
 ---@param definition BetaMoonUiHudDefinition
@@ -598,6 +644,9 @@ function UiHuds:getRequired(key) end
 ---Current native hook support; false preserves native drawing for an unsupported part.
 ---@return table<BetaMoonUiHudPart, boolean>
 function UiHuds:capabilities() end
+---Detailed independent operation support; returned records are detached and read-only.
+---@return table<BetaMoonUiHudPart, BetaMoonUiHudPartCapability>
+function UiHuds:partCapabilities() end
 ---Requires the BetaMoon Java agent; registration alone changes nothing.
 ---@param key string
 ---@return BetaMoonUiHudActivation
