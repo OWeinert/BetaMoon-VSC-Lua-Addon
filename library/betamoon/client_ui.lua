@@ -537,7 +537,8 @@ function UiInventories:activate(key) end
 ---@field screen? string Owned registered screen key for additive content.
 ---@field nativeParts? table<BetaMoonUiHudPart, BetaMoonUiHudNativePart> Additive content or at least one native claim is required.
 ---@field priority? integer -10000..10000; higher replacement priority wins, ties use latest activation.
----@field visibility? {contexts: BetaMoonUiHudVisibility[]?, debug: boolean?, hideGui: boolean?} Default gameplay, debug=true, hideGui=false.
+---@field visibility? {contexts: BetaMoonUiHudVisibility[]?, debug: boolean?, hideGui: boolean?, behindMenus: boolean?} Default gameplay; behindMenus=true retains player HUDs behind menus; debug=true, hideGui=false.
+---@field layer? 'auto'|'world'|'overlay' Auto uses the world layer in a world, foreground for explicit worldless menus. World HUDs paint before menu backgrounds; overlay is explicit foreground.
 ---@field safeArea? boolean Defaults to true for additive content; reserve native/notification/recovery chrome.
 ---@field interactive? boolean Defaults to false; replacement documents always stay passive.
 ---@field regions? string[] 1..32 local/exported element IDs, required only for interactive additive content.
