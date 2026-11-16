@@ -559,8 +559,18 @@ function UiInventories:activate(key) end
 ---@alias BetaMoonUiHudPart 'crosshair'|'hotbar'|'health'|'armor'|'breath'|'chat'
 ---@alias BetaMoonUiHudVisibility 'gameplay'|'chat'|'inventory'|'pause'|'menu'
 ---@class BetaMoonUiHudNativePart
----@field hide? boolean True requests hiding; choose exactly one hide or replace.
+---@field hide? boolean True requests hiding; choose exactly one hide, replace or modify.
 ---@field replace? string Owned registered screen key for a passive replacement.
+---@field modify? BetaMoonUiHudModifier Native geometry only; chat unsupported.
+---@class BetaMoonUiHudModifier
+---@field mode? 'offset'|'anchor' Defaults to offset; fields of the other mode are rejected.
+---@field offsetX? number Offset mode, -16384..16384, default 0.
+---@field offsetY? number Offset mode, -16384..16384, default 0.
+---@field x? number Anchor mode, -16384..16384, default 0.
+---@field y? number Anchor mode, -16384..16384, default 0.
+---@field anchorX? number Anchor mode, 0..1, default 0; uses scaled body width.
+---@field anchorY? number Anchor mode, 0..1, default 0; uses scaled body height.
+---@field scale? number Uniform scale 0.25..4, default 1.
 ---@class BetaMoonUiHudDefinition
 ---@field key string Canonical owned HUD key.
 ---@field screen? string Owned registered screen key for additive content.
@@ -577,8 +587,8 @@ function UiInventories:activate(key) end
 ---@field interactive boolean
 ---@field screen? string
 ---@class BetaMoonUiHudPartStatus
----@field status 'queued'|'hidden'|'replaced'|'covered'|'unavailable'|'suspended'|'failed'|'closed'
----@field reason? 'not_rendered'|'native_hook_unavailable'
+---@field status 'queued'|'hidden'|'replaced'|'modified'|'covered'|'unavailable'|'suspended'|'failed'|'closed'
+---@field reason? 'not_rendered'|'native_hook_unavailable'|'unsupported_operation'
 ---@class BetaMoonUiHudActivation
 ---@field key string
 ---@field status fun(self: BetaMoonUiHudActivation): 'queued'|'active'|'suspended'|'refused'|'closed'
