@@ -7,8 +7,8 @@
 -- --------------------------------------------------------------------------
 
 ---@alias BetaMoonUiColor integer|string ARGB integer or #RRGGBB/#AARRGGBB.
----@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'
----@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'numberbox'|'dropdown'|'contextmenu'|'tabs'|'progress'|'dialog'|'tooltip'|'iconmeter'
+---@alias BetaMoonUiCapability 'input'|'modal_layers'|'world_data'|'native_inventory'|'native_items'|'prepared_drawing'|'raw_drawing'|'hud_observation'
+---@alias BetaMoonUiControl 'text'|'image'|'panel'|'row'|'column'|'grid'|'scroll'|'list'|'tree'|'table'|'overlay'|'spacer'|'divider'|'button'|'checkbox'|'choice'|'radio'|'slider'|'stepper'|'textbox'|'textarea'|'numberbox'|'dropdown'|'contextmenu'|'tabs'|'progress'|'dialog'|'tooltip'|'iconmeter'|'item'
 ---@alias BetaMoonUiSchema table<string, BetaMoonUiField>
 ---@class BetaMoonUiField
 ---@field type 'number'|'integer'|'boolean'|'string'|'color'|'string_list'|'data'
@@ -175,6 +175,11 @@
 ---@field optionHeight? integer Radio/tabs option height 1..1024, default 20.
 ---@field maximumLength? integer Textbox/textarea UTF-16 limit 0..65536; default 4096. Textarea normalizes CRLF/CR to LF before checking.
 ---@field wrap? boolean Textarea: wrap to viewport width (default true); false allows horizontal scrolling.
+---@field item? {id: integer, damage?: integer, count?: integer} Cosmetic registered item; damage defaults 0, count 1. Cannot combine with source.
+---@field source? {hotbarSlot: integer} Item view: read-only slot 1..9; requires hud_observation.
+---@field showCount? boolean Item view: native count overlay, default true.
+---@field showDurability? boolean Item view: native durability bar, default true.
+---@field pickupAnimation? boolean Item view: bounded native pickup animation for semantic sources, default true.
 ---@field unitsPerIcon? number Icon meter: positive units per cell; default 1.
 ---@field maxIcons? integer Icon meter admission bound 1..256, default 256.
 ---@field iconWidth? integer Icon meter: 0 for skin width, or 1..256.
