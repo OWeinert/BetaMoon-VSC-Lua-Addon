@@ -180,6 +180,9 @@
 ---@field showCount? boolean Item view: native count overlay, default true.
 ---@field showDurability? boolean Item view: native durability bar, default true.
 ---@field pickupAnimation? boolean Item view: bounded native pickup animation for semantic sources, default true.
+---@field nativeSprite? 'minecraft:crosshair'|'minecraft:hotbar'|'minecraft:hotbar-cell'|'minecraft:hotbar-selection' Portable image sprite alias; exclusive with image.
+---@field hudSource? 'health'|'armor'|'breath' Icon meter: optional live source requiring hud_observation. Native effects require ten cells and native capacity/units.
+---@field nativeEffects? boolean Icon meter: Java-sampled native flash/jitter/bubble effects; default true for a live source.
 ---@field unitsPerIcon? number Icon meter: positive units per cell; default 1.
 ---@field maxIcons? integer Icon meter admission bound 1..256, default 256.
 ---@field iconWidth? integer Icon meter: 0 for skin width, or 1..256.
