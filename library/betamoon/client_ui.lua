@@ -184,7 +184,7 @@
 ---@field hudSource? 'health'|'armor'|'breath' Icon meter: optional live source requiring hud_observation. Native effects require ten cells and native capacity/units.
 ---@field nativeEffects? boolean Icon meter: Java-sampled native flash/jitter/bubble effects; default true for a live source.
 ---@field unitsPerIcon? number Icon meter: positive units per cell; default 1.
----@field maxIcons? integer Icon meter admission bound 1..256, default 256.
+---@field maxIcons? integer Icon meter static admission bound 1..256, default 256; bindings/overrides may not exceed the authored bound. Refresh the definition to raise it.
 ---@field iconWidth? integer Icon meter: 0 for skin width, or 1..256.
 ---@field iconHeight? integer Icon meter: 0 for skin height, or 1..256.
 ---@field pitchX? integer Icon meter: 0 for skin pitch, or 1..512.
@@ -564,6 +564,7 @@ function UiInventories:activate(key) end
 ---@class BetaMoonUiHudNativePart
 ---@field hide? boolean True requests hiding; choose exactly one hide, replace or modify.
 ---@field replace? string Owned registered screen key for a passive replacement.
+---@field bounds? string Replacement-only local/exported element ID; absent uses conservative native footprint.
 ---@field modify? BetaMoonUiHudModifier Native geometry only; chat unsupported.
 ---@class BetaMoonUiHudModifier
 ---@field mode? 'offset'|'anchor' Defaults to offset; fields of the other mode are rejected.
