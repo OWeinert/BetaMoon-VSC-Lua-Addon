@@ -575,6 +575,28 @@ function UiInventories:activate(key) end
 ---@field anchorX? number Anchor mode, 0..1, default 0; uses scaled body width.
 ---@field anchorY? number Anchor mode, 0..1, default 0; uses scaled body height.
 ---@field scale? number Uniform scale 0.25..4, default 1.
+---@alias BetaMoonUiBuiltInHudComponent 'betamoon:hud/health'|'betamoon:hud/armor'|'betamoon:hud/breath'|'betamoon:hud/hotbar'|'betamoon:hud/crosshair'
+---@class BetaMoonUiHudStatProps
+---@field presentation? 'icons'|'bar' Defaults to icons.
+---@field skin? string Optional local icon skin in the consuming screen resources.
+---@field nativeEffects? boolean Defaults to true; Java native history/flash/jitter/bubble sampling.
+---@field columns? integer 0 for one row, or 1..256.
+---@field iconWidth? integer 0 for skin dimensions, or 1..256.
+---@field iconHeight? integer 0 for skin dimensions, or 1..256.
+---@field pitchX? integer 0 for skin pitch, or 1..512.
+---@field pitchY? integer 0 for skin pitch, or 1..512.
+---@field width? integer Bar width, default 81; 1..16384.
+---@field height? integer Bar height, default 9; 1..16384.
+---@class BetaMoonUiHudHotbarProps
+---@field layout? 'horizontal'|'vertical'|'grid' Defaults to horizontal.
+---@field columns? integer Grid columns 1..9, default 3.
+---@field showFrame? boolean Defaults to true.
+---@field showCount? boolean Defaults to true.
+---@field showDurability? boolean Defaults to true.
+---@field pickupAnimation? boolean Defaults to true.
+---@class BetaMoonUiHudCrosshairProps
+---@field image? string Empty uses native inversion; explicit packaged image uses ordinary image painting.
+---@field size? integer 1..1024, default 16.
 ---@class BetaMoonUiHudDefinition
 ---@field key string Canonical owned HUD key.
 ---@field screen? string Owned registered screen key for additive content.
